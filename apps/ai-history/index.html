@@ -65,6 +65,7 @@ button{font-family:inherit}
 .speeds button.on{color:var(--ink); border-color:#2E4A6E; background:#132340}
 #scrub{width:100%; accent-color:var(--amber); height:18px}
 #tl{width:100%; height:54px; display:block; cursor:pointer}
+.cap{font-size:.58rem; letter-spacing:.1em; color:#5B7897; text-transform:uppercase; margin:0 0 5px}
 .score{display:grid; grid-template-columns:repeat(5,1fr); gap:6px}
 .sc{border:1px solid var(--line); border-radius:9px; padding:6px 4px; text-align:center; background:#0D1A2E}
 .sc b{display:block; font-size:1.02rem; line-height:1.1}
@@ -149,7 +150,10 @@ button{font-family:inherit}
 
     <canvas id="tl"></canvas>
 
-    <div class="score" id="score"></div>
+    <div>
+      <div class="cap">firsts by country · where the work was done</div>
+      <div class="score" id="score"></div>
+    </div>
     <div class="recs" id="recs"></div>
     <div class="note" id="rec-note">—</div>
   </aside>
