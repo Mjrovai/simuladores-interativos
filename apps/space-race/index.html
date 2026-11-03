@@ -13,7 +13,7 @@
   --ink:#003A70; --ink-soft:#33383D; --muted:#6C7580; --slate:#3F6A92;
   --us:#0A5CA8; --ussr:var(--red);
   --line:rgba(0,58,112,.14); --line-soft:rgba(0,58,112,.07);
-  --ocean:#DDE7F1; --land:#B9CADB; --grid:rgba(0,58,112,.16);
+  --ocean:#E3EBF4; --land:#AEC3D6; --grid:rgba(0,58,112,.18);
   --glow:rgba(243,112,53,.18);
   --font:Calibri,Carlito,"Segoe UI",-apple-system,system-ui,sans-serif;
   --mono:"SF Mono",ui-monospace,Menlo,monospace;
@@ -72,6 +72,7 @@ h1 em{font-style:normal;color:var(--amber-deep)}
 .board{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:16px;padding:18px 0 6px;align-items:start}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
 .globe-card{padding:10px 10px 6px}
+.globe-card canvas{max-width:620px;margin:0 auto}
 canvas#globe{display:block;width:100%;height:auto;aspect-ratio:1/1;cursor:grab;border-radius:10px}
 canvas#globe.drag{cursor:grabbing}
 .globe-foot{display:flex;justify-content:space-between;align-items:center;font-size:.72rem;color:var(--muted);padding:6px 6px 4px}
@@ -91,8 +92,8 @@ canvas#globe.drag{cursor:grabbing}
 .spd button[aria-pressed="true"]{background:var(--navy);color:#fff}
 :root[data-theme="dark"] .spd button[aria-pressed="true"]{background:var(--amber);color:#1B1B1B}
 input[type=range]{width:100%;accent-color:var(--amber);margin:14px 0 2px}
-.tl{position:relative;height:64px;margin-top:4px}
-.tl canvas{width:100%;height:64px;display:block;cursor:pointer}
+.tl{position:relative;height:74px;margin-top:4px}
+.tl canvas{width:100%;height:74px;display:block;cursor:pointer}
 
 .score{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
 .side{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface-2)}
@@ -113,8 +114,12 @@ input[type=range]{width:100%;accent-color:var(--amber);margin:14px 0 2px}
 .rec.future .t{color:var(--muted)}
 
 .mission{margin-top:14px}
+.photo{margin:0 0 12px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface-2)}
+.photo img{display:block;width:100%;height:auto;max-height:200px;object-fit:cover}
+.credit{font-size:.66rem;color:var(--muted);padding:6px 9px;border-top:1px solid var(--line-soft);line-height:1.35}
 .mission h2{margin:0 0 2px;font-size:1.02rem;color:var(--ink)}
 .mission .meta{font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.mission .meta.next{color:var(--amber-deep)}
 .mission p{margin:0;font-size:.88rem;color:var(--ink-soft)}
 .chip{display:inline-block;font-size:.68rem;letter-spacing:.07em;text-transform:uppercase;border-radius:999px;
   padding:3px 8px;border:1px solid var(--amber);color:var(--amber-deep);background:var(--glow);margin-top:9px}
@@ -185,6 +190,10 @@ footer.site .wrap{display:flex;gap:14px;justify-content:space-between;flex-wrap:
     </div>
 
     <div class="card mission" id="mission">
+      <figure class="photo" id="m-photo" hidden>
+        <img id="m-img" alt="" loading="lazy">
+        <figcaption class="credit" id="m-credit"></figcaption>
+      </figure>
       <div class="meta" id="m-meta">—</div>
       <h2 id="m-name">—</h2>
       <p id="m-text">Scrub the timeline to begin.</p>
@@ -204,7 +213,7 @@ footer.site .wrap{display:flex;gap:14px;justify-content:space-between;flex-wrap:
 
 <footer class="site">
   <div class="wrap">
-    <span>Dates and crews from public mission records · globe outlines: Natural Earth 110m (public domain)</span>
+    <span>Dates and crews from public mission records · globe: Natural Earth 110m · photos: NASA and Wikimedia Commons, public domain (Tereshkova photo CC BY-SA 3.0, credited on the card)</span>
     <a href="https://github.com/Mjrovai/simuladores-interativos" target="_blank" rel="noopener">Source on GitHub ↗</a>
   </span>
 </footer>
@@ -309,102 +318,191 @@ const LAND = [[[-59.6,-80.0],[-60.2,-81.0],[-66.3,-80.3],[-59.6,-80.0]],[[-159.2
     return { x: cx + R * x, y: cy - R * y, z };
   }
 
-  function drawGlobe() {
+  /* fotos de domínio público (Wikimedia/NASA) */
+  const PHOTOS = {
+    'Sputnik 1': ['sputnik', 'Sputnik 1 replica · public domain'],
+    'Sputnik 2': ['laika', 'Laika on a 1959 Romanian stamp · public domain'],
+    'Explorer 1': ['explorer1', 'Explorer 1 · NASA/JPL, public domain'],
+    'Vostok 1 · Gagarin': ['gagarin', 'Yuri Gagarin, 1961 · public domain'],
+    'Vostok 6 · Tereshkova': ['tereshkova', 'Tereshkova · RIA Novosti, CC BY-SA 3.0'],
+    'Voskhod 2 · Leonov': ['leonov', 'Alexei Leonov · public domain'],
+    'Luna 9': ['luna9', 'Luna 9 · public domain'],
+    'Lunokhod 1': ['lunokhod', 'Luna 17 / Lunokhod 1 model · public domain'],
+    'Apollo 1': ['apollo1crew', 'Apollo 1 crew · NASA, public domain'],
+    'Apollo 8': ['earthrise', 'Earthrise, Apollo 8 · NASA, public domain'],
+    'Apollo 11': ['aldrin', 'Buzz Aldrin, Apollo 11 · NASA, public domain'],
+    'Soyuz 11': ['soyuz11', 'Soyuz 11 crew · public domain'],
+    'Skylab': ['skylab', 'Skylab · NASA, public domain']
+  };
+
+  const counts = { baikonur: 0, cape: 0, vandenberg: 0 };
+  let latest = null, cardEvent = null;
+
+  /* projeção ortográfica com "clamp" no limbo: pontos do lado oculto são
+     colados na borda em vez de atravessar o disco (elimina os picos/artefatos) */
+  function drawGlobe(nowMs) {
     const w = canvas.width, h = canvas.height;
-    ctx.clearRect(0, 0, w, h);
     const cx = w / 2, cy = h / 2, R = Math.min(w, h) * 0.44;
+    ctx.clearRect(0, 0, w, h);
 
     const css = getComputedStyle(document.documentElement);
-    const ocean = css.getPropertyValue('--ocean').trim(), landC = css.getPropertyValue('--land').trim(),
-          grid = css.getPropertyValue('--grid').trim(), ink = css.getPropertyValue('--ink').trim(),
-          muted = css.getPropertyValue('--muted').trim(),
-          usC = css.getPropertyValue('--us').trim(), ussrC = css.getPropertyValue('--ussr').trim(),
-          amber = css.getPropertyValue('--amber').trim();
+    const g = (n) => css.getPropertyValue(n).trim();
+    const ocean = g('--ocean'), landC = g('--land'), grid = g('--grid'),
+          muted = g('--muted'), usC = g('--us'), ussrC = g('--ussr'), amber = g('--amber');
 
-    // halo + esfera
-    const halo = ctx.createRadialGradient(cx, cy, R * 0.9, cx, cy, R * 1.18);
-    halo.addColorStop(0, 'rgba(243,112,53,.16)'); halo.addColorStop(1, 'rgba(243,112,53,0)');
-    ctx.fillStyle = halo; ctx.beginPath(); ctx.arc(cx, cy, R * 1.18, 0, 7); ctx.fill();
+    const p0 = lat0 * Math.PI / 180;
+    const proj = (lon, lat) => {
+      const p = lat * Math.PI / 180, l = (lon - lon0) * Math.PI / 180;
+      let x = Math.cos(p) * Math.sin(l);
+      let y = Math.cos(p0) * Math.sin(p) - Math.sin(p0) * Math.cos(p) * Math.cos(l);
+      let z = Math.sin(p0) * Math.sin(p) + Math.cos(p0) * Math.cos(p) * Math.cos(l);
+      const vis = z > 0.02;
+      if (!vis) {
+        const r = Math.hypot(x, y);
+        if (r < 1e-6) return null;
+        x /= r; y /= r;
+      }
+      return { x: cx + R * x, y: cy - R * y, vis, z };
+    };
+
+    // halo + oceano
+    const halo = ctx.createRadialGradient(cx, cy, R * 0.92, cx, cy, R * 1.2);
+    halo.addColorStop(0, 'rgba(243,112,53,.15)'); halo.addColorStop(1, 'rgba(243,112,53,0)');
+    ctx.fillStyle = halo; ctx.beginPath(); ctx.arc(cx, cy, R * 1.2, 0, 7); ctx.fill();
     ctx.fillStyle = ocean; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.fill();
 
-    // continentes
     ctx.save();
     ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.clip();
+
+    // continentes
     ctx.fillStyle = landC;
     for (const ring of LAND) {
       ctx.beginPath();
       let started = false;
-      for (const [LON, LAT] of ring) {
-        const p = project(LON, LAT, R, cx, cy);
-        if (p.z <= 0) { started = false; continue; }
-        if (!started) { ctx.moveTo(p.x, p.y); started = true; } else ctx.lineTo(p.x, p.y);
+      for (let i = 0; i < ring.length; i++) {
+        const q = proj(ring[i][0], ring[i][1]);
+        if (!q) { started = false; continue; }
+        started ? ctx.lineTo(q.x, q.y) : (ctx.moveTo(q.x, q.y), started = true);
       }
-      ctx.fill();
+      ctx.closePath(); ctx.fill();
     }
     // grade
     ctx.strokeStyle = grid; ctx.lineWidth = 1;
     for (let lat = -60; lat <= 60; lat += 30) {
       ctx.beginPath(); let st = false;
-      for (let lon = -180; lon <= 180; lon += 4) {
-        const p = project(lon, lat, R, cx, cy);
-        if (p.z <= 0) { st = false; continue; }
-        st ? ctx.lineTo(p.x, p.y) : (ctx.moveTo(p.x, p.y), st = true);
+      for (let lon = -180; lon <= 180; lon += 3) {
+        const q = proj(lon, lat);
+        if (!q || !q.vis) { st = false; continue; }
+        st ? ctx.lineTo(q.x, q.y) : (ctx.moveTo(q.x, q.y), st = true);
       }
       ctx.stroke();
     }
     for (let lon = -180; lon < 180; lon += 30) {
       ctx.beginPath(); let st = false;
-      for (let lat = -90; lat <= 90; lat += 4) {
-        const p = project(lon, lat, R, cx, cy);
-        if (p.z <= 0) { st = false; continue; }
-        st ? ctx.lineTo(p.x, p.y) : (ctx.moveTo(p.x, p.y), st = true);
+      for (let lat = -88; lat <= 88; lat += 3) {
+        const q = proj(lon, lat);
+        if (!q || !q.vis) { st = false; continue; }
+        st ? ctx.lineTo(q.x, q.y) : (ctx.moveTo(q.x, q.y), st = true);
       }
       ctx.stroke();
     }
     ctx.restore();
-
     ctx.strokeStyle = grid; ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.stroke();
 
-    // sítios de lançamento
-    for (const key in SITES) {
-      const [lat, lon, label] = SITES[key];
-      const p = project(lon, lat, R, cx, cy);
-      if (p.z <= 0.02) continue;
-      ctx.fillStyle = muted; ctx.globalAlpha = 0.65;
-      ctx.beginPath(); ctx.arc(p.x, p.y, 2.4, 0, 7); ctx.fill();
-      ctx.globalAlpha = 1;
-      ctx.font = `600 ${Math.round(R * 0.038)}px ${getComputedStyle(document.body).fontFamily}`;
-      ctx.fillStyle = muted;
-      ctx.fillText(label, p.x + 6, p.y - 5);
-    }
+    /* ---- trajetória da missão selecionada (ou da mais recente) ---- */
+    const focus = selected && norm(selected.date) <= t ? selected : (cardEvent || latest);
+    if (focus) {
+      const [flat, flon] = SITES[focus.site];
+      const cislunar = /Luna|Apollo/.test(focus.name) && focus.name !== 'Apollo 1';
+      const age = (t - norm(focus.date)) / DAY;
+      const p = Math.min(1, Math.max(0, ((nowMs / 1000) % 4) / 4));  // 0..1 em 4 s
 
-    // eventos até a data
-    const vis = visibleEvents(t);
-    vis.forEach((e) => {
-      const [lat, lon] = SITES[e.site];
-      const p = project(lon, lat, R, cx, cy);
-      if (p.z <= 0) return;
-      const age = (t - norm(e.date)) / DAY;
-      const col = e.country === 'usa' ? usC : ussrC;
-      if (age < 45) {
-        const k = age / 45;
-        ctx.strokeStyle = col; ctx.globalAlpha = 0.55 * (1 - k);
-        ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.arc(p.x, p.y, 6 + 44 * k, 0, 7); ctx.stroke();
+      if (!cislunar) {
+        ctx.strokeStyle = focus.country === 'usa' ? usC : ussrC;
+        ctx.globalAlpha = 0.55; ctx.lineWidth = 2*DPR; ctx.setLineDash([5*DPR, 5*DPR]);
+        ctx.beginPath();
+        let st = false;
+        for (let k = 0; k <= 60; k++) {
+          const u = k / 60;
+          const q = proj(flon + u * 145, flat * 0.55 + 18 * Math.sin(u * 3.1));
+          if (!q || !q.vis) { st = false; continue; }
+          st ? ctx.lineTo(q.x, q.y) : (ctx.moveTo(q.x, q.y), st = true);
+        }
+        ctx.stroke(); ctx.setLineDash([]);
+        const q = proj(flon + p * 145, flat * 0.55 + 18 * Math.sin(p * 3.1));
+        if (q && q.vis) {
+          ctx.globalAlpha = 1; ctx.fillStyle = amber;
+          ctx.beginPath(); ctx.arc(q.x, q.y, 3.4*DPR, 0, 7); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+      } else {
+        // Terra → Lua
+        const s0 = proj(flon, flat);
+        const mx = w - Math.max(34 * DPR, R * 0.16), my = Math.max(30 * DPR, R * 0.20);
+        ctx.globalAlpha = 0.85;
+        ctx.fillStyle = '#C9CFD6';
+        ctx.beginPath(); ctx.arc(mx, my, Math.max(9*DPR, R*0.055), 0, 7); ctx.fill();
+        ctx.fillStyle = 'rgba(0,0,0,.18)';
+        ctx.beginPath(); ctx.arc(mx - R*0.016, my - R*0.016, Math.max(7*DPR, R*0.045), 0, 7); ctx.fill();
+        ctx.globalAlpha = 1;
+        if (s0 && s0.vis) {
+          ctx.strokeStyle = amber; ctx.globalAlpha = 0.6; ctx.lineWidth = 1.8*DPR;
+          ctx.setLineDash([4*DPR, 6*DPR]);
+          ctx.beginPath(); ctx.moveTo(s0.x, s0.y);
+          ctx.quadraticCurveTo((s0.x + mx) / 2, Math.min(s0.y, my) - R * 0.22, mx, my);
+          ctx.stroke(); ctx.setLineDash([]);
+          const u = p;
+          const bx = (1-u)*(1-u)*s0.x + 2*(1-u)*u*((s0.x + mx) / 2) + u*u*mx;
+          const by = (1-u)*(1-u)*s0.y + 2*(1-u)*u*(Math.min(s0.y, my) - R * 0.22) + u*u*my;
+          ctx.globalAlpha = 1; ctx.fillStyle = amber;
+          ctx.beginPath(); ctx.arc(bx, by, 3.4*DPR, 0, 7); ctx.fill();
+        }
         ctx.globalAlpha = 1;
       }
-      const isSel = selected === e;
-      ctx.fillStyle = col;
-      ctx.beginPath(); ctx.arc(p.x, p.y, isSel ? 6.5 : 4.6, 0, 7); ctx.fill();
-      ctx.strokeStyle = isSel ? amber : 'rgba(255,255,255,.65)';
-      ctx.lineWidth = isSel ? 2.4 : 1.2;
-      ctx.beginPath(); ctx.arc(p.x, p.y, isSel ? 8.5 : 6, 0, 7); ctx.stroke();
-    });
+      void age;
+    }
 
-    // disco/horizonte
-    ctx.strokeStyle = 'rgba(243,112,53,.35)'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.arc(cx, cy, R + 2, Math.PI * 0.15, Math.PI * 0.85); ctx.stroke();
+    /* ---- sítios de lançamento com contador ---- */
+    for (const key in SITES) {
+      const [lat, lon, label] = SITES[key];
+      const q = proj(lon, lat);
+      if (!q || !q.vis) continue;
+      ctx.fillStyle = muted; ctx.globalAlpha = 0.8;
+      ctx.beginPath(); ctx.arc(q.x, q.y, 2.6*DPR, 0, 7); ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.font = `600 ${Math.round(R*0.037)}px ${getComputedStyle(document.body).fontFamily}`;
+      ctx.fillStyle = muted;
+      ctx.textAlign = 'left';
+      const n = counts[key] || 0;
+      ctx.fillText(n ? `${label} · ${n}` : label, q.x + 6*DPR, q.y - 6*DPR);
+    }
+
+    /* ---- marcadores: só o mais recente pulsa ---- */
+    const vis = visibleEvents(t);
+    if (latest) {
+      const [lat, lon] = SITES[latest.site];
+      const q = proj(lon, lat);
+      const age = (t - norm(latest.date)) / DAY;
+      if (q && q.vis && age < 30) {
+        const k = age / 30;
+        ctx.strokeStyle = latest.country === 'usa' ? usC : ussrC;
+        ctx.globalAlpha = 0.5 * (1 - k); ctx.lineWidth = 2*DPR;
+        ctx.beginPath(); ctx.arc(q.x, q.y, (7 + 40 * k) * DPR, 0, 7); ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+    }
+    for (const e of vis.slice(-12)) {
+      const [lat, lon] = SITES[e.site];
+      const q = proj(lon, lat);
+      if (!q || !q.vis) continue;
+      const isSel = e === selected;
+      ctx.fillStyle = e.country === 'usa' ? usC : ussrC;
+      ctx.beginPath(); ctx.arc(q.x, q.y, (isSel ? 5.2 : 3.8) * DPR, 0, 7); ctx.fill();
+      ctx.strokeStyle = isSel ? amber : 'rgba(255,255,255,.55)';
+      ctx.lineWidth = (isSel ? 2.4 : 1.1) * DPR;
+      ctx.beginPath(); ctx.arc(q.x, q.y, (isSel ? 7.4 : 5.4) * DPR, 0, 7); ctx.stroke();
+    }
   }
 
   /* ---------------- timeline ---------------- */
@@ -418,7 +516,8 @@ const LAND = [[[-59.6,-80.0],[-60.2,-81.0],[-66.3,-80.3],[-59.6,-80.0]],[[-159.2
     const X = (ms) => pad + (w - 2 * pad) * (ms - START) / SPAN;
 
     tlx.strokeStyle = line; tlx.lineWidth = 1;
-    tlx.beginPath(); tlx.moveTo(pad, h * 0.50); tlx.lineTo(w - pad, h * 0.50); tlx.stroke();
+    const AX = h * 0.42;
+    tlx.beginPath(); tlx.moveTo(pad, AX); tlx.lineTo(w - pad, AX); tlx.stroke();
 
     // anos
     tlx.fillStyle = css.getPropertyValue('--muted').trim();
@@ -426,27 +525,27 @@ const LAND = [[[-59.6,-80.0],[-60.2,-81.0],[-66.3,-80.3],[-59.6,-80.0]],[[-159.2
     for (let y = 1957; y <= 1975; y += 1) {
       const x = X(Date.UTC(y, 0, 1));
       tlx.strokeStyle = line;
-      tlx.beginPath(); tlx.moveTo(x, h * 0.50 - 3); tlx.lineTo(x, h * 0.50 + 3); tlx.stroke();
-      if (y % 2 === 0) tlx.fillText(String(y), x + 3, h - 3);
+      tlx.beginPath(); tlx.moveTo(x, AX - 3); tlx.lineTo(x, AX + 3); tlx.stroke();
+      if (y % 2 === 0) tlx.fillText(String(y), x + 3, h - 5);
     }
     // eventos: URSS acima da linha, EUA abaixo
     EVENTS.forEach((e, i) => {
       const x = X(ts[i]);
       const isUs = e.country === 'usa';
-      const y = h * 0.50 + (isUs ? 10 : -10);
+      const y = AX + (isUs ? 9 : -9);
       const c = isUs ? us : ussr;
       const past = ts[i] <= t;
       tlx.globalAlpha = past ? 1 : 0.28;
       tlx.fillStyle = c;
       tlx.beginPath(); tlx.arc(x, y, 3.6, 0, 7); tlx.fill();
       tlx.strokeStyle = c; tlx.lineWidth = 1;
-      tlx.beginPath(); tlx.moveTo(x, h * 0.50); tlx.lineTo(x, y); tlx.stroke();
+      tlx.beginPath(); tlx.moveTo(x, AX); tlx.lineTo(x, y); tlx.stroke();
       tlx.globalAlpha = 1;
     });
     // playhead
     const px = X(t);
     tlx.strokeStyle = amber; tlx.lineWidth = 2.5;
-    tlx.beginPath(); tlx.moveTo(px, 4); tlx.lineTo(px, h - 2); tlx.stroke();
+    tlx.beginPath(); tlx.moveTo(px, 2); tlx.lineTo(px, h - 2); tlx.stroke();
   }
 
   /* ---------------- UI ---------------- */
@@ -474,18 +573,50 @@ const LAND = [[[-59.6,-80.0],[-60.2,-81.0],[-66.3,-80.3],[-59.6,-80.0]],[[-159.2
       recs.appendChild(row);
     });
 
+    counts.baikonur = counts.cape = counts.vandenberg = 0;
+    vis.forEach(e => counts[e.site]++);
+    latest = [...vis].sort((a, b) => norm(b.date) - norm(a.date))[0] || null;
+
+    // próxima missão, se a última já ficou para trás (>60 dias)
+    const upcoming = EVENTS.find(e => norm(e.date) > t) || null;
+    const stale = !latest || (t - norm(latest.date)) / DAY > 60;
+
     let ev;
     if (selected && ts[EVENTS.indexOf(selected)] <= t) ev = selected;
-    else ev = [...vis].sort((a, b) => norm(b.date) - norm(a.date))[0];
+    else ev = (stale && upcoming) ? null : latest;
     if (ev) {
+      $('m-meta').classList.remove('next');
       $('m-meta').textContent = `${fmtDate(norm(ev.date))} · ${ev.country === 'usa' ? 'United States' : 'Soviet Union'} · ${SITES[ev.site][2]}`;
       $('m-name').textContent = ev.name;
       $('m-text').textContent = ev.text;
       const rec = ev.rec ? RECORDS.find(r => r.id === ev.rec) : null;
       $('m-chip').innerHTML = rec ? `<span class="chip">${rec.title}</span>` : '';
+      const ph = PHOTOS[ev.name];
+      const fig = $('m-photo');
+      if (ph) {
+        $('m-img').src = 'photos/' + ph[0] + '.jpg';
+        $('m-img').alt = ev.name;
+        $('m-credit').textContent = ph[1];
+        fig.hidden = false;
+      } else {
+        fig.hidden = true;
+      }
       targetLon = SITES[ev.site][1];
+      cardEvent = ev;
+    } else if (upcoming) {
+      const days = Math.round((norm(upcoming.date) - t) / DAY);
+      $('m-meta').textContent = `next · ${fmtDate(norm(upcoming.date))} · in ${days} days`;
+      $('m-meta').classList.add('next');
+      $('m-name').textContent = upcoming.name;
+      $('m-text').textContent = upcoming.text;
+      $('m-chip').innerHTML = `<span class="chip" style="border-color:var(--line);color:var(--muted);background:transparent">upcoming</span>`;
+      const ph = PHOTOS[upcoming.name];
+      const fig = $('m-photo');
+      if (ph) { $('m-img').src = 'photos/' + ph[0] + '.jpg'; $('m-img').alt = upcoming.name; $('m-credit').textContent = ph[1]; fig.hidden = false; }
+      else fig.hidden = true;
+      cardEvent = upcoming;
     }
-    drawGlobe(); drawTimeline();
+    drawGlobe(performance.now()); drawTimeline();
   }
 
   $('scrub').addEventListener('input', (e) => { playing = false; $('play').textContent = '▶ Play'; render(START + SPAN * (+e.target.value / 1000)); });
@@ -511,33 +642,50 @@ const LAND = [[[-59.6,-80.0],[-60.2,-81.0],[-66.3,-80.3],[-59.6,-80.0]],[[-159.2
   // globo: arrastar + clicar em marcador
   const pick = (mx, my) => {
     const w = canvas.width, h = canvas.height, cx = w / 2, cy = h / 2, R = Math.min(w, h) * 0.44;
-    let best = null, bestD = 18 * DPR;
+    let best = null, bestD = 22 * DPR;
     visibleEvents(t).forEach(e => {
       const [lat, lon] = SITES[e.site];
-      const p = project(lon, lat, R, cx, cy);
-      if (p.z <= 0) return;
-      const d = Math.hypot(p.x - mx, p.y - my);
-      if (d < bestD) { bestD = d; best = e; }
+      const q = projScreen(lon, lat);
+      if (!q || !q.vis) return;
+      const d = Math.hypot(q.x - mx, q.y - my);
+      if (d < bestD) { bestD = d; best = e; }        // percorre em ordem cronológica: fica a mais recente
     });
     return best;
   };
+  function projScreen(lon, lat) {
+    const w = canvas.width, h = canvas.height, cx = w / 2, cy = h / 2, R = Math.min(w, h) * 0.44;
+    const p = lat * Math.PI / 180, l = (lon - lon0) * Math.PI / 180, p0 = lat0 * Math.PI / 180;
+    const x = Math.cos(p) * Math.sin(l);
+    const y = Math.cos(p0) * Math.sin(p) - Math.sin(p0) * Math.cos(p) * Math.cos(l);
+    const z = Math.sin(p0) * Math.sin(p) + Math.cos(p0) * Math.cos(p) * Math.cos(l);
+    return { x: cx + R * x, y: cy - R * y, vis: z > 0.02 };
+  }
   const toCanvas = (e) => {
     const r = canvas.getBoundingClientRect();
     return [(e.clientX - r.left) * canvas.width / r.width, (e.clientY - r.top) * canvas.height / r.height];
   };
-  canvas.addEventListener('pointerdown', (e) => { dragging = true; targetLon = null; lastX = e.clientX; canvas.classList.add('drag'); });
+  let dragStartX = 0, moved = 0;
+  canvas.addEventListener('pointerdown', (e) => {
+    dragging = true; targetLon = null; lastX = e.clientX; dragStartX = e.clientX; moved = 0;
+    canvas.classList.add('drag');
+  });
   window.addEventListener('pointerup', (e) => {
     if (!dragging) return;
     dragging = false; canvas.classList.remove('drag');
-    const [mx, my] = toCanvas(e);
-    const hit = pick(mx, my);
-    if (hit) { selected = hit; render(); }
+    lon0 = ((lon0 % 360) + 360) % 360;
+    if (moved < 6 * DPR) {                      // clique curto = selecionar marcador
+      const [mx, my] = toCanvas(e);
+      const hit = pick(mx, my);
+      if (hit) { selected = hit; render(); }
+    }
   });
   window.addEventListener('pointermove', (e) => {
     if (!dragging) return;
-    lon0 = (lon0 - (e.clientX - lastX) * 0.35) % 360;
+    const dx = e.clientX - lastX;
+    moved += Math.abs(dx);
+    lon0 = ((lon0 - dx * 0.35) % 360 + 360) % 360;
     lastX = e.clientX;
-    drawGlobe();
+    drawGlobe(performance.now());
   });
 
   // tema
@@ -570,7 +718,7 @@ const LAND = [[[-59.6,-80.0],[-60.2,-81.0],[-66.3,-80.3],[-59.6,-80.0]],[[-159.2
       } else {
         lon0 = (lon0 + dt * 0.004) % 360;                   // deriva lenta
       }
-      drawGlobe();
+      drawGlobe(now);
     }
     requestAnimationFrame(frame);
   }
