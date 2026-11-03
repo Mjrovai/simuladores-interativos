@@ -356,7 +356,7 @@ const grid = new THREE.LineSegments(
 );
 globe.add(grid);
 
-scene.add(new THREE.AmbientLight(0xffffff, 1.15));
+scene.add(new THREE.AmbientLight(0xffffff, 1.55));
 const sun = new THREE.DirectionalLight(0xfff3e6, 1.0);
 sun.position.set(3, 1.6, 2.4);
 scene.add(sun);
@@ -402,11 +402,11 @@ for (const key in SITES) {
 /* ---- arcos ---- */
 const arcGroup = new THREE.Group();
 globe.add(arcGroup);
-let arcLine = null, arcDot = null, moonMesh = null, moonLine = null, cislunarSite = null, cislunarRet = null,
+let arcLine = null, arcDot = null, moonMesh = null, moonLine = null, cislunarSite = null, cislunarPlan = null,
     cislunarUntil = 0, rotBoost = 0;
 
 function clearArcs() {
-  if (performance.now() >= cislunarUntil) { cislunarSite = null; cislunarRet = null; }
+  if (performance.now() >= cislunarUntil) { cislunarSite = null; cislunarPlan = null; }
   [arcLine, arcDot, moonLine].forEach(o => { if (o) { arcGroup.remove(o); o.geometry?.dispose?.(); } });
   arcLine = arcDot = moonLine = null;
   if (moonMesh) moonMesh.visible = false;
@@ -440,8 +440,11 @@ function buildArc(ev) {
     // missão translunar: desenhada em 2D sobre o canvas (ver drawSky) e mantida por 9 s
     arcLine = { userData: { moon: true, site: [lat, lon] } };
     cislunarSite = [lat, lon];
-    cislunarRet = ev.ret || null;
-    cislunarUntil = performance.now() + 9000;
+    const plan = LUNAR_PLAN[ev.name] || {off: 0, dur: 4, kind: 'orbit'};
+    const screenSec = Math.max(4, Math.min(14, plan.dur));
+    cislunarPlan = { site: [lat, lon], ret: ev.ret || null, hasRet: !!ev.ret,
+                     dur: plan.dur, kind: plan.kind, t0: performance.now() };
+    cislunarUntil = performance.now() + screenSec*1000 + 1400;
   }
 
   if (!arcDot) {
@@ -473,6 +476,20 @@ const counts = {baikonur:0, cape:0, vandenberg:0};
 
 /* ---- camada 2D: viagem Terra→Lua ---- */
 const sky = $('sky'), skx = sky.getContext('2d');
+/* ---- plano de voo de cada missão lunar (dias reais) ---- */
+const LUNAR_PLAN = {
+  'Apollo 8':   {off: 0,    dur: 6.2,  kind: 'orbit'},    // evento = lançamento
+  'Apollo 11':  {off: -4.3, dur: 8.1,  kind: 'landing'},  // evento = pouso (lançou 16 jul)
+  'Apollo 15':  {off: 0,    dur: 12.3, kind: 'landing'},
+  'Apollo 17':  {off: 0,    dur: 12.6, kind: 'landing'},
+  'Luna 1':     {off: 0,    dur: 1.4,  kind: 'flyby'},
+  'Luna 2':     {off: -1.4, dur: 1.4,  kind: 'impact'},   // evento = impacto
+  'Luna 3':     {off: 0,    dur: 2.5,  kind: 'flyby'},
+  'Luna 9':     {off: -3.5, dur: 3.5,  kind: 'landing'},  // evento = pouso
+  'Luna 16':    {off: -12,  dur: 12,   kind: 'landing'},  // evento = retorno da cápsula
+  'Lunokhod 1': {off: -7.5, dur: 7.5,  kind: 'landing'},  // evento = pouso
+};
+
 function drawSky(now) {
   const w = host.clientWidth, h = host.clientHeight;
   const dpr = Math.min(devicePixelRatio || 1, 2);
@@ -481,39 +498,45 @@ function drawSky(now) {
   }
   skx.setTransform(dpr, 0, 0, dpr, 0, 0);
   skx.clearRect(0, 0, w, h);
-  if (!cislunarSite) return;
-  if (playing && now > cislunarUntil) { cislunarSite = null; return; }
 
-  const [lat, lon] = cislunarSite;
-  const remain = cislunarUntil - now;
-  const fade = Math.max(0, Math.min(1, remain / 1400));
-  if (fade <= 0) { cislunarSite = null; cislunarRet = null; return; }
+  const P = cislunarPlan;
+  if (!P) return;
+  const fade = Math.max(0, Math.min(1, (cislunarUntil - now) / 1400));
+  if (fade <= 0) { cislunarPlan = null; cislunarSite = null; return; }
 
-  const mx = w*0.80, my = h*0.20;                       // lua (ponto fixo da cena)
+  // tempo de missão em dias, comprimido: 1 dia real ≈ 1 s de tela (4–14 s no total)
+  const screenSec = Math.max(4, Math.min(14, P.dur));
+  let el = (now - P.t0) / 1000 * (P.dur / screenSec);
+  if (!playing) el = el % P.dur;                    // pausado: repete o voo
+  el = Math.max(0, Math.min(P.dur, el));
+  const out = Math.min(3, P.dur * 0.45);                  // perna de ida ~3 dias
+  const ret = P.hasRet ? Math.min(3, P.dur * 0.45) : 0;   // perna de volta ~3 dias
+  const mid = Math.max(0, P.dur - out - ret);
+
+  const mx = w*0.80, my = h*0.20;                          // lua (ponto fixo da cena)
   const q = (t,a,b,c) => (1-t)*(1-t)*a + 2*(1-t)*t*b + t*t*c;
   const font = `600 ${Math.max(9, w*0.015)}px ${getComputedStyle(document.body).fontFamily}`;
-  const note = (txt, x, y, size) => {                       // texto que não vaza do cartão
+  const note = (txt, x, y, size) => {
     skx.font = `600 ${Math.max(8, w*(size||0.0125))}px ${getComputedStyle(document.body).fontFamily}`;
     const tw = skx.measureText(txt).width;
     skx.fillText(txt, Math.max(6, Math.min(x, w - tw - 8)), Math.min(y, h - 8));
   };
 
   // lançamento na tela
-  const v = ll2v(lat, lon, R*1.01).applyMatrix4(globe.matrixWorld).project(camera);
+  const v = ll2v(P.site[0], P.site[1], R*1.01).applyMatrix4(globe.matrixWorld).project(camera);
   const sx = (v.x*0.5+0.5)*w, sy = (-v.y*0.5+0.5)*h;
-  // centro do globo na tela (para prender o retorno no limbo)
   const c0 = new THREE.Vector3(0,0,0).project(camera);
   const gx = (c0.x*0.5+0.5)*w, gy = (-c0.y*0.5+0.5)*h;
 
-  // destino do retorno (splashdown ou cápsula de amostra) — null = one-way
+  // destino do retorno (amerissagem ou cápsula) — null nas one-way
   let ex = null, ey = null, retVisible = false;
-  if (cislunarRet) {
-    const rv = ll2v(cislunarRet[0], cislunarRet[1], R*1.01).applyMatrix4(globe.matrixWorld);
+  if (P.hasRet) {
+    const rv = ll2v(P.ret[0], P.ret[1], R*1.01).applyMatrix4(globe.matrixWorld);
     const toCam = camera.position.clone().sub(rv).normalize();
     retVisible = rv.clone().normalize().dot(toCam) > 0.04;
     const rp = rv.clone().project(camera);
     ex = (rp.x*0.5+0.5)*w; ey = (-rp.y*0.5+0.5)*h;
-    if (Math.hypot(ex-sx, ey-sy) < 70) { ex = null; ey = null; }   // volta ao mesmo ponto: só o rótulo
+    if (Math.hypot(ex-sx, ey-sy) < 70) { ex = null; ey = null; }
     else if (!retVisible) {
       const dx = ex-gx, dy = ey-gy, dd = Math.hypot(dx,dy) || 1;
       const limb = Math.min(w,h)*0.43;
@@ -521,23 +544,21 @@ function drawSky(now) {
     }
   }
 
-  // ---- ida: sítio -> lua
+  const phase = !P.hasRet ? (el < out ? 'out' : 'arrived')
+              : el < out ? 'out'
+              : el > P.dur - ret ? 'ret'
+              : 'moon';
+
+  // ---- curvas
   const c1x = (sx+mx)/2, c1y = Math.min(sy,my) - h*0.16;
-  const u = (now % 8000) / 8000;
-  const outPhase = u < 0.5;
-  const hasRet = !!cislunarRet;
-  const aOut = (outPhase || !hasRet) ? 0.85 : 0.2;
-  const aRet = outPhase ? 0.25 : 0.6;
+  let c2x = null, c2y = null;
+  if (ex !== null) { c2x = (mx+ex)/2; c2y = Math.max(my,ey) + h*0.10; }
 
   skx.lineWidth = 1.6; skx.setLineDash([5,5]);
-  skx.strokeStyle = `rgba(243,112,53,${aOut*fade})`;
+  skx.strokeStyle = `rgba(243,112,53,${(phase === 'out' ? 0.85 : 0.22) * fade})`;
   skx.beginPath(); skx.moveTo(sx,sy); skx.quadraticCurveTo(c1x,c1y,mx,my); skx.stroke();
-
-  // ---- volta: lua -> oceano (Apollo) ou cápsula (Luna 16); ausente nas one-way
-  let c2x, c2y;
-  if (ex !== null) {
-    c2x = (mx+ex)/2; c2y = Math.max(my,ey) + h*0.10;
-    skx.strokeStyle = `rgba(127,178,224,${aRet*fade})`;
+  if (c2x !== null) {
+    skx.strokeStyle = `rgba(127,178,224,${(phase === 'ret' ? 0.7 : 0.22) * fade})`;
     skx.beginPath(); skx.moveTo(mx,my); skx.quadraticCurveTo(c2x,c2y,ex,ey); skx.stroke();
   }
   skx.setLineDash([]);
@@ -551,42 +572,53 @@ function drawSky(now) {
   skx.globalAlpha = 1;
 
   skx.font = font;
-  // etiqueta da ida
-  const px1 = q(0.55, sx, c1x, mx), py1 = q(0.55, sy, c1y, my);
-  if (outPhase || !hasRet) { skx.fillStyle = `rgba(243,112,53,${0.95*fade})`; skx.fillText('outbound', px1 + 6, py1 - 10); }
 
-  skx.font = font;
-  if (cislunarRet) {
-    if (ex !== null) {
-      // ponto de amerissagem/pouso + rótulo
-      skx.fillStyle = `rgba(127,178,224,${0.9*fade})`;
-      skx.beginPath(); skx.arc(ex, ey, 3.4, 0, 7); skx.fill();
-      if (!outPhase) {
-        const px2 = q(0.55, mx, c2x, ex), py2 = q(0.55, my, c2y, ey);
-        skx.fillText('return', px2 + 6, py2 - 8);
-      }
-      if (retVisible) {
-        skx.fillStyle = `rgba(110,132,155,${0.95*fade})`;
-        note(cislunarRet[2], ex + 8, ey + 20);
-      }
-    } else {
-      // volta ao mesmo ponto do mapa: só a nota
+  // ---- ponto de retorno
+  if (c2x !== null) {
+    skx.fillStyle = `rgba(127,178,224,${0.9*fade})`;
+    skx.beginPath(); skx.arc(ex, ey, 3.4, 0, 7); skx.fill();
+    if (retVisible) {
       skx.fillStyle = `rgba(110,132,155,${0.95*fade})`;
-      note(cislunarRet[2] + ' · capsule return', mx - mr - 4, my + mr + 16);
+      note(P.ret[2], ex + 8, ey + 20);
     }
+  } else if (P.hasRet) {
+    skx.fillStyle = `rgba(110,132,155,${0.95*fade})`;
+    note(P.ret[2] + ' · capsule return', mx - mr - 4, my + mr + 16);
   } else {
     skx.fillStyle = `rgba(110,132,155,${0.95*fade})`;
     note('one-way · no return', mx - mr - 4, my + mr + 16);
   }
 
-  // ---- pontos em movimento
-  skx.fillStyle = '#F37035';
-  skx.beginPath(); skx.arc(q(u, sx, c1x, mx), q(u, sy, c1y, my), 3.6, 0, 7); skx.fill();
-  if (ex !== null) {
-    const ru = (u + 0.5) % 1;
-    skx.fillStyle = '#7FB2E0';
-    skx.beginPath(); skx.arc(q(ru, mx, c2x, ex), q(ru, my, c2y, ey), 3.2, 0, 7); skx.fill();
+  // ---- nave: posição conforme o dia de missão
+  let nx = mx, ny = my, col = '#7FB2E0';
+  if (phase === 'out') {
+    const u = Math.min(1, el / out);
+    nx = q(u, sx, c1x, mx); ny = q(u, sy, c1y, my); col = '#F37035';
+  } else if (phase === 'ret' && c2x !== null) {
+    const u = Math.min(1, (el - (P.dur - ret)) / ret);
+    nx = q(u, mx, c2x, ex); ny = q(u, my, c2y, ey);
   }
+  skx.fillStyle = col;
+  skx.beginPath(); skx.arc(nx, ny, 3.8, 0, 7); skx.fill();
+
+  // ---- relógio da missão
+  const days = el >= 1 ? el.toFixed(el < 10 ? 1 : 0) : el.toFixed(1);
+  let clock;
+  if (phase === 'out') clock = `T+ ${days} d · outbound`;
+  else if (phase === 'moon') clock = `T+ ${days} d · lunar ${P.kind || 'orbit'}`;
+  else if (phase === 'ret') clock = `T+ ${days} d · return home`;
+  else clock = `T+ ${days} d · arrived, no return`;
+  // pill fixa no canto: relógio da missão
+  skx.font = `700 ${Math.max(10, w*0.014)}px ${getComputedStyle(document.body).fontFamily}`;
+  const cw = skx.measureText(clock).width;
+  skx.globalAlpha = fade * 0.92;
+  skx.fillStyle = 'rgba(14,26,38,.82)';
+  const px = 12, py = 12, ph = 26, pw = cw + 22;
+  if (skx.roundRect) { skx.beginPath(); skx.roundRect(px, py, pw, ph, 13); skx.fill(); }
+  else skx.fillRect(px, py, pw, ph);
+  skx.fillStyle = '#F2F6FA';
+  skx.fillText(clock, px + 11, py + 18);
+  skx.globalAlpha = 1;
 }
 
 /* ======================= linha do tempo ======================= */
@@ -699,10 +731,13 @@ function render(now = t, rebuildArc = false) {
     if (rebuildArc || arcKey !== null) { arcKey = null; clearArcs(); }
     focusLon = SITES[upcoming.site][1];
   }
-  if (cislunarSite && performance.now() < cislunarUntil) {
+  if (cislunarPlan && performance.now() < cislunarUntil) {
     // ida: globo no sítio de lançamento · volta: globo no ponto de amerissagem
-    const u = (performance.now() % 8000) / 8000;
-    focusLon = (u >= 0.5 && cislunarRet) ? cislunarRet[1] : cislunarSite[1];
+    const P = cislunarPlan;
+    const screenSec = Math.max(4, Math.min(14, P.dur));
+    const el = (now - P.t0) / 1000 * (P.dur / screenSec);
+    const ret = P.hasRet ? Math.min(3, P.dur * 0.45) : 0;
+    focusLon = (ret && el > P.dur - ret) ? P.ret[1] : P.site[1];
   }
   drawTimeline();
   updateLabels();
@@ -762,7 +797,7 @@ host.addEventListener('pointerup', (e) => {
 $('scrub').addEventListener('input', (e) => {
   playing = false; $('play').textContent = '▶ Play';
   selected = null; dwellUntil = 0;
-  cislunarUntil = 0; cislunarSite = null; cislunarRet = null;   // corta a vista lunar anterior
+  cislunarUntil = 0; cislunarSite = null; cislunarPlan = null;   // corta a vista lunar anterior
   render(START + SPAN * (+e.target.value / 1000), true);
   syncPtr();
 });
@@ -786,7 +821,7 @@ tlC.addEventListener('click', (e) => {
   const r = tlC.getBoundingClientRect();
   const frac = (e.clientX - r.left) / r.width;
   playing = false; $('play').textContent = '▶ Play'; selected = null; dwellUntil = 0;
-  cislunarUntil = 0; cislunarSite = null; cislunarRet = null;
+  cislunarUntil = 0; cislunarSite = null; cislunarPlan = null;
   render(START + SPAN * Math.max(0, Math.min(1, frac)), true);
   syncPtr();
 });
@@ -829,14 +864,20 @@ function tick(now) {
     }
   }
 
-  sun.position.copy(camera.position).multiplyScalar(0.8).add(new THREE.Vector3(1.5, 2.5, 0));
+  sun.position.copy(camera.position).multiplyScalar(0.9);
+  sun.position.y += 1.8; sun.position.x += 0.6;
   sun.lookAt(0,0,0);
+
+  if (!playing && cislunarPlan) cislunarUntil = Math.max(cislunarUntil, now + 2500);
 
   if (!dragging) {
     // viagem lunar em cena: globo acompanha a perna em curso (lançamento ↔ amerissagem)
-    if (cislunarSite && now < cislunarUntil) {
-      const lu = (now % 8000) / 8000;
-      focusLon = (lu >= 0.5 && cislunarRet) ? cislunarRet[1] : cislunarSite[1];
+    if (cislunarPlan && now < cislunarUntil) {
+      const P = cislunarPlan;
+      const secs = Math.max(4, Math.min(14, P.dur));
+      const el = (now - P.t0) / 1000 * (P.dur / secs);
+      const ret = P.hasRet ? Math.min(3, P.dur * 0.45) : 0;
+      focusLon = (ret && el > P.dur - ret) ? P.ret[1] : P.site[1];
     }
     const want = lonToRot(focusLon);
     let d = ((want - rotY + Math.PI) % (2*Math.PI) + 2*Math.PI) % (2*Math.PI) - Math.PI;
