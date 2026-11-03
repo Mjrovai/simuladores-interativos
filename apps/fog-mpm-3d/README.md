@@ -1,6 +1,6 @@
 # FOG-MPM · Explorador 3D
 
-![Prévia do explorador: introdução, anatomia, lançamento e voo](preview.png)
+![Prévia do explorador](../../assets/thumbs/fog.jpg)
 
 Aplicativo web interativo que explica, em 3D, o funcionamento do **FOG-MPM**
 (*Fiber Optic Guided Multi-Purpose Missile*) da Avibras — míssil brasileiro
