@@ -580,7 +580,7 @@ function render(now = t, rebuildArc = false) {
   } else if (upcoming) {
     const days = Math.round((norm(upcoming.date) - t) / DAY);
     $('m-meta').classList.add('next');
-    $('m-meta').textContent = `next · ${fmtDate(norm(upcoming.date))} · in ${days} days`;
+    $('m-meta').textContent = `next · ${fmtDate(norm(upcoming.date))} · in ${days} ${days === 1 ? "day" : "days"}`;
     $('m-name').textContent = upcoming.name;
     $('m-text').textContent = upcoming.text;
     $('m-chip').innerHTML = `<span class="chip" style="border-color:var(--line);color:var(--muted);background:transparent">upcoming</span>`;
@@ -742,8 +742,6 @@ function resize() {
   tlC.width = Math.round(TLW * dpr); tlC.height = Math.round(TLH * dpr);
   drawTimeline();
 }
-window.__dbg = () => ({rotY, target: lonToRot(focusLon), focusLon, hasFocus: typeof focusLon,
-                       globeY: globe.rotation.y, camZ: camera.position.z});
 new ResizeObserver(resize).observe(host);
 window.addEventListener('resize', resize);
 resize();
