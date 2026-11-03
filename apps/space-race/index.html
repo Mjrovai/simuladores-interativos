@@ -17,7 +17,7 @@
   --font:Calibri,Carlito,"Segoe UI",-apple-system,system-ui,sans-serif;
   --mono:"SF Mono",ui-monospace,Menlo,monospace;
   --radius:14px;
-  --shadow:0 1px 2px rgba(0,58,112,.06),0 14px 34px -20px rgba(0,58,112,.30);
+  --shadow:0 1px 2px rgba(0,58,112,.06),0 14px 30px -20px rgba(0,58,112,.28);
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
@@ -26,7 +26,7 @@
     --us:#7FB2E0; --ussr:#FF6B57;
     --line:rgba(255,255,255,.15); --line-soft:rgba(255,255,255,.08);
     --glow:rgba(243,112,53,.22);
-    --shadow:0 1px 2px rgba(0,0,0,.4),0 16px 40px -22px rgba(0,0,0,.8);
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 14px 34px -22px rgba(0,0,0,.8);
   }
 }
 :root[data-theme="dark"]{
@@ -35,102 +35,118 @@
   --us:#7FB2E0; --ussr:#FF6B57;
   --line:rgba(255,255,255,.15); --line-soft:rgba(255,255,255,.08);
   --glow:rgba(243,112,53,.22);
-  --shadow:0 1px 2px rgba(0,0,0,.4),0 16px 40px -22px rgba(0,0,0,.8);
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 14px 34px -22px rgba(0,0,0,.8);
 }
 *{box-sizing:border-box}
-body{margin:0;font-family:var(--font);color:var(--ink-soft);background:var(--bg);font-size:16px;line-height:1.55;
-  -webkit-font-smoothing:antialiased;background-image:radial-gradient(900px 500px at 80% -6%,var(--glow),transparent 60%);background-attachment:fixed}
-.wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+html,body{height:100%}
+body{margin:0;font-family:var(--font);color:var(--ink-soft);background:var(--bg);font-size:15px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;display:flex;flex-direction:column;overflow:hidden;
+  background-image:radial-gradient(900px 480px at 82% -8%,var(--glow),transparent 60%)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 18px;width:100%}
 a{color:var(--us);text-decoration:none}
 a:hover{color:var(--amber-deep)}
 
-header.top{position:sticky;top:0;z-index:20;backdrop-filter:blur(10px) saturate(1.4);
-  background:color-mix(in srgb,var(--bg) 86%,transparent);border-bottom:1px solid var(--line-soft)}
-header.top .wrap{display:flex;align-items:center;gap:12px;height:56px}
-.brand{font-weight:700;color:var(--ink);font-size:1rem;display:flex;align-items:center;gap:8px}
-.brand i{width:9px;height:9px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 3px var(--glow)}
+header.top{flex:none;border-bottom:1px solid var(--line-soft);background:color-mix(in srgb,var(--bg) 88%,transparent)}
+header.top .wrap{display:flex;align-items:center;gap:12px;height:50px}
+.brand{font-weight:700;color:var(--ink);font-size:.98rem;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.brand i{width:8px;height:8px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 3px var(--glow)}
+.brand small{font-weight:500;color:var(--muted);font-size:.78rem}
 header nav{margin-left:auto;display:flex;gap:6px;align-items:center}
-header nav a{font-size:.82rem;padding:6px 9px;border-radius:8px;color:var(--ink-soft)}
+header nav a{font-size:.8rem;padding:6px 9px;border-radius:8px;color:var(--ink-soft)}
 header nav a:hover{background:var(--line-soft);color:var(--ink)}
-.tgl{width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);
-  border-radius:9px;background:transparent;color:var(--ink-soft);cursor:pointer}
-.tgl svg{width:17px;height:17px;display:none}
+.tgl{width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);
+  border-radius:8px;background:transparent;color:var(--ink-soft);cursor:pointer}
+.tgl svg{width:16px;height:16px;display:none}
 .tgl .moon{display:block}
 :root[data-theme="dark"] .tgl .moon{display:none}
 :root[data-theme="dark"] .tgl .sun{display:block}
 
-.hero{padding:28px 0 2px}
-.eyebrow{font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--slate);font-weight:600;margin:0 0 8px}
-h1{margin:0;font-size:clamp(1.7rem,3.4vw,2.4rem);line-height:1.08;letter-spacing:-.02em;color:var(--ink);font-weight:700}
-h1 em{font-style:normal;color:var(--amber-deep)}
-.hero p{margin:8px 0 0;max-width:70ch;font-size:.96rem;color:var(--ink-soft)}
+.app{flex:1;min-height:0;display:grid;grid-template-columns:minmax(280px,1.05fr) minmax(330px,.95fr);
+  grid-template-rows:minmax(0,1fr) auto;gap:12px;padding:12px 0;max-width:1180px;margin:0 auto;width:100%;padding-left:18px;padding-right:18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);min-height:0}
 
-.board{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.92fr);gap:16px;padding:16px 0 6px;align-items:start}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
-.globe-card{padding:8px;position:relative}
-#globe3d{position:relative;width:100%;aspect-ratio:1/1;border-radius:12px;overflow:hidden;cursor:grab;
-  background:radial-gradient(circle at 50% 45%, rgba(243,112,53,.10), transparent 62%)}
+/* globo */
+.globe-card{grid-column:1;grid-row:1;display:flex;flex-direction:column;padding:6px;position:relative}
+#globe3d{flex:1;min-height:0;position:relative;cursor:grab;border-radius:10px;overflow:hidden}
 #globe3d.drag{cursor:grabbing}
 #globe3d canvas{display:block;width:100%;height:100%}
 #sky{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 #labels{position:absolute;inset:0;pointer-events:none}
-.mlabel{position:absolute;transform:translate(6px,-50%);font-size:11px;font-weight:600;color:var(--muted);
-  white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,.45)}
-.globe-foot{display:flex;justify-content:space-between;align-items:center;font-size:.72rem;color:var(--muted);padding:6px 6px 2px}
+.mlabel{position:absolute;transform:translate(6px,-50%);font-size:10.5px;font-weight:600;color:var(--muted);
+  white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+.globe-foot{flex:none;display:flex;justify-content:space-between;font-size:.68rem;color:var(--muted);padding:4px 4px 0}
 
-.clock{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}
-.date{font-family:var(--mono);font-size:1.5rem;color:var(--ink);letter-spacing:-.01em;line-height:1}
-.day{font-size:.76rem;color:var(--muted)}
-.controls{display:flex;align-items:center;gap:8px;margin-top:12px;flex-wrap:wrap}
-.btn{font:inherit;font-size:.8rem;font-weight:600;padding:8px 13px;border-radius:9px;border:1px solid var(--navy);
+/* coluna direita */
+.side{grid-column:2;grid-row:1;display:flex;flex-direction:column;gap:10px;min-height:0}
+.ctrl{flex:none;padding:12px 14px}
+.clock{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.date{font-family:var(--mono);font-size:1.28rem;color:var(--ink);line-height:1}
+.day{font-size:.72rem;color:var(--muted)}
+.spd{margin-left:auto;display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.spd button{font:inherit;font-size:.72rem;padding:5px 8px;background:transparent;border:none;border-right:1px solid var(--line);color:var(--muted);cursor:pointer}
+.spd button:last-child{border-right:none}
+.spd button[aria-pressed="true"]{background:var(--navy);color:#fff}
+:root[data-theme="dark"] .spd button[aria-pressed="true"]{background:var(--amber);color:#1B1B1B}
+input[type=range]{width:100%;accent-color:var(--amber);margin:10px 0 0}
+.tl{position:relative;height:58px;margin-top:2px}
+.tl canvas{width:100%;height:58px;display:block;cursor:pointer}
+.rowbtns{display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap}
+.btn{font:inherit;font-size:.78rem;font-weight:600;padding:7px 12px;border-radius:8px;border:1px solid var(--navy);
   background:var(--navy);color:#fff;cursor:pointer;white-space:nowrap}
 .btn:hover{background:var(--amber-deep);border-color:var(--amber-deep)}
 .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
 .btn.ghost:hover{border-color:var(--amber);color:var(--amber-deep)}
-.spd{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
-.spd button{font:inherit;font-size:.76rem;padding:7px 9px;background:transparent;border:none;border-right:1px solid var(--line);color:var(--muted);cursor:pointer}
-.spd button:last-child{border-right:none}
-.spd button[aria-pressed="true"]{background:var(--navy);color:#fff}
-:root[data-theme="dark"] .spd button[aria-pressed="true"]{background:var(--amber);color:#1B1B1B}
-input[type=range]{width:100%;accent-color:var(--amber);margin:14px 0 2px}
-.tl{position:relative;height:74px;margin-top:4px}
-.tl canvas{width:100%;height:74px;display:block;cursor:pointer}
+.score-inline{margin-left:auto;display:flex;align-items:center;gap:12px;font-size:.78rem;color:var(--muted)}
+.score-inline .s{display:inline-flex;align-items:center;gap:5px}
+.score-inline b{font-family:var(--mono);font-size:.95rem;color:var(--ink)}
+.score-inline .dot{width:7px;height:7px;border-radius:50%}
+.dot.ussr{background:var(--ussr)} .dot.usa{background:var(--us)}
 
-.score{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
-.side{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface-2)}
-.side .hd{display:flex;align-items:center;gap:7px;font-size:.74rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
-.side .dot{width:8px;height:8px;border-radius:50%}
-.side .n{font-family:var(--mono);font-size:1.3rem;color:var(--ink);margin-top:3px}
-.side.ussr .dot{background:var(--ussr)}
-.side.usa .dot{background:var(--us)}
-
-.shared{margin-top:8px;font-size:.74rem;color:var(--muted)}
-.recs{margin-top:10px;display:flex;flex-direction:column;gap:1px;max-height:206px;overflow:auto;padding-right:4px;
-  mask-image:linear-gradient(to bottom,#000 82%,transparent);-webkit-mask-image:linear-gradient(to bottom,#000 82%,transparent)}
-.rec{display:grid;grid-template-columns:10px 1fr auto;gap:8px;align-items:center;font-size:.8rem;padding:5px 2px;border-bottom:1px solid var(--line-soft)}
-.rec:last-child{border-bottom:none}
-.rec .d{width:8px;height:8px;border-radius:50%}
-.rec .t{color:var(--ink)}
-.rec .y{font-family:var(--mono);font-size:.72rem;color:var(--muted)}
-.rec.future{opacity:.34}
+/* tabela de recordes */
+.rec-card{flex:1;min-height:0;display:flex;flex-direction:column;padding:10px 12px 6px}
+.rec-head{display:flex;align-items:baseline;gap:8px;flex:none;padding-bottom:4px;border-bottom:1px solid var(--line-soft)}
+.rec-head h2{margin:0;font-size:.82rem;letter-spacing:.1em;text-transform:uppercase;color:var(--slate)}
+.rec-head span{font-size:.68rem;color:var(--muted);margin-left:auto}
+.recs{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;
+  mask-image:linear-gradient(to bottom,#000 88%,transparent);-webkit-mask-image:linear-gradient(to bottom,#000 88%,transparent)}
+.rec{display:grid;grid-template-columns:9px 1fr auto;gap:8px;align-items:center;font-size:.79rem;
+  padding:4px 2px;border-bottom:1px solid var(--line-soft);flex:none}
+.rec .d{width:7px;height:7px;border-radius:50%}
+.rec .t{color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rec .y{font-family:var(--mono);font-size:.7rem;color:var(--muted)}
+.rec.future{opacity:.3}
 .rec.future .t{color:var(--muted)}
+.rec.fresh{animation:fresh 1.4s ease-out}
+@keyframes fresh{0%{background:rgba(243,112,53,.28)}100%{background:transparent}}
 
-.mission{margin-top:14px}
-.photo{margin:0 0 12px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#0d1b2a}
-.photo img{display:block;width:100%;height:auto;max-height:300px;object-fit:contain}
-.credit{font-size:.66rem;color:var(--muted);padding:6px 9px;border-top:1px solid var(--line-soft);line-height:1.35;background:var(--surface)}
-.mission h2{margin:0 0 2px;font-size:1.02rem;color:var(--ink)}
-.mission .meta{font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+/* faixa da missão */
+.mission{grid-column:1/-1;grid-row:2;display:grid;grid-template-columns:190px 1fr;gap:14px;align-items:start;padding:12px 14px}
+.mission.no-photo{grid-template-columns:1fr}
+.mission .photo{margin:0}
+.photo{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#0d1b2a}
+.photo img{display:block;width:100%;height:auto;max-height:132px;object-fit:contain}
+.credit{font-size:.62rem;color:var(--muted);padding:4px 7px;border-top:1px solid var(--line-soft);background:var(--surface);line-height:1.3}
+.mbody{min-width:0}
+.mission h2{margin:0 0 2px;font-size:.98rem;color:var(--ink)}
+.mission .meta{font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
 .mission .meta.next{color:var(--amber-deep)}
-.mission p{margin:0;font-size:.88rem;color:var(--ink-soft)}
-.chip{display:inline-block;font-size:.68rem;letter-spacing:.07em;text-transform:uppercase;border-radius:999px;
-  padding:3px 8px;border:1px solid var(--amber);color:var(--amber-deep);background:var(--glow);margin-top:9px}
+.mission p{margin:0;font-size:.84rem;color:var(--ink-soft);max-width:88ch}
+.chip{display:inline-block;font-size:.64rem;letter-spacing:.07em;text-transform:uppercase;border-radius:999px;
+  padding:2px 7px;border:1px solid var(--amber);color:var(--amber-deep);background:var(--glow);margin-top:6px}
 
-.note{margin:14px 0 40px;font-size:.8rem;color:var(--muted);max-width:82ch}
-footer.site{border-top:1px solid var(--line-soft);padding:18px 0 40px;color:var(--muted);font-size:.78rem}
-footer.site .wrap{display:flex;gap:14px;justify-content:space-between;flex-wrap:wrap}
-@media(max-width:900px){.board{grid-template-columns:1fr}.recs{max-height:none}}
-@media(max-width:560px){.brand{font-size:.92rem}.brand .yrs{display:none}}
+footer.site{flex:none;border-top:1px solid var(--line-soft);color:var(--muted);font-size:.68rem;padding:6px 0}
+footer.site .wrap{display:flex;gap:12px;justify-content:space-between;flex-wrap:wrap;align-items:center}
+
+@media(max-width:900px){
+  body{overflow:auto;height:auto}
+  .app{grid-template-columns:1fr;grid-template-rows:auto auto auto;height:auto}
+  .globe-card{grid-column:1;grid-row:1;height:min(78vw,420px)}
+  .side{grid-column:1;grid-row:2}
+  .rec-card{max-height:320px}
+  .mission{grid-column:1;grid-row:3;grid-template-columns:120px 1fr}
+  .photo img{max-height:96px}
+}
+@media(max-width:760px){.brand small{display:none}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -138,7 +154,7 @@ footer.site .wrap{display:flex;gap:14px;justify-content:space-between;flex-wrap:
 
 <header class="top">
   <div class="wrap">
-    <span class="brand"><i></i>The Space Race <span class="yrs">· 1957–1975</span></span>
+    <span class="brand"><i></i>The Space Race <span class="yrs">· 1957–1975</span> <small>· thirty missions, one scoreboard of firsts</small></span>
     <nav>
       <a href="../../">← Gallery</a>
       <button class="tgl" type="button" aria-label="Toggle theme">
@@ -149,50 +165,48 @@ footer.site .wrap{display:flex;gap:14px;justify-content:space-between;flex-wrap:
   </div>
 </header>
 
-<div class="wrap hero">
-  <p class="eyebrow">launch by launch · thirty missions</p>
-  <h1>Eighteen years, <em>one scoreboard</em> of firsts</h1>
-  <p>From the beep of Sputnik to a handshake in orbit. Drag the Earth, scrub the timeline, and watch who holds
-     which record on any given day. The dates are real; the counting is the argument.</p>
-</div>
-
-<main class="wrap board">
+<main class="app">
   <section class="card globe-card">
     <div id="globe3d"><canvas id="sky"></canvas><div id="labels"></div></div>
-    <div class="globe-foot"><span>drag to rotate · click a marker</span><span id="hint">—</span></div>
+    <div class="globe-foot"><span>drag to rotate · click a marker</span><span id="hint">30 missions · 1957–1975</span></div>
   </section>
 
-  <section>
-    <div class="card">
+  <section class="side">
+    <div class="card ctrl">
       <div class="clock">
         <span class="date" id="date">4 Oct 1957</span>
         <span class="day" id="day">day 1 of 6,503</span>
-      </div>
-      <div class="controls">
-        <button class="btn" id="play">▶ Play</button>
         <div class="spd" id="spd" role="group" aria-label="Speed">
           <button data-s="1" aria-pressed="true">1×</button>
           <button data-s="2" aria-pressed="false">2×</button>
           <button data-s="4" aria-pressed="false">4×</button>
         </div>
-        <button class="btn ghost" id="reset">Reset</button>
       </div>
       <input type="range" id="scrub" min="0" max="1000" value="0" aria-label="Time">
       <div class="tl"><canvas id="tl"></canvas></div>
-
-      <div class="score">
-        <div class="side ussr"><div class="hd"><span class="dot"></span>USSR</div><div class="n" id="n-ussr">0</div></div>
-        <div class="side usa"><div class="hd"><span class="dot"></span>USA</div><div class="n" id="n-usa">0</div></div>
+      <div class="rowbtns">
+        <button class="btn" id="play">▶ Play</button>
+        <button class="btn ghost" id="reset">Reset</button>
+        <div class="score-inline">
+          <span class="s"><i class="dot ussr"></i>USSR <b id="n-ussr">0</b></span>
+          <span class="s"><i class="dot usa"></i>USA <b id="n-usa">0</b></span>
+          <span id="shared" hidden>+1 shared</span>
+        </div>
       </div>
-      <div class="shared" id="shared" hidden>+ 1 shared first · Apollo–Soyuz, 1975</div>
-      <div class="recs" id="recs"></div>
     </div>
 
-    <div class="card mission" id="mission">
-      <figure class="photo" id="m-photo" hidden>
-        <img id="m-img" alt="" loading="lazy">
-        <figcaption class="credit" id="m-credit"></figcaption>
-      </figure>
+    <div class="card rec-card">
+      <div class="rec-head"><h2>Firsts</h2><span id="rec-note">follows the newest</span></div>
+      <div class="recs" id="recs"></div>
+    </div>
+  </section>
+
+  <section class="card mission" id="mission">
+    <figure class="photo" id="m-photo" hidden>
+      <img id="m-img" alt="" loading="lazy">
+      <figcaption class="credit" id="m-credit"></figcaption>
+    </figure>
+    <div class="mbody">
       <div class="meta" id="m-meta">—</div>
       <h2 id="m-name">—</h2>
       <p id="m-text">Scrub the timeline to begin.</p>
@@ -201,19 +215,10 @@ footer.site .wrap{display:flex;gap:14px;justify-content:space-between;flex-wrap:
   </section>
 </main>
 
-<div class="wrap">
-  <p class="note">
-    Counting firsts is one way to read the race, not the only one. The Soviet programme collected most of the
-    early records; the American programme spent those same years building the industrial depth that put two
-    people on the Moon in 1969. Both sides also lost crews — Komarov, the Apollo 1 fire and Soyuz 11 are in the
-    data, because a scoreboard that hides them is a worse lesson.
-  </p>
-</div>
-
 <footer class="site">
   <div class="wrap">
-    <span>Dates and crews from public mission records · Earth texture: NASA Blue Marble (public domain) · photos: NASA and Wikimedia Commons, public domain (Tereshkova photo CC BY-SA 3.0, credited on the card)</span>
-    <a href="https://github.com/Mjrovai/simuladores-interativos" target="_blank" rel="noopener">Source on GitHub ↗</a>
+    <span>Dates and crews from public mission records · Earth: NASA Blue Marble · photos: NASA / Wikimedia Commons (Tereshkova CC BY-SA 3.0) · counting firsts is one reading of the race</span>
+    <a href="https://github.com/Mjrovai/simuladores-interativos" target="_blank" rel="noopener">Source ↗</a>
   </div>
 </footer>
 
@@ -313,7 +318,7 @@ const cssVar = (n) => getComputedStyle(document.documentElement).getPropertyValu
 
 /* ======================= estado ======================= */
 let t = START, playing = false, speed = 1, selected = null, cardEvent = null, latest = null,
-    dwellUntil = 0, eventPtr = 0;
+    dwellUntil = 0, eventPtr = 0, lastDone = -1, arcKey = null;
 
 /* ======================= globo 3D ======================= */
 const host = $('globe3d'), labelsBox = $('labels');
@@ -410,7 +415,8 @@ function buildArc(ev) {
   if (!ev) return;
   const [lat, lon] = SITES[ev.site];
   const color = ev.country === 'usa' ? 0x2E88D8 : 0xE2452F;
-  const cislunar = /Luna|Apollo/.test(ev.name) && ev.name !== 'Apollo 1';
+  const cislunar = ev.name.startsWith('Luna') ||
+    (ev.name.startsWith('Apollo') && ev.name !== 'Apollo 1' && ev.name !== 'Apollo–Soyuz');
 
   if (!cislunar) {
     const pts = [];
@@ -562,6 +568,21 @@ function render(now = t, rebuildArc = false) {
     recs.appendChild(row);
   });
 
+  // a lista acompanha sozinha o recorde mais recente
+  if (done.length !== lastDone) {
+    lastDone = done.length;
+    requestAnimationFrame(() => {
+      const rows = [...recs.children];
+      const target = rows[Math.max(0, done.length - 1)];
+      if (target) {
+        target.classList.add('fresh');
+        const rel = target.getBoundingClientRect().top - recs.getBoundingClientRect().top + recs.scrollTop;
+        recs.scrollTop = Math.max(0, rel - recs.clientHeight + target.offsetHeight + 12);
+      }
+      $('rec-note').textContent = `${done.length} of ${RECORDS.length} unlocked`;
+    });
+  }
+
   const upcoming = EVENTS.find(e => norm(e.date) > t) || null;
   const stale = !latest || (t - norm(latest.date)) / DAY > 60;
   let ev = (selected && ts[EVENTS.indexOf(selected)] <= t) ? selected : ((stale && upcoming) ? null : latest);
@@ -575,7 +596,7 @@ function render(now = t, rebuildArc = false) {
     $('m-chip').innerHTML = rec ? `<span class="chip">${rec.title}</span>` : '';
     setPhoto(ev);
     cardEvent = ev;
-    if (rebuildArc) buildArc(ev);
+    if (rebuildArc || ev.name !== arcKey) { arcKey = ev.name; buildArc(ev); }
     focusLon = SITES[ev.site][1];
   } else if (upcoming) {
     const days = Math.round((norm(upcoming.date) - t) / DAY);
@@ -586,7 +607,7 @@ function render(now = t, rebuildArc = false) {
     $('m-chip').innerHTML = `<span class="chip" style="border-color:var(--line);color:var(--muted);background:transparent">upcoming</span>`;
     setPhoto(upcoming);
     cardEvent = upcoming;
-    if (rebuildArc) { clearArcs(); arcDot && (arcDot.visible = false); }
+    if (rebuildArc || arcKey !== null) { arcKey = null; clearArcs(); }
     focusLon = SITES[upcoming.site][1];
   }
   drawTimeline();
@@ -595,6 +616,7 @@ function render(now = t, rebuildArc = false) {
 
 function setPhoto(ev) {
   const ph = PHOTOS[ev.name], fig = $('m-photo');
+  $('mission').classList.toggle('no-photo', !ph);
   if (!ph) { fig.hidden = true; return; }
   const img = $('m-img');
   if (!img.src.endsWith(ph[0] + '.jpg')) img.src = 'photos/' + ph[0] + '.jpg';
