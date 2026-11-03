@@ -1,344 +1,613 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Simuladores Interativos — laboratório aberto</title>
-<meta name="description" content="Simuladores e laboratórios interativos de engenharia, IA, eletrônica, história da computação e 3D. Roda no navegador, sem instalação.">
+<meta name="description" content="15 simuladores e laboratórios interativos de IA, engenharia, eletrônica, história da computação e 3D. Rodam no navegador, sem instalação. PT/EN, light/dark.">
 <meta property="og:title" content="Simuladores Interativos">
-<meta property="og:description" content="Laboratórios interativos de IA, engenharia, eletrônica e história da computação — abertos no navegador.">
+<meta property="og:description" content="Laboratórios interativos de IA, engenharia, eletrônica e história da computação — abertos no navegador, sem instalação.">
 <meta property="og:image" content="assets/thumbs/fog.jpg">
 <meta property="og:type" content="website">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧪</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23003A70'/><path d='M22 66 L42 30 L58 58 L70 40 L78 66' stroke='%23F37035' stroke-width='8' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<script>
+// Aplica tema e idioma antes do primeiro paint (sem flash).
+(function () {
+  try {
+    var t = localStorage.getItem('theme');
+    if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+    else document.documentElement.setAttribute('data-theme',
+      window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    var l = localStorage.getItem('lang');
+    if (l === 'pt' || l === 'en') document.documentElement.setAttribute('data-lang', l);
+  } catch (e) {}
+})();
+</script>
 <style>
-  :root{
-    --bg:#0a0c14; --bg2:#111527; --card:#141a2e; --card2:#1a2140;
-    --ink:#e9edff; --muted:#9aa4cc; --line:#28304f;
-    --accent:#7c5cff; --accent2:#ff5c8a; --ok:#37e0a0;
-    --radius:16px;
-  }
-  *{box-sizing:border-box}
-  html{scroll-behavior:smooth}
-  body{
-    margin:0; background:
-      radial-gradient(1100px 600px at 12% -10%, rgba(124,92,255,.22), transparent 60%),
-      radial-gradient(900px 500px at 92% 0%, rgba(255,92,138,.14), transparent 55%),
-      var(--bg);
-    color:var(--ink);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,Roboto,Arial,sans-serif;
-    -webkit-font-smoothing:antialiased;
-  }
-  a{color:inherit}
-  .wrap{max-width:1180px; margin:0 auto; padding:0 24px}
+/* ==========================================================================
+   Simuladores Interativos — identidade UNIFEI / mjrovai.com
+   Azul UNIFEI #003A70 · Laranja #F37035 · Vermelho #DA291C · Cinza #A2AAAD
+   Light é o modo principal; dark usa o azul profundo.
+   ========================================================================== */
+:root {
+  --navy:       #003A70;
+  --amber:      #F37035;
+  --amber-deep: #D9591C;
+  --red:        #DA291C;
+  --ugray:      #A2AAAD;
 
-  /* ---------- header ---------- */
-  header{padding:72px 0 32px}
-  .badge{
-    display:inline-flex; align-items:center; gap:8px; font-size:12px; letter-spacing:.14em;
-    text-transform:uppercase; color:#b9c2e8; border:1px solid var(--line);
-    background:rgba(124,92,255,.10); padding:7px 13px; border-radius:999px;
-  }
-  .badge i{width:7px;height:7px;border-radius:50%;background:var(--ok); box-shadow:0 0 10px var(--ok)}
-  h1{
-    font-size:clamp(34px,6vw,62px); line-height:1.03; margin:22px 0 0; letter-spacing:-.025em;
-    font-weight:800;
-  }
-  h1 em{
-    font-style:normal;
-    background:linear-gradient(96deg,var(--accent) 10%,var(--accent2) 85%);
-    -webkit-background-clip:text; background-clip:text; color:transparent;
-  }
-  .lede{color:var(--muted); font-size:clamp(15px,1.7vw,19px); line-height:1.6; max-width:64ch; margin:18px 0 0}
-  .lede b{color:#d5dbf5; font-weight:600}
-  .meta{display:flex; flex-wrap:wrap; gap:10px; margin-top:26px; font-size:13px; color:var(--muted)}
-  .meta span{border:1px solid var(--line); border-radius:999px; padding:6px 12px; background:rgba(255,255,255,.02)}
+  --bg:        #FBFCFD;
+  --bg-2:      #EEF2F6;
+  --surface:   #FFFFFF;
+  --surface-2: #F3F6FA;
+  --ink:       var(--navy);
+  --ink-soft:  #33383D;
+  --muted:     #6C7580;
+  --slate:     #3F6A92;
+  --steel:     #7FB2E0;
+  --line:      rgba(0, 58, 112, 0.14);
+  --line-soft: rgba(0, 58, 112, 0.07);
+  --accent:    var(--amber);
+  --accent-tx: var(--amber-deep);
+  --link:      #0A5CA8;
+  --glow:      rgba(243, 112, 53, 0.20);
 
-  /* ---------- toolbar ---------- */
-  .toolbar{
-    position:sticky; top:0; z-index:20; margin-top:36px; padding:14px 0;
-    backdrop-filter:blur(14px); background:rgba(10,12,20,.78);
-    border-top:1px solid var(--line); border-bottom:1px solid var(--line);
-  }
-  .toolbar .wrap{display:flex; gap:14px; align-items:center; flex-wrap:wrap}
-  .search{
-    flex:1 1 240px; min-width:200px; display:flex; align-items:center; gap:10px;
-    border:1px solid var(--line); background:var(--card); border-radius:12px; padding:10px 14px;
-  }
-  .search svg{opacity:.55; flex:none}
-  .search input{
-    background:none; border:none; outline:none; color:var(--ink); font-size:15px; width:100%;
-    font-family:inherit;
-  }
-  .search input::placeholder{color:#6b76a0}
-  .chips{display:flex; gap:8px; flex-wrap:wrap}
-  .chip{
-    font:inherit; font-size:13px; color:var(--muted); cursor:pointer;
-    background:var(--card); border:1px solid var(--line); border-radius:999px; padding:9px 15px;
-    transition:.18s;
-  }
-  .chip:hover{color:var(--ink); border-color:#3d4780}
-  .chip[aria-pressed="true"]{
-    color:#fff; border-color:transparent;
-    background:linear-gradient(96deg,var(--accent),#5a8bff);
-    box-shadow:0 6px 22px rgba(124,92,255,.35);
-  }
+  --font-display: Calibri, Carlito, "Segoe UI", -apple-system, system-ui, sans-serif;
+  --font-body:    Calibri, Carlito, "Segoe UI", -apple-system, system-ui, sans-serif;
+  --font-mono:    "SF Mono", ui-monospace, "IBM Plex Mono", Menlo, monospace;
 
-  /* ---------- grid ---------- */
-  main{padding:38px 0 20px}
-  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); gap:22px}
-  .card{
-    display:flex; flex-direction:column; overflow:hidden; text-decoration:none;
-    background:linear-gradient(180deg,var(--card),var(--card2));
-    border:1px solid var(--line); border-radius:var(--radius);
-    transition:transform .22s ease, border-color .22s, box-shadow .22s;
-  }
-  .card:hover{transform:translateY(-4px); border-color:#41508f; box-shadow:0 18px 44px rgba(0,0,0,.45)}
-  .card:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
-  .thumb{
-    position:relative; aspect-ratio:16/9; overflow:hidden;
-    display:grid; place-items:center; border-bottom:1px solid var(--line);
-    background:linear-gradient(135deg,#1b2246,#101530);
-  }
-  .thumb img{width:100%; height:100%; object-fit:cover; object-position:center 35%; display:block}
-  .thumb .glyph{font-size:52px; line-height:1; filter:drop-shadow(0 8px 22px rgba(0,0,0,.5))}
-  .thumb::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg,transparent 55%,rgba(10,12,20,.55))}
-  .body{padding:18px 18px 20px; display:flex; flex-direction:column; gap:10px; flex:1}
-  .card h2{font-size:17.5px; margin:0; letter-spacing:-.01em; line-height:1.3; display:flex; gap:8px; align-items:baseline}
-  .card h2 .arrow{margin-left:auto; color:var(--muted); font-size:15px; transition:transform .2s, color .2s}
-  .card:hover h2 .arrow{transform:translate(2px,-2px); color:var(--accent2)}
-  .card p{margin:0; color:var(--muted); font-size:14px; line-height:1.55}
-  .tags{display:flex; gap:6px; flex-wrap:wrap; margin-top:auto; padding-top:6px}
-  .tag{font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:#a9b3dd;
-       border:1px solid var(--line); border-radius:999px; padding:4px 9px; background:rgba(255,255,255,.03)}
-  .tag.hot{color:#c9bfff; border-color:#4b3ea0; background:rgba(124,92,255,.14)}
+  --maxw: 1080px;
+  --radius: 14px;
+  --shadow: 0 1px 2px rgba(0,58,112,.06), 0 12px 32px -18px rgba(0,58,112,.28);
+  --shadow-lg: 0 2px 6px rgba(0,58,112,.10), 0 30px 60px -28px rgba(0,58,112,.34);
+}
 
-  .filenote{
-    background:rgba(255,181,71,.12); border-bottom:1px solid #6a5324; color:#f0d9ad;
-    font-size:13.5px; line-height:1.5; padding:12px 24px; text-align:center;
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:        #002B52;
+    --bg-2:      var(--navy);
+    --surface:   #0A487F;
+    --surface-2: #073E71;
+    --ink:       #FFFFFF;
+    --ink-soft:  #CAD7E6;
+    --muted:     #8AA0BC;
+    --slate:     #8FB0D4;
+    --line:      rgba(255, 255, 255, 0.15);
+    --line-soft: rgba(255, 255, 255, 0.08);
+    --accent-tx: #F7935F;
+    --link:      var(--steel);
+    --glow:      rgba(243, 112, 53, 0.24);
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 14px 34px -18px rgba(0,0,0,.7);
+    --shadow-lg: 0 2px 6px rgba(0,0,0,.5), 0 34px 64px -28px rgba(0,0,0,.75);
   }
-  .filenote code{background:rgba(0,0,0,.35); padding:2px 6px; border-radius:5px; font-size:12.5px}
-  .empty{display:none; text-align:center; color:var(--muted); padding:60px 0; font-size:15px}
-  .empty.on{display:block}
+}
+:root[data-theme="dark"] {
+  --bg:        #002B52;
+  --bg-2:      var(--navy);
+  --surface:   #0A487F;
+  --surface-2: #073E71;
+  --ink:       #FFFFFF;
+  --ink-soft:  #CAD7E6;
+  --muted:     #8AA0BC;
+  --slate:     #8FB0D4;
+  --line:      rgba(255, 255, 255, 0.15);
+  --line-soft: rgba(255, 255, 255, 0.08);
+  --accent-tx: #F7935F;
+  --link:      var(--steel);
+  --glow:      rgba(243, 112, 53, 0.24);
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 14px 34px -18px rgba(0,0,0,.7);
+  --shadow-lg: 0 2px 6px rgba(0,0,0,.5), 0 34px 64px -28px rgba(0,0,0,.75);
+}
 
-  footer{border-top:1px solid var(--line); margin-top:46px; padding:30px 0 56px; color:var(--muted); font-size:13.5px}
-  footer .wrap{display:flex; gap:18px; justify-content:space-between; flex-wrap:wrap; align-items:center}
-  footer a{text-decoration:none; color:#c3cbee; border-bottom:1px solid #3a4470}
-  footer a:hover{color:#fff; border-color:var(--accent)}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 
-  @media (max-width:600px){
-    header{padding:48px 0 24px}
-    .wrap{padding:0 16px}
-    .grid{grid-template-columns:1fr}
-  }
-  @media (prefers-reduced-motion:reduce){
-    *{transition:none!important; animation:none!important}
-  }
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--ink);
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(1200px 620px at 84% -10%, var(--glow), transparent 62%),
+    radial-gradient(var(--line-soft) 1px, transparent 1px);
+  background-size: auto, 26px 26px;
+  background-attachment: fixed, scroll;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+a { color: var(--link); text-decoration: none; }
+a:hover { color: var(--accent-tx); }
+
+/* ---------- header ---------- */
+.site-header {
+  position: sticky; top: 0; z-index: 50;
+  backdrop-filter: saturate(1.4) blur(10px);
+  background: color-mix(in srgb, var(--bg) 84%, transparent);
+  border-bottom: 1px solid var(--line-soft);
+}
+.nav { display: flex; align-items: center; gap: 14px; height: 62px; }
+.brand {
+  display: inline-flex; align-items: baseline; gap: 7px; margin-right: auto;
+  font-family: var(--font-display); font-weight: 700; font-size: 1.02rem;
+  color: var(--ink); letter-spacing: -.01em;
+}
+.brand:hover { color: var(--ink); }
+.brand .mark {
+  width: 9px; height: 9px; border-radius: 50%; background: var(--amber);
+  box-shadow: 0 0 0 3px var(--glow); align-self: center; flex: none;
+}
+.brand .b-sub { color: var(--muted); font-weight: 500; }
+.brand .b-main { color: var(--ink); }
+.nav-links { display: flex; gap: 4px; align-items: center; }
+.nav-links a {
+  font-family: var(--font-display); font-weight: 500; font-size: .82rem;
+  color: var(--ink-soft); padding: 7px 10px; border-radius: 8px;
+  transition: color .2s, background .2s; white-space: nowrap;
+}
+.nav-links a:hover { color: var(--ink); background: var(--line-soft); }
+
+.langtoggle {
+  display: inline-flex; border: 1px solid var(--line); border-radius: 10px;
+  overflow: hidden; margin-left: 4px;
+}
+.langtoggle button {
+  font-family: var(--font-display); font-weight: 600; font-size: .74rem;
+  letter-spacing: .06em; padding: 8px 10px; line-height: 1;
+  background: transparent; color: var(--muted); border: none; cursor: pointer;
+  transition: color .18s, background .18s;
+}
+.langtoggle button:hover { color: var(--ink); background: var(--line-soft); }
+.langtoggle button[aria-pressed="true"] { color: #fff; background: var(--navy); }
+:root[data-theme="dark"] .langtoggle button[aria-pressed="true"] { background: var(--amber); color: #1B1B1B; }
+
+.theme-toggle {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px; flex: none;
+  border: 1px solid var(--line); border-radius: 10px;
+  background: transparent; color: var(--ink-soft); cursor: pointer;
+  transition: color .2s, border-color .2s, background .2s;
+}
+.theme-toggle:hover { color: var(--ink); border-color: var(--accent); background: var(--line-soft); }
+.theme-toggle svg { width: 18px; height: 18px; display: none; }
+.theme-toggle .icon-moon { display: block; }
+.theme-toggle .icon-sun  { display: none; }
+:root[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+:root[data-theme="dark"] .theme-toggle .icon-sun  { display: block; }
+
+/* ---------- hero ---------- */
+.hero { padding: 62px 0 10px; }
+.eyebrow {
+  font-family: var(--font-display); font-weight: 600; font-size: .74rem;
+  letter-spacing: .16em; text-transform: uppercase; color: var(--slate); margin: 0 0 14px;
+}
+h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.1rem, 5.2vw, 3.5rem);
+  line-height: 1.06; letter-spacing: -.022em; font-weight: 700;
+  color: var(--ink); margin: 0; text-wrap: balance;
+}
+h1 em { font-style: normal; color: var(--accent-tx); }
+.lede {
+  font-size: 1.06rem; line-height: 1.65; color: var(--ink-soft);
+  max-width: 66ch; margin: 18px 0 0;
+}
+.lede b { color: var(--ink); font-weight: 600; }
+.stats { display: flex; flex-wrap: wrap; gap: 34px; margin: 30px 0 4px; }
+.stat { display: flex; flex-direction: column; gap: 3px; }
+.stat b {
+  font-family: var(--font-display); font-size: 1.7rem; font-weight: 700;
+  color: var(--ink); line-height: 1;
+}
+.stat span {
+  font-family: var(--font-display); font-weight: 500; font-size: .68rem;
+  letter-spacing: .11em; text-transform: uppercase; color: var(--muted);
+}
+
+/* ---------- toolbar ---------- */
+.toolbar {
+  position: sticky; top: 62px; z-index: 40; margin-top: 34px; padding: 14px 0;
+  backdrop-filter: saturate(1.4) blur(10px);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  border-top: 1px solid var(--line-soft);
+  border-bottom: 1px solid var(--line-soft);
+}
+.toolbar .wrap { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.search {
+  flex: 1 1 240px; min-width: 200px; display: flex; align-items: center; gap: 9px;
+  border: 1px solid var(--line); background: var(--surface);
+  border-radius: 10px; padding: 9px 13px;
+}
+.search svg { color: var(--muted); flex: none; }
+.search input {
+  background: none; border: none; outline: none; color: var(--ink);
+  font-family: inherit; font-size: .95rem; width: 100%;
+}
+.search input::placeholder { color: var(--muted); opacity: .85; }
+.search:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow); }
+
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip {
+  font-family: var(--font-display); font-size: .79rem; font-weight: 500;
+  color: var(--muted); cursor: pointer; background: transparent;
+  border: 1px solid var(--line); border-radius: 999px; padding: 7px 13px;
+  transition: color .18s, border-color .18s, background .18s;
+}
+.chip:hover { color: var(--ink); border-color: var(--slate); }
+.chip[aria-pressed="true"] {
+  color: #fff; background: var(--navy); border-color: var(--navy);
+}
+:root[data-theme="dark"] .chip[aria-pressed="true"] {
+  background: var(--amber); border-color: var(--amber); color: #1B1B1B;
+}
+
+/* ---------- grid ---------- */
+main { padding-bottom: 20px; }
+.grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 16px; padding-top: 28px;
+}
+.card {
+  position: relative; display: flex; flex-direction: column; gap: 8px;
+  padding: 20px 18px 18px; overflow: hidden;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); color: var(--ink);
+  transition: transform .18s ease, box-shadow .2s, border-color .2s;
+}
+.card::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: var(--accent); transform: scaleY(0); transform-origin: top;
+  transition: transform .22s ease;
+}
+.card:hover {
+  transform: translateY(-3px); border-color: var(--slate);
+  box-shadow: var(--shadow-lg); color: var(--ink);
+}
+.card:hover::before { transform: scaleY(1); }
+.card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.card .num {
+  font-family: var(--font-mono); font-size: .7rem; font-weight: 600;
+  letter-spacing: .08em; color: var(--slate);
+}
+.card h2 {
+  font-family: var(--font-display); font-size: 1.06rem; font-weight: 700;
+  line-height: 1.28; letter-spacing: -.01em; color: var(--ink); margin: 0;
+  display: flex; gap: 8px; align-items: baseline;
+}
+.card h2 .arrow {
+  margin-left: auto; color: var(--muted); font-size: .9rem; flex: none;
+  transition: transform .2s, color .2s;
+}
+.card:hover h2 .arrow { transform: translate(2px, -2px); color: var(--accent-tx); }
+.card p { margin: 0; font-size: .9rem; line-height: 1.55; color: var(--ink-soft); }
+.tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: auto; padding-top: 8px; }
+.tag {
+  font-family: var(--font-display); font-size: .66rem; font-weight: 500;
+  letter-spacing: .07em; text-transform: uppercase; color: var(--muted);
+  border: 1px solid var(--line); border-radius: 999px; padding: 3px 8px;
+  background: var(--surface-2);
+}
+.tag.hot { color: var(--accent-tx); border-color: var(--amber); background: var(--glow); }
+
+.empty { display: none; padding: 56px 0; text-align: center; color: var(--muted); font-size: .95rem; }
+.empty.on { display: block; }
+
+/* ---------- footer ---------- */
+.site-footer {
+  border-top: 1px solid var(--line-soft); margin-top: 40px; padding: 26px 0 54px;
+  color: var(--muted); font-size: .82rem;
+}
+.site-footer .wrap { display: flex; gap: 16px; justify-content: space-between; flex-wrap: wrap; align-items: center; }
+.site-footer a { color: var(--ink-soft); border-bottom: 1px solid var(--line); }
+.site-footer a:hover { color: var(--accent-tx); border-color: var(--accent); }
+
+/* ---------- aviso file:// ---------- */
+.filenote {
+  background: color-mix(in srgb, var(--amber) 14%, var(--bg));
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-soft); font-size: .84rem; line-height: 1.5;
+  padding: 11px 24px; text-align: center;
+}
+.filenote code {
+  font-family: var(--font-mono); font-size: .78rem;
+  background: var(--surface-2); border: 1px solid var(--line);
+  padding: 1px 5px; border-radius: 5px;
+}
+
+@media (max-width: 720px) {
+  .hero { padding: 40px 0 8px; }
+  .wrap { padding: 0 16px; }
+  .stats { gap: 22px; }
+  .toolbar { position: static; }
+  .nav-links a.optional { display: none; }
+  .grid { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+  html { scroll-behavior: auto; }
+}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="wrap">
-    <span class="badge"><i></i> laboratório aberto · uso livre em aula</span>
-    <h1>Simuladores<br><em>Interativos</em></h1>
-    <p class="lede">
-      Uma coleção de <b>laboratórios que rodam no navegador</b>: assinatura de mísseis em 3D, CPU Z80 e Apple&nbsp;1,
-      redes neurais treinando XOR na sua frente, ponto de operação de transistores, jogos e pequenas aulas visuais.
-      Sem instalação, sem build, sem servidor — clique e use.
-    </p>
-    <div class="meta">
-      <span>15 simuladores</span>
-      <span>HTML + WebGL · tudo estático, sem backend</span>
-      <span>PT / EN</span>
-      <span>cada app abre em nova aba</span>
-    </div>
+<header class="site-header">
+  <div class="wrap nav">
+    <a class="brand" href="./"><i class="mark"></i><span class="b-main" data-i18n="brand.main">Simuladores</span> <span class="b-sub" data-i18n="brand.sub">Interativos</span></a>
+    <nav class="nav-links" aria-label="Links">
+      <a href="https://mjrovai.com/" target="_blank" rel="noopener" class="optional">mjrovai.com ↗</a>
+      <a href="https://github.com/Mjrovai/simuladores-interativos" target="_blank" rel="noopener">GitHub ↗</a>
+      <div class="langtoggle" role="group" aria-label="Idioma / Language">
+        <button type="button" data-lang="pt" aria-pressed="true">PT</button>
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+      <button class="theme-toggle" type="button" aria-label="Alternar tema">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.5 6.5 0 0 0 9.8 9.8z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.4 5.4l1.6 1.6M17 17l1.6 1.6M18.6 5.4L17 7M7 17l-1.6 1.6"/></svg>
+      </button>
+    </nav>
   </div>
+</header>
+
+<main>
+  <section class="hero wrap">
+    <p class="eyebrow" data-i18n="hero.eyebrow">laboratório aberto · uso livre em aula</p>
+    <h1><span data-i18n="hero.title1">Simuladores</span><br><em data-i18n="hero.title2">Interativos</em></h1>
+    <p class="lede" data-i18n-html="hero.lede">Quinze <b>laboratórios que rodam no navegador</b>: assinatura de mísseis em 3D, CPU Z80 e Apple&nbsp;1, redes neurais treinando XOR na sua frente, ponto de operação de transistores, jogos e pequenas aulas visuais. Sem instalação, sem build, sem servidor.</p>
+    <div class="stats">
+      <div class="stat"><b>15</b><span data-i18n="stat.apps">simuladores</span></div>
+      <div class="stat"><b>0</b><span data-i18n="stat.setup">instalação</span></div>
+      <div class="stat"><b>PT·EN</b><span data-i18n="stat.lang">idiomas</span></div>
+      <div class="stat"><b>3D·CPU·IA</b><span data-i18n="stat.topics">temas</span></div>
+    </div>
+  </section>
 
   <div class="toolbar">
     <div class="wrap">
       <label class="search">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-        <input id="q" type="search" placeholder="Buscar por nome, tema ou tecnologia…" autocomplete="off">
+        <input id="q" type="search" placeholder="Buscar por nome, tema ou tecnologia…" autocomplete="off" aria-label="Buscar">
       </label>
       <div class="chips" id="chips">
-        <button class="chip" data-filter="all" aria-pressed="true">Todos</button>
-        <button class="chip" data-filter="3D" aria-pressed="false">3D</button>
-        <button class="chip" data-filter="IA" aria-pressed="false">IA</button>
-        <button class="chip" data-filter="CPU" aria-pressed="false">CPU</button>
-        <button class="chip" data-filter="Eletrônica" aria-pressed="false">Eletrônica</button>
-        <button class="chip" data-filter="Jogos" aria-pressed="false">Jogos</button>
-        <button class="chip" data-filter="História" aria-pressed="false">História</button>
-        <button class="chip" data-filter="Apps" aria-pressed="false">Apps</button>
+        <button class="chip" data-filter="all" aria-pressed="true" data-i18n="f.all">Todos</button>
+        <button class="chip" data-filter="3d" aria-pressed="false" data-i18n="f.3d">3D</button>
+        <button class="chip" data-filter="ai" aria-pressed="false" data-i18n="f.ai">IA</button>
+        <button class="chip" data-filter="cpu" aria-pressed="false" data-i18n="f.cpu">CPU</button>
+        <button class="chip" data-filter="electronics" aria-pressed="false" data-i18n="f.electronics">Eletrônica</button>
+        <button class="chip" data-filter="games" aria-pressed="false" data-i18n="f.games">Jogos</button>
+        <button class="chip" data-filter="history" aria-pressed="false" data-i18n="f.history">História</button>
+        <button class="chip" data-filter="apps" aria-pressed="false" data-i18n="f.apps">Apps</button>
       </div>
     </div>
   </div>
-</header>
 
-<main class="wrap">
-  <div class="grid" id="grid">
+  <section class="wrap">
+    <div class="grid" id="grid">
 
-    <a class="card" href="apps/fog-mpm-3d/" target="_blank" rel="noopener" data-tags="3D engenharia defesa" data-title="FOG-MPM míssil avibras fibra óptica three.js 3d">
-      <div class="thumb"><img src="assets/thumbs/fog.jpg" alt="FOG-MPM em vista de corte" loading="lazy"></div>
-      <div class="body">
-        <h2>FOG-MPM · Explorador 3D <span class="arrow">↗</span></h2>
-        <p>O míssil guiado por fibra óptica da Avibras em sete capítulos: anatomia com corte e raio-X, sequência de lançamento, jammer de RF ignorado pelo fio e engajamento de 12&nbsp;km com telemetria e vídeo do seeker.</p>
-        <div class="tags"><span class="tag hot">3D</span><span class="tag">WebGL</span><span class="tag">PT</span></div>
-      </div>
-    </a>
+      <a class="card" href="apps/fog-mpm-3d/" target="_blank" rel="noopener" data-tags="3d" data-keywords="FOG-MPM Avibras míssil missile fibra óptica fibre optic defesa defence three.js 3d">
+        <span class="num">01</span>
+        <h2><span data-i18n="c1.title">FOG-MPM · Explorador 3D</span><span class="arrow">↗</span></h2>
+        <p data-i18n="c1.desc">O míssil guiado por fibra óptica da Avibras em sete capítulos: anatomia com corte e raio-X, sequência de lançamento, jammer de RF ignorado pelo fio e engajamento de 12 km com telemetria e vídeo do seeker.</p>
+        <div class="tags"><span class="tag hot">3D</span><span class="tag">WebGL</span><span class="tag" data-i18n="tag.pt">PT</span></div>
+      </a>
 
-    <a class="card" href="apps/v2-a4/" target="_blank" rel="noopener" data-tags="3D história engenharia" data-title="V-2 A4 foguete alemão 1942 modelo 3d glb corte explodido">
-      <div class="thumb"><img src="assets/thumbs/v2.jpg" alt="V-2 em vista explodida" loading="lazy"></div>
-      <div class="body">
-        <h2>V-2 / A4 · Modelo 3D <span class="arrow">↗</span></h2>
-        <p>Os 14 sistemas do míssil balístico de 1942 em modelo procedural: corte seccional, vista explodida com etiquetas, ficha técnica de cada componente e exportação GLB para Blender ou Unity.</p>
-        <div class="tags"><span class="tag hot">3D</span><span class="tag">WebGL</span><span class="tag">História</span></div>
-      </div>
-    </a>
+      <a class="card" href="apps/v2-a4/" target="_blank" rel="noopener" data-tags="3d history" data-keywords="V-2 A4 foguete rocket 1942 alemão german balístico missile glb three.js 3d">
+        <span class="num">02</span>
+        <h2><span data-i18n="c2.title">V-2 / A4 · Modelo 3D</span><span class="arrow">↗</span></h2>
+        <p data-i18n="c2.desc">Os 14 sistemas do míssil balístico de 1942 em modelo procedural: corte seccional, vista explodida com etiquetas, ficha técnica de cada componente e exportação GLB para Blender ou Unity.</p>
+        <div class="tags"><span class="tag hot">3D</span><span class="tag">WebGL</span><span class="tag" data-i18n="tag.history">História</span></div>
+      </a>
 
-    <a class="card" href="apps/z80-lab/z80.html" target="_blank" rel="noopener" data-tags="CPU assembly" data-title="Z80 lab assembly lições assembler passo a passo">
-      <div class="thumb"><span class="glyph">🕹️</span></div>
-      <div class="body">
-        <h2>Z80 Lab <span class="arrow">↗</span></h2>
-        <p>Dez lições de assembly Z80 com assembler próprio, execução passo a passo, inspetor de memória, console e um verificador que confere o resultado dos seus programas.</p>
-        <div class="tags"><span class="tag hot">CPU</span><span class="tag">Assembly</span><span class="tag">EN</span></div>
-      </div>
-    </a>
+      <a class="card" href="apps/z80-lab/z80.html" target="_blank" rel="noopener" data-tags="cpu" data-keywords="Z80 lab assembly assembler lições lessons cpu emulador emulator 1976">
+        <span class="num">03</span>
+        <h2><span data-i18n="c3.title">Z80 Lab</span><span class="arrow">↗</span></h2>
+        <p data-i18n="c3.desc">Dez lições de assembly Z80 com assembler próprio, execução passo a passo, inspetor de memória, console e um verificador que confere o resultado dos seus programas.</p>
+        <div class="tags"><span class="tag hot" data-i18n="tag.cpu">CPU</span><span class="tag">Assembly</span><span class="tag" data-i18n="tag.en">EN</span></div>
+      </a>
 
-    <a class="card" href="apps/apple1-lab/a1.html" target="_blank" rel="noopener" data-tags="CPU assembly história" data-title="Apple 1 lab 6502 assembly woz monitor lições">
-      <div class="thumb"><span class="glyph">🍎</span></div>
-      <div class="body">
-        <h2>Apple 1 Lab <span class="arrow">↗</span></h2>
-        <p>Dez lições de 6502 na máquina que começou a Apple: Woz Monitor, tela e teclado mapeados, montagem de programas, execução controlada e verificação automática dos exercícios.</p>
-        <div class="tags"><span class="tag hot">CPU</span><span class="tag">6502</span><span class="tag">EN</span></div>
-      </div>
-    </a>
+      <a class="card" href="apps/apple1-lab/a1.html" target="_blank" rel="noopener" data-tags="cpu" data-keywords="Apple 1 6502 lab assembly woz monitor lições lessons cpu emulador emulator">
+        <span class="num">04</span>
+        <h2><span data-i18n="c4.title">Apple 1 Lab</span><span class="arrow">↗</span></h2>
+        <p data-i18n="c4.desc">Dez lições de 6502 na máquina que começou a Apple: Woz Monitor, tela e teclado mapeados, montagem de programas, execução controlada e verificação automática dos exercícios.</p>
+        <div class="tags"><span class="tag hot" data-i18n="tag.cpu">CPU</span><span class="tag">6502</span><span class="tag" data-i18n="tag.en">EN</span></div>
+      </a>
 
-    <a class="card" href="apps/windows95/" target="_blank" rel="noopener" data-tags="CPU retro sistema operacional" data-title="windows 95 simulador desktop menu iniciar minesweeper notepad paint">
-      <div class="thumb"><span class="glyph">🪟</span></div>
-      <div class="body">
-        <h2>Windows 95 <span class="arrow">↗</span></h2>
-        <p>O desktop de 1995 recriado em página única: boot, área de trabalho, menu Iniciar, janelas arrastáveis, Notepad, Paint, Calculadora, Minesweeper e desligar o sistema.</p>
-        <div class="tags"><span class="tag hot">CPU</span><span class="tag">Retro</span><span class="tag">SO</span></div>
-      </div>
-    </a>
+      <a class="card" href="apps/windows95/" target="_blank" rel="noopener" data-tags="cpu" data-keywords="Windows 95 simulador simulator desktop menu iniciar start windows retro sistema operacional OS minesweeper notepad paint">
+        <span class="num">05</span>
+        <h2><span data-i18n="c5.title">Windows 95</span><span class="arrow">↗</span></h2>
+        <p data-i18n="c5.desc">O desktop de 1995 recriado em página única: boot, área de trabalho, menu Iniciar, janelas arrastáveis, Notepad, Paint, Calculadora, Minesweeper e desligar o sistema.</p>
+        <div class="tags"><span class="tag hot" data-i18n="tag.cpu">CPU</span><span class="tag" data-i18n="tag.retro">Retro</span><span class="tag" data-i18n="tag.os">SO</span></div>
+      </a>
 
-    <a class="card" href="apps/mac1984/" target="_blank" rel="noopener" data-tags="CPU retro história sistema operacional" data-title="macintosh 128k 1984 simulador finder sistema clássico apple">
-      <div class="thumb"><span class="glyph">🖥️</span></div>
-      <div class="body">
-        <h2>Macintosh 128K · 1984 <span class="arrow">↗</span></h2>
-        <p>O primeiro Mac: System 1.0 com Finder, disco de 400 KB, janelas, menu Apple, Read Me, About This Macintosh e calculadora — a interface que definiu o mouse e a área de trabalho.</p>
-        <div class="tags"><span class="tag hot">CPU</span><span class="tag">Retro</span><span class="tag">História</span></div>
-      </div>
-    </a>
+      <a class="card" href="apps/mac1984/" target="_blank" rel="noopener" data-tags="cpu history" data-keywords="Macintosh 128K 1984 simulador simulator system 1.0 finder apple retro sistema operacional OS">
+        <span class="num">06</span>
+        <h2><span data-i18n="c6.title">Macintosh 128K · 1984</span><span class="arrow">↗</span></h2>
+        <p data-i18n="c6.desc">O primeiro Mac: System 1.0 com Finder, disco de 400 KB, janelas, menu Apple, Read Me, About This Macintosh e calculadora — a interface que definiu o mouse e a área de trabalho.</p>
+        <div class="tags"><span class="tag hot" data-i18n="tag.cpu">CPU</span><span class="tag" data-i18n="tag.retro">Retro</span><span class="tag" data-i18n="tag.history">História</span></div>
+      </a>
 
-    <a class="card" href="apps/deep-learning/" target="_blank" rel="noopener" data-tags="IA" data-title="deep learning rede neural xor backpropagation ativações simulador bilíngue">
-      <div class="thumb"><span class="glyph">🧠</span></div>
-      <div class="body">
-        <h2>Simulador de Deep Learning <span class="arrow">↗</span></h2>
-        <p>Neurônio, funções de ativação, propagação à frente e backpropagation — com treino de XOR ao vivo, curva de aprendizado e fronteira de decisão desenhada no plano. Bilíngue PT/EN.</p>
-        <div class="tags"><span class="tag hot">IA</span><span class="tag">PT / EN</span><span class="tag">Interativo</span></div>
-      </div>
-    </a>
+      <a class="card" href="apps/deep-learning/" target="_blank" rel="noopener" data-tags="ai" data-keywords="deep learning rede neural neural network XOR backpropagation backprop ativações activations neurônio neuron simulador simulator">
+        <span class="num">07</span>
+        <h2><span data-i18n="c7.title">Simulador de Deep Learning</span><span class="arrow">↗</span></h2>
+        <p data-i18n="c7.desc">Neurônio, funções de ativação, propagação à frente e backpropagation — com treino de XOR ao vivo, curva de aprendizado e fronteira de decisão desenhada no plano. Bilíngue PT/EN.</p>
+        <div class="tags"><span class="tag hot" data-i18n="tag.ai">IA</span><span class="tag" data-i18n="tag.bilingual">PT / EN</span><span class="tag" data-i18n="tag.interactive">Interativo</span></div>
+      </a>
 
-    <a class="card" href="apps/transformer-executivo/" target="_blank" rel="noopener" data-tags="IA" data-title="transformer atenção briefing executivo ia generativa">
-      <div class="thumb"><span class="glyph">✨</span></div>
-      <div class="body">
-        <h2>Transformer em 3 minutos <span class="arrow">↗</span></h2>
-        <p>O mecanismo por trás da IA generativa traduzido para a linguagem de negócios, com uma demonstração interativa de atenção palavra por palavra.</p>
-        <div class="tags"><span class="tag hot">IA</span><span class="tag">PT</span><span class="tag">Aula</span></div>
-      </div>
-    </a>
+      <a class="card" href="apps/transformer-executivo/" target="_blank" rel="noopener" data-tags="ai" data-keywords="transformer atenção attention briefing executivo executive ia generativa generative ai ChatGPT">
+        <span class="num">08</span>
+        <h2><span data-i18n="c8.title">Transformer em 3 minutos</span><span class="arrow">↗</span></h2>
+        <p data-i18n="c8.desc">O mecanismo por trás da IA generativa traduzido para a linguagem de negócios, com uma demonstração interativa de atenção palavra por palavra.</p>
+        <div class="tags"><span class="tag hot" data-i18n="tag.ai">IA</span><span class="tag" data-i18n="tag.pt">PT</span><span class="tag" data-i18n="tag.class">Aula</span></div>
+      </a>
 
-    <a class="card" href="apps/llm-predictor/" target="_blank" rel="noopener" data-tags="IA ferramenta" data-title="preditor performance llm local apple silicon memória tokens por segundo">
-      <div class="thumb"><span class="glyph">📊</span></div>
-      <div class="body">
-        <h2>Preditor de LLM local <span class="arrow">↗</span></h2>
-        <p>Estima tokens/s, tempo até o primeiro token, memória, contexto que cabe e energia de 23 modelos e 12 quantizações no Apple Silicon — antes de baixar os pesos.</p>
-        <div class="tags"><span class="tag">IA</span><span class="tag">Ferramenta</span><span class="tag">PT / EN</span></div>
-      </div>
-    </a>
+      <a class="card" href="apps/llm-predictor/" target="_blank" rel="noopener" data-tags="ai apps" data-keywords="LLM preditor predictor performance tokens por segundo tokens/s TTFT memória memory apple silicon quantização quantization">
+        <span class="num">09</span>
+        <h2><span data-i18n="c9.title">Preditor de LLM local</span><span class="arrow">↗</span></h2>
+        <p data-i18n="c9.desc">Estima tokens/s, tempo até o primeiro token, memória, contexto que cabe e energia de 23 modelos e 12 quantizações no Apple Silicon — antes de baixar os pesos.</p>
+        <div class="tags"><span class="tag hot" data-i18n="tag.ai">IA</span><span class="tag" data-i18n="tag.tool">Ferramenta</span><span class="tag" data-i18n="tag.bilingual">PT / EN</span></div>
+      </a>
 
-    <a class="card" href="apps/color-palette/" target="_blank" rel="noopener" data-tags="Apps design cores ferramenta" data-title="color palette generator paletas de cores harmonia contraste tailwind export">
-      <div class="thumb"><span class="glyph">🎨</span></div>
-      <div class="body">
-        <h2>Color Palette Generator <span class="arrow">↗</span></h2>
-        <p>Gera paletas de cinco cores com modos de harmonia, trava de cores, leitura de contraste WCAG, cópia em HEX/RGB/HSL e exportação em CSS, Tailwind, JSON e SVG. Salva no navegador.</p>
-        <div class="tags"><span class="tag hot">Apps</span><span class="tag">Design</span><span class="tag">EN</span></div>
-      </div>
-    </a>
+      <a class="card" href="apps/color-palette/" target="_blank" rel="noopener" data-tags="apps" data-keywords="color palette paleta cores colors harmonia harmony contraste contrast WCAG tailwind export">
+        <span class="num">10</span>
+        <h2><span data-i18n="c10.title">Color Palette Generator</span><span class="arrow">↗</span></h2>
+        <p data-i18n="c10.desc">Gera paletas de cinco cores com modos de harmonia, trava de cores, leitura de contraste WCAG, cópia em HEX/RGB/HSL e exportação em CSS, Tailwind, JSON e SVG. Salva no navegador.</p>
+        <div class="tags"><span class="tag hot" data-i18n="tag.apps">Apps</span><span class="tag" data-i18n="tag.design">Design</span><span class="tag" data-i18n="tag.en">EN</span></div>
+      </a>
 
-    <a class="card" href="apps/polarizacao-transistores/" target="_blank" rel="noopener" data-tags="Eletrônica" data-title="polarização transistor bjt ponto q reta de carga calculadora">
-      <div class="thumb"><span class="glyph">⚡</span></div>
-      <div class="body">
-        <h2>Polarização de Transistores <span class="arrow">↗</span></h2>
-        <p>Como fixar o ponto de operação do BJT: regiões de operação, reta de carga DC, métodos de polarização e calculadoras que atualizam os diagramas enquanto você ajusta os resistores.</p>
-        <div class="tags"><span class="tag hot">Eletrônica</span><span class="tag">PT</span><span class="tag">Calculadoras</span></div>
-      </div>
-    </a>
+      <a class="card" href="apps/polarizacao-transistores/" target="_blank" rel="noopener" data-tags="electronics" data-keywords="polarização polarization transistor BJT ponto Q operating point reta de carga load line eletrônica electronics semicondutores">
+        <span class="num">11</span>
+        <h2><span data-i18n="c11.title">Polarização de Transistores</span><span class="arrow">↗</span></h2>
+        <p data-i18n="c11.desc">Como fixar o ponto de operação do BJT: regiões de operação, reta de carga DC, métodos de polarização e calculadoras que atualizam os diagramas enquanto você ajusta os resistores.</p>
+        <div class="tags"><span class="tag hot" data-i18n="tag.electronics">Eletrônica</span><span class="tag" data-i18n="tag.pt">PT</span><span class="tag" data-i18n="tag.calculators">Calculadoras</span></div>
+      </a>
 
-    <a class="card" href="apps/corrida-espacial/" target="_blank" rel="noopener" data-tags="História" data-title="corrida espacial eua urss 1957 1975 linha do tempo">
-      <div class="thumb"><span class="glyph">🚀</span></div>
-      <div class="body">
-        <h2>A Corrida Espacial <span class="arrow">↗</span></h2>
-        <p>EUA × URSS de 1957 a 1975: protagonistas, galeria, linha do tempo dos marcos e o legado tecnológico da disputa que colocou o homem na Lua.</p>
-        <div class="tags"><span class="tag hot">História</span><span class="tag">PT</span><span class="tag">Aula</span></div>
-      </div>
-    </a>
+      <a class="card" href="apps/corrida-espacial/" target="_blank" rel="noopener" data-tags="history" data-keywords="corrida espacial space race EUA URSS USA USSR 1957 1975 lua moon história history">
+        <span class="num">12</span>
+        <h2><span data-i18n="c12.title">A Corrida Espacial</span><span class="arrow">↗</span></h2>
+        <p data-i18n="c12.desc">EUA × URSS de 1957 a 1975: protagonistas, galeria, linha do tempo dos marcos e o legado tecnológico da disputa que colocou o homem na Lua.</p>
+        <div class="tags"><span class="tag hot" data-i18n="tag.history">História</span><span class="tag" data-i18n="tag.pt">PT</span><span class="tag" data-i18n="tag.class">Aula</span></div>
+      </a>
 
-    <a class="card" href="apps/corrida-espacial-en/" target="_blank" rel="noopener" data-tags="História" data-title="space race usa ussr timeline english">
-      <div class="thumb"><span class="glyph">🌍</span></div>
-      <div class="body">
-        <h2>The Space Race <span class="arrow">↗</span></h2>
-        <p>A versão em inglês do mesmo material: quem eram os protagonistas, os marcos de 1957 a 1975 e o que sobrou dessa disputa na tecnologia de hoje.</p>
-        <div class="tags"><span class="tag">História</span><span class="tag">EN</span><span class="tag">Aula</span></div>
-      </div>
-    </a>
+      <a class="card" href="apps/corrida-espacial-en/" target="_blank" rel="noopener" data-tags="history" data-keywords="space race corrida espacial USA USSR EUA URSS 1957 1975 moon lua history english">
+        <span class="num">13</span>
+        <h2><span data-i18n="c13.title">The Space Race</span><span class="arrow">↗</span></h2>
+        <p data-i18n="c13.desc">A versão em inglês do mesmo material: quem eram os protagonistas, os marcos de 1957 a 1975 e o que sobrou dessa disputa na tecnologia de hoje.</p>
+        <div class="tags"><span class="tag hot" data-i18n="tag.history">História</span><span class="tag" data-i18n="tag.en">EN</span><span class="tag" data-i18n="tag.class">Aula</span></div>
+      </a>
 
-    <a class="card" href="apps/tetris/" target="_blank" rel="noopener" data-tags="Jogos" data-title="tetris jogo teclado toque">
-      <div class="thumb"><span class="glyph">🎮</span></div>
-      <div class="body">
-        <h2>Tetris <span class="arrow">↗</span></h2>
-        <p>O clássico em um arquivo só: peças, próximas peças, pontuação e níveis. Teclado no desktop, controles de toque no celular.</p>
-        <div class="tags"><span class="tag hot">Jogos</span><span class="tag">Canvas</span><span class="tag">PT / EN</span></div>
-      </div>
-    </a>
+      <a class="card" href="apps/tetris/" target="_blank" rel="noopener" data-tags="games" data-keywords="tetris jogo game canvas teclado keyboard toque touch">
+        <span class="num">14</span>
+        <h2><span data-i18n="c14.title">Tetris</span><span class="arrow">↗</span></h2>
+        <p data-i18n="c14.desc">O clássico em um arquivo só: peças, próximas peças, pontuação e níveis. Teclado no desktop, controles de toque no celular.</p>
+        <div class="tags"><span class="tag hot" data-i18n="tag.games">Jogos</span><span class="tag">Canvas</span><span class="tag" data-i18n="tag.bilingual">PT / EN</span></div>
+      </a>
 
-    <a class="card" href="apps/paciencia/" target="_blank" rel="noopener" data-tags="Jogos" data-title="paciência klondike solitaire cartas arrastar">
-      <div class="thumb"><span class="glyph">🃏</span></div>
-      <div class="body">
-        <h2>Paciência · Klondike <span class="arrow">↗</span></h2>
-        <p>O jogo de cartas de sempre, com arrastar e soltar, movimentação automática para as fundações e vitória comemorada.</p>
-        <div class="tags"><span class="tag hot">Jogos</span><span class="tag">PT</span><span class="tag">Arrastar</span></div>
-      </div>
-    </a>
+      <a class="card" href="apps/paciencia/" target="_blank" rel="noopener" data-tags="games" data-keywords="paciência patience solitaire klondike cartas cards jogo game arrastar drag">
+        <span class="num">15</span>
+        <h2><span data-i18n="c15.title">Paciência · Klondike</span><span class="arrow">↗</span></h2>
+        <p data-i18n="c15.desc">O jogo de cartas de sempre, com arrastar e soltar, movimentação automática para as fundações e vitória comemorada.</p>
+        <div class="tags"><span class="tag hot" data-i18n="tag.games">Jogos</span><span class="tag" data-i18n="tag.pt">PT</span><span class="tag" data-i18n="tag.drag">Arrastar</span></div>
+      </a>
 
-  </div>
-  <div class="empty" id="empty">Nenhum simulador encontrado com esse filtro.</div>
+    </div>
+    <div class="empty" id="empty" data-i18n="empty">Nenhum simulador encontrado com esse filtro.</div>
+  </section>
 </main>
 
-<footer>
+<footer class="site-footer">
   <div class="wrap">
-    <span>Feito para aula e estudo · modelos 3D e números são reconstruções esquemáticas, não documentação oficial.</span>
-    <a href="https://github.com/Mjrovai/simuladores-interativos" target="_blank" rel="noopener">Código no GitHub ↗</a>
+    <span data-i18n="footer.note">Feito para aula e estudo · modelos 3D e números são reconstruções esquemáticas, não documentação oficial.</span>
+    <a href="https://github.com/Mjrovai/simuladores-interativos" target="_blank" rel="noopener" data-i18n="footer.code">Código no GitHub ↗</a>
   </div>
 </footer>
 
 <script>
 (() => {
+  /* ---------------- dicionário EN ---------------- */
+  const EN = {
+    'brand.main': 'Interactive',
+    'brand.sub': 'Simulators',
+    'aria.theme': 'Toggle theme',
+    'aria.search': 'Search',
+    'hero.eyebrow': 'open lab · free to use in class',
+    'hero.title1': 'Interactive',
+    'hero.title2': 'Simulators',
+    'hero.lede': 'Fifteen <b>labs that run in the browser</b>: missile signatures in 3D, Z80 and Apple&nbsp;1 CPUs, neural networks training XOR in front of you, transistor bias points, games and small visual lessons. No install, no build, no server.',
+    'stat.apps': 'simulators',
+    'stat.setup': 'install',
+    'stat.lang': 'languages',
+    'stat.topics': 'topics',
+    'f.all': 'All',
+    'f.3d': '3D',
+    'f.ai': 'AI',
+    'f.cpu': 'CPU',
+    'f.electronics': 'Electronics',
+    'f.games': 'Games',
+    'f.history': 'History',
+    'f.apps': 'Apps',
+    'tag.pt': 'PT',
+    'tag.en': 'EN',
+    'tag.ai': 'AI',
+    'tag.cpu': 'CPU',
+    'tag.history': 'History',
+    'tag.electronics': 'Electronics',
+    'tag.games': 'Games',
+    'tag.apps': 'Apps',
+    'tag.retro': 'Retro',
+    'tag.os': 'OS',
+    'tag.design': 'Design',
+    'tag.bilingual': 'PT / EN',
+    'tag.interactive': 'Interactive',
+    'tag.tool': 'Tool',
+    'tag.class': 'Lesson',
+    'tag.calculators': 'Calculators',
+    'tag.drag': 'Drag &amp; drop',
+    'c1.title': 'FOG-MPM · 3D Explorer',
+    'c1.desc': "Avibras' fibre-optic guided missile in seven chapters: cutaway and X-ray anatomy, launch sequence, an RF jammer the wire ignores, and a 12 km engagement with telemetry and seeker video.",
+    'c2.title': 'V-2 / A4 · 3D Model',
+    'c2.desc': 'The 14 systems of the 1942 ballistic missile as a procedural model: sectional cut, exploded view with labels, a spec sheet per component and GLB export for Blender or Unity.',
+    'c3.title': 'Z80 Lab',
+    'c3.desc': 'Ten Z80 assembly lessons with a built-in assembler, single-step execution, memory inspector, console and a checker that verifies the result of your programs.',
+    'c4.title': 'Apple 1 Lab',
+    'c4.desc': 'Ten 6502 lessons on the machine that started Apple: Woz Monitor, mapped screen and keyboard, program assembly, controlled execution and automatic exercise checks.',
+    'c5.title': 'Windows 95',
+    'c5.desc': 'The 1995 desktop recreated in a single page: boot, desktop, Start menu, draggable windows, Notepad, Paint, Calculator, Minesweeper and shutdown.',
+    'c6.title': 'Macintosh 128K · 1984',
+    'c6.desc': 'The first Mac: System 1.0 with Finder, a 400 KB disk, windows, the Apple menu, Read Me, About This Macintosh and a calculator — the interface that defined the mouse and the desktop.',
+    'c7.title': 'Deep Learning Simulator',
+    'c7.desc': 'Neuron, activation functions, forward pass and backpropagation — with live XOR training, a learning curve and the decision boundary drawn on the plane. Bilingual PT/EN.',
+    'c8.title': 'Transformer in 3 minutes',
+    'c8.desc': 'The mechanism behind generative AI translated into business language, with an interactive word-by-word attention demo.',
+    'c9.title': 'Local LLM predictor',
+    'c9.desc': 'Estimates tokens/s, time to first token, memory, context that fits and energy for 23 models and 12 quantizations on Apple Silicon — before you download the weights.',
+    'c10.title': 'Color Palette Generator',
+    'c10.desc': 'Generates five-colour palettes with harmony modes, colour locks, WCAG contrast readings, HEX/RGB/HSL copy and export to CSS, Tailwind, JSON and SVG. Saves in the browser.',
+    'c11.title': 'Transistor Bias',
+    'c11.desc': 'How to set the BJT operating point: regions of operation, DC load line, bias methods and calculators that update the diagrams as you adjust the resistors.',
+    'c12.title': 'The Space Race',
+    'c12.desc': 'USA × USSR from 1957 to 1975: the protagonists, a gallery, a timeline of milestones and the technological legacy of the race that put a man on the Moon.',
+    'c13.title': 'The Space Race (EN)',
+    'c13.desc': "The English version of the same material: who the protagonists were, the milestones from 1957 to 1975, and what remains of that race in today's technology.",
+    'c14.title': 'Tetris',
+    'c14.desc': 'The classic in a single file: pieces, next queue, score and levels. Keyboard on desktop, touch controls on mobile.',
+    'c15.title': 'Solitaire · Klondike',
+    'c15.desc': 'The card game as always, with drag and drop, automatic moves to the foundations and a celebrated win.',
+    'empty': 'No simulator matches this filter.',
+    'footer.note': 'Made for class and study · 3D models and numbers are schematic reconstructions, not official documentation.',
+    'footer.code': 'Source on GitHub ↗',
+    'search.ph': 'Search by name, topic or technology…'
+  };
+
+  const root = document.documentElement;
+  const TITLES = { pt: 'Simuladores Interativos — laboratório aberto', en: 'Interactive Simulators — open lab' };
+
+  /* guarda o PT que veio no HTML (fonte da verdade) */
+  const PT = {};
+  document.querySelectorAll('[data-i18n],[data-i18n-html]').forEach(el => {
+    const k = el.dataset.i18n || el.dataset.i18nHtml;
+    PT[k] = el.innerHTML;
+  });
+  PT['search.ph'] = 'Buscar por nome, tema ou tecnologia…';
+  const DICTS = { pt: PT, en: EN };
+
   const cards = [...document.querySelectorAll('.card')];
   const chips = [...document.querySelectorAll('.chip')];
   const q = document.getElementById('q');
   const empty = document.getElementById('empty');
+  const themeBtn = document.querySelector('.theme-toggle');
   let filter = 'all';
+  let lang = 'pt';
 
   const norm = s => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
-  function apply() {
+  function applyFilter() {
     const term = norm(q.value.trim());
     let shown = 0;
     cards.forEach(card => {
-      const hay = norm(card.dataset.title + ' ' + card.dataset.tags + ' ' + card.textContent);
-      const tags = norm(card.dataset.tags);
+      const hay = norm((card.dataset.keywords || '') + ' ' + card.textContent);
+      const tags = norm(card.dataset.tags || '');
       const okFilter = filter === 'all' || tags.includes(norm(filter));
       const okTerm = !term || hay.includes(term);
       const show = okFilter && okTerm;
@@ -348,15 +617,64 @@
     empty.classList.toggle('on', shown === 0);
   }
 
+  function applyLang(next) {
+    lang = (next === 'en') ? 'en' : 'pt';
+    const d = DICTS[lang];
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const k = el.dataset.i18n;
+      if (k in d) el.innerHTML = d[k];
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(el => {
+      const k = el.dataset.i18nHtml;
+      if (k in d) el.innerHTML = d[k];
+    });
+    q.placeholder = d['search.ph'];
+    q.setAttribute('aria-label', lang === 'en' ? 'Search' : 'Buscar');
+    themeBtn.setAttribute('aria-label', lang === 'en' ? 'Toggle theme' : 'Alternar tema');
+    document.title = TITLES[lang];
+    root.setAttribute('lang', lang === 'en' ? 'en' : 'pt-BR');
+    root.setAttribute('data-lang', lang);
+    document.querySelectorAll('.langtoggle button').forEach(b =>
+      b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
+    applyFilter();
+  }
+
   chips.forEach(chip => chip.addEventListener('click', () => {
     filter = chip.dataset.filter;
     chips.forEach(c => c.setAttribute('aria-pressed', String(c === chip)));
-    apply();
+    applyFilter();
   }));
-  q.addEventListener('input', apply);
-  q.addEventListener('keydown', e => { if (e.key === 'Escape') { q.value = ''; apply(); } });
+  q.addEventListener('input', applyFilter);
+  q.addEventListener('keydown', e => { if (e.key === 'Escape') { q.value = ''; applyFilter(); } });
+  document.addEventListener('keydown', e => {
+    if (e.key === '/' && document.activeElement !== q) { e.preventDefault(); q.focus(); }
+  });
 
-  // Aberto por file:// (duplo clique): aponta para os arquivos e avisa sobre os apps que exigem servidor.
+  document.querySelectorAll('.langtoggle button').forEach(b => b.addEventListener('click', () => {
+    try { localStorage.setItem('lang', b.dataset.lang); } catch (e) {}
+    applyLang(b.dataset.lang);
+  }));
+
+  themeBtn.addEventListener('click', () => {
+    const current = root.getAttribute('data-theme')
+      || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    const next = current === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('theme', next); } catch (e) {}
+  });
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', ev => {
+    let saved = null;
+    try { saved = localStorage.getItem('theme'); } catch (e) {}
+    if (saved) return;
+    root.setAttribute('data-theme', ev.matches ? 'dark' : 'light');
+  });
+
+  /* idioma inicial */
+  let savedLang = null;
+  try { savedLang = localStorage.getItem('lang'); } catch (e) {}
+  applyLang(savedLang === 'en' ? 'en' : 'pt');
+
+  /* aberto por file:// */
   if (location.protocol === 'file:') {
     cards.forEach(a => {
       const h = a.getAttribute('href');
@@ -369,10 +687,6 @@
       '<code>http://127.0.0.1:8099/</code>.';
     document.body.prepend(note);
   }
-  document.addEventListener('keydown', e => {
-    if (e.key === '/' && document.activeElement !== q) { e.preventDefault(); q.focus(); }
-  });
-  apply();
 })();
 </script>
 </body>
