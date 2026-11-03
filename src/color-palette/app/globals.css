@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  /*
+   * Font variables are registered by next/font in app/layout.tsx:
+   * --font-inter (body) and --font-grotesk (display).
+   */
+  font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", sans-serif;
+  text-rendering: optimizeLegibility;
+}
+
+/* Display face for headings, brand, and numeric color values. */
+@layer utilities {
+  .font-display {
+    font-family: var(--font-grotesk), var(--font-inter), ui-sans-serif,
+      system-ui, sans-serif;
+  }
+}
+
+/*
+ * Visible keyboard focus for every interactive control.
+ * `:where(...)` keeps the selector at zero specificity so component
+ * classes can still customize focus when needed.
+ */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid #6366f1; /* indigo-500 */
+  outline-offset: 2px;
+}
+
+::selection {
+  background-color: #c7d2fe; /* indigo-200 */
+  color: #111827; /* ink */
+}
+
+/* Respect users who prefer reduced motion (spec: reduced-motion friendly). */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

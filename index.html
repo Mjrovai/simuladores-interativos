@@ -112,6 +112,11 @@
        border:1px solid var(--line); border-radius:999px; padding:4px 9px; background:rgba(255,255,255,.03)}
   .tag.hot{color:#c9bfff; border-color:#4b3ea0; background:rgba(124,92,255,.14)}
 
+  .filenote{
+    background:rgba(255,181,71,.12); border-bottom:1px solid #6a5324; color:#f0d9ad;
+    font-size:13.5px; line-height:1.5; padding:12px 24px; text-align:center;
+  }
+  .filenote code{background:rgba(0,0,0,.35); padding:2px 6px; border-radius:5px; font-size:12.5px}
   .empty{display:none; text-align:center; color:var(--muted); padding:60px 0; font-size:15px}
   .empty.on{display:block}
 
@@ -145,6 +150,7 @@
       <span>15 simuladores</span>
       <span>HTML + WebGL · tudo estático, sem backend</span>
       <span>PT / EN</span>
+      <span>cada app abre em nova aba</span>
     </div>
   </div>
 
@@ -171,7 +177,7 @@
 <main class="wrap">
   <div class="grid" id="grid">
 
-    <a class="card" href="apps/fog-mpm-3d/" data-tags="3D engenharia defesa" data-title="FOG-MPM míssil avibras fibra óptica three.js 3d">
+    <a class="card" href="apps/fog-mpm-3d/" target="_blank" rel="noopener" data-tags="3D engenharia defesa" data-title="FOG-MPM míssil avibras fibra óptica three.js 3d">
       <div class="thumb"><img src="assets/thumbs/fog.jpg" alt="FOG-MPM em vista de corte" loading="lazy"></div>
       <div class="body">
         <h2>FOG-MPM · Explorador 3D <span class="arrow">↗</span></h2>
@@ -180,7 +186,7 @@
       </div>
     </a>
 
-    <a class="card" href="apps/v2-a4/" data-tags="3D história engenharia" data-title="V-2 A4 foguete alemão 1942 modelo 3d glb corte explodido">
+    <a class="card" href="apps/v2-a4/" target="_blank" rel="noopener" data-tags="3D história engenharia" data-title="V-2 A4 foguete alemão 1942 modelo 3d glb corte explodido">
       <div class="thumb"><img src="assets/thumbs/v2.jpg" alt="V-2 em vista explodida" loading="lazy"></div>
       <div class="body">
         <h2>V-2 / A4 · Modelo 3D <span class="arrow">↗</span></h2>
@@ -189,7 +195,7 @@
       </div>
     </a>
 
-    <a class="card" href="apps/z80-lab/z80.html" data-tags="CPU assembly" data-title="Z80 lab assembly lições assembler passo a passo">
+    <a class="card" href="apps/z80-lab/z80.html" target="_blank" rel="noopener" data-tags="CPU assembly" data-title="Z80 lab assembly lições assembler passo a passo">
       <div class="thumb"><span class="glyph">🕹️</span></div>
       <div class="body">
         <h2>Z80 Lab <span class="arrow">↗</span></h2>
@@ -198,7 +204,7 @@
       </div>
     </a>
 
-    <a class="card" href="apps/apple1-lab/a1.html" data-tags="CPU assembly história" data-title="Apple 1 lab 6502 assembly woz monitor lições">
+    <a class="card" href="apps/apple1-lab/a1.html" target="_blank" rel="noopener" data-tags="CPU assembly história" data-title="Apple 1 lab 6502 assembly woz monitor lições">
       <div class="thumb"><span class="glyph">🍎</span></div>
       <div class="body">
         <h2>Apple 1 Lab <span class="arrow">↗</span></h2>
@@ -207,7 +213,7 @@
       </div>
     </a>
 
-    <a class="card" href="apps/windows95/" data-tags="CPU retro sistema operacional" data-title="windows 95 simulador desktop menu iniciar minesweeper notepad paint">
+    <a class="card" href="apps/windows95/" target="_blank" rel="noopener" data-tags="CPU retro sistema operacional" data-title="windows 95 simulador desktop menu iniciar minesweeper notepad paint">
       <div class="thumb"><span class="glyph">🪟</span></div>
       <div class="body">
         <h2>Windows 95 <span class="arrow">↗</span></h2>
@@ -216,7 +222,7 @@
       </div>
     </a>
 
-    <a class="card" href="apps/mac1984/" data-tags="CPU retro história sistema operacional" data-title="macintosh 128k 1984 simulador finder sistema clássico apple">
+    <a class="card" href="apps/mac1984/" target="_blank" rel="noopener" data-tags="CPU retro história sistema operacional" data-title="macintosh 128k 1984 simulador finder sistema clássico apple">
       <div class="thumb"><span class="glyph">🖥️</span></div>
       <div class="body">
         <h2>Macintosh 128K · 1984 <span class="arrow">↗</span></h2>
@@ -225,7 +231,7 @@
       </div>
     </a>
 
-    <a class="card" href="apps/deep-learning/" data-tags="IA" data-title="deep learning rede neural xor backpropagation ativações simulador bilíngue">
+    <a class="card" href="apps/deep-learning/" target="_blank" rel="noopener" data-tags="IA" data-title="deep learning rede neural xor backpropagation ativações simulador bilíngue">
       <div class="thumb"><span class="glyph">🧠</span></div>
       <div class="body">
         <h2>Simulador de Deep Learning <span class="arrow">↗</span></h2>
@@ -234,7 +240,7 @@
       </div>
     </a>
 
-    <a class="card" href="apps/transformer-executivo/" data-tags="IA" data-title="transformer atenção briefing executivo ia generativa">
+    <a class="card" href="apps/transformer-executivo/" target="_blank" rel="noopener" data-tags="IA" data-title="transformer atenção briefing executivo ia generativa">
       <div class="thumb"><span class="glyph">✨</span></div>
       <div class="body">
         <h2>Transformer em 3 minutos <span class="arrow">↗</span></h2>
@@ -243,7 +249,7 @@
       </div>
     </a>
 
-    <a class="card" href="apps/llm-predictor/" data-tags="IA ferramenta" data-title="preditor performance llm local apple silicon memória tokens por segundo">
+    <a class="card" href="apps/llm-predictor/" target="_blank" rel="noopener" data-tags="IA ferramenta" data-title="preditor performance llm local apple silicon memória tokens por segundo">
       <div class="thumb"><span class="glyph">📊</span></div>
       <div class="body">
         <h2>Preditor de LLM local <span class="arrow">↗</span></h2>
@@ -252,7 +258,7 @@
       </div>
     </a>
 
-    <a class="card" href="apps/color-palette/" data-tags="Apps design cores ferramenta" data-title="color palette generator paletas de cores harmonia contraste tailwind export">
+    <a class="card" href="apps/color-palette/" target="_blank" rel="noopener" data-tags="Apps design cores ferramenta" data-title="color palette generator paletas de cores harmonia contraste tailwind export">
       <div class="thumb"><span class="glyph">🎨</span></div>
       <div class="body">
         <h2>Color Palette Generator <span class="arrow">↗</span></h2>
@@ -261,7 +267,7 @@
       </div>
     </a>
 
-    <a class="card" href="apps/polarizacao-transistores/" data-tags="Eletrônica" data-title="polarização transistor bjt ponto q reta de carga calculadora">
+    <a class="card" href="apps/polarizacao-transistores/" target="_blank" rel="noopener" data-tags="Eletrônica" data-title="polarização transistor bjt ponto q reta de carga calculadora">
       <div class="thumb"><span class="glyph">⚡</span></div>
       <div class="body">
         <h2>Polarização de Transistores <span class="arrow">↗</span></h2>
@@ -270,7 +276,7 @@
       </div>
     </a>
 
-    <a class="card" href="apps/corrida-espacial/" data-tags="História" data-title="corrida espacial eua urss 1957 1975 linha do tempo">
+    <a class="card" href="apps/corrida-espacial/" target="_blank" rel="noopener" data-tags="História" data-title="corrida espacial eua urss 1957 1975 linha do tempo">
       <div class="thumb"><span class="glyph">🚀</span></div>
       <div class="body">
         <h2>A Corrida Espacial <span class="arrow">↗</span></h2>
@@ -279,7 +285,7 @@
       </div>
     </a>
 
-    <a class="card" href="apps/corrida-espacial-en/" data-tags="História" data-title="space race usa ussr timeline english">
+    <a class="card" href="apps/corrida-espacial-en/" target="_blank" rel="noopener" data-tags="História" data-title="space race usa ussr timeline english">
       <div class="thumb"><span class="glyph">🌍</span></div>
       <div class="body">
         <h2>The Space Race <span class="arrow">↗</span></h2>
@@ -288,7 +294,7 @@
       </div>
     </a>
 
-    <a class="card" href="apps/tetris/" data-tags="Jogos" data-title="tetris jogo teclado toque">
+    <a class="card" href="apps/tetris/" target="_blank" rel="noopener" data-tags="Jogos" data-title="tetris jogo teclado toque">
       <div class="thumb"><span class="glyph">🎮</span></div>
       <div class="body">
         <h2>Tetris <span class="arrow">↗</span></h2>
@@ -297,7 +303,7 @@
       </div>
     </a>
 
-    <a class="card" href="apps/paciencia/" data-tags="Jogos" data-title="paciência klondike solitaire cartas arrastar">
+    <a class="card" href="apps/paciencia/" target="_blank" rel="noopener" data-tags="Jogos" data-title="paciência klondike solitaire cartas arrastar">
       <div class="thumb"><span class="glyph">🃏</span></div>
       <div class="body">
         <h2>Paciência · Klondike <span class="arrow">↗</span></h2>
@@ -349,6 +355,20 @@
   }));
   q.addEventListener('input', apply);
   q.addEventListener('keydown', e => { if (e.key === 'Escape') { q.value = ''; apply(); } });
+
+  // Aberto por file:// (duplo clique): aponta para os arquivos e avisa sobre os apps que exigem servidor.
+  if (location.protocol === 'file:') {
+    cards.forEach(a => {
+      const h = a.getAttribute('href');
+      if (h.endsWith('/')) a.setAttribute('href', h + 'index.html');
+    });
+    const note = document.createElement('div');
+    note.className = 'filenote';
+    note.innerHTML = 'Você abriu a galeria direto do disco. Os apps de arquivo único funcionam assim; ' +
+      '<b>FOG-MPM, V-2 e Color Palette precisam de servidor</b> — rode <code>start.command</code> e acesse ' +
+      '<code>http://127.0.0.1:8099/</code>.';
+    document.body.prepend(note);
+  }
   document.addEventListener('keydown', e => {
     if (e.key === '/' && document.activeElement !== q) { e.preventDefault(); q.focus(); }
   });
