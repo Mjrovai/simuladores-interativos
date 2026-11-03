@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Corrida Espacial — EUA × URSS</title>
+    <style>
+        :root {
+            --bg: #0b1026;
+            --bg-soft: #111936;
+            --card: #161f42;
+            --text: #e8ecff;
+            --muted: #9aa4d4;
+            --us: #4f8cff;
+            --ussr: #ff5b5b;
+            --gold: #ffd166;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.65;
+        }
+
+        /* Céu estrelado */
+        .stars, .stars::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: -1;
+            background-image:
+                radial-gradient(1px 1px at 20px 30px, #fff, transparent),
+                radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,.7), transparent),
+                radial-gradient(1.5px 1.5px at 240px 160px, #fff, transparent),
+                radial-gradient(1px 1px at 320px 40px, rgba(255,255,255,.8), transparent),
+                radial-gradient(1.5px 1.5px at 420px 220px, #fff, transparent),
+                radial-gradient(1px 1px at 500px 120px, rgba(255,255,255,.6), transparent),
+                radial-gradient(1px 1px at 90px 250px, #fff, transparent),
+                radial-gradient(1.5px 1.5px at 380px 300px, rgba(255,255,255,.85), transparent);
+            background-size: 550px 350px;
+        }
+        .stars::after {
+            background-size: 320px 240px;
+            opacity: .5;
+        }
+
+        /* Navegação */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px 18px;
+            justify-content: center;
+            padding: 12px 16px;
+            background: rgba(11, 16, 38, .92);
+            backdrop-filter: blur(6px);
+            border-bottom: 1px solid rgba(255,255,255,.08);
+            font-size: .92rem;
+        }
+        nav a {
+            color: var(--muted);
+            text-decoration: none;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: color .2s, background .2s;
+        }
+        nav a:hover { color: var(--text); background: rgba(255,255,255,.07); }
+
+        /* Hero */
+        header {
+            text-align: center;
+            padding: 90px 20px 70px;
+        }
+        header .emoji { font-size: 4rem; display: block; margin-bottom: 12px; }
+        header h1 {
+            font-size: clamp(2.2rem, 6vw, 3.6rem);
+            letter-spacing: .5px;
+            background: linear-gradient(90deg, var(--us), #cfd8ff, var(--ussr));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        header p.sub {
+            max-width: 640px;
+            margin: 16px auto 0;
+            color: var(--muted);
+            font-size: 1.1rem;
+        }
+        .badge {
+            display: inline-block;
+            margin-top: 22px;
+            padding: 8px 18px;
+            border: 1px solid rgba(255,255,255,.15);
+            border-radius: 999px;
+            color: var(--gold);
+            font-size: .9rem;
+            letter-spacing: .4px;
+        }
+
+        main {
+            max-width: 880px;
+            margin: 0 auto;
+            padding: 0 20px 40px;
+        }
+
+        section {
+            background: var(--card);
+            border: 1px solid rgba(255,255,255,.07);
+            border-radius: 14px;
+            padding: 28px;
+            margin-bottom: 26px;
+            box-shadow: 0 8px 30px rgba(0,0,0,.35);
+        }
+        section h2 {
+            color: var(--gold);
+            font-size: 1.5rem;
+            margin-bottom: 14px;
+        }
+        section p { margin-bottom: 12px; }
+        section p:last-child { margin-bottom: 0; }
+
+        /* Duelo */
+        .duel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-top: 8px;
+        }
+        @media (max-width: 640px) { .duel { grid-template-columns: 1fr; } }
+        .country {
+            border-radius: 12px;
+            padding: 20px;
+            background: var(--bg-soft);
+            border-top: 4px solid;
+        }
+        .country.us { border-top-color: var(--us); }
+        .country.ussr { border-top-color: var(--ussr); }
+        .country h3 { margin-bottom: 8px; font-size: 1.15rem; }
+        .country.us h3 { color: var(--us); }
+        .country.ussr h3 { color: var(--ussr); }
+        .country ul { margin: 10px 0 0 18px; color: var(--muted); font-size: .95rem; }
+        .country li { margin-bottom: 6px; }
+
+        /* Linha do tempo */
+        .timeline {
+            list-style: none;
+            margin-top: 10px;
+            border-left: 3px solid rgba(255,255,255,.15);
+            padding-left: 22px;
+        }
+        .timeline li {
+            position: relative;
+            margin-bottom: 22px;
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity .5s ease, transform .5s ease;
+        }
+        .timeline li.visible { opacity: 1; transform: none; }
+        .timeline li:last-child { margin-bottom: 0; }
+        .timeline li::before {
+            content: "";
+            position: absolute;
+            left: -30.5px;
+            top: 7px;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: var(--gold);
+            box-shadow: 0 0 10px rgba(255,209,102,.8);
+        }
+        .timeline .year {
+            font-weight: 700;
+            color: var(--gold);
+            font-size: 1.05rem;
+        }
+        .timeline .flag-us { color: var(--us); }
+        .timeline .flag-ussr { color: var(--ussr); }
+        .timeline p { color: var(--muted); font-size: .97rem; }
+
+        /* Galeria */
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .gallery-item {
+            background: var(--bg-soft);
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .gallery-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            border: 1px solid rgba(255,255,255,.1);
+        }
+        .gallery-item p {
+            font-size: .8rem;
+            color: var(--muted);
+        }
+
+        /* Curiosidades */
+        .facts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 14px;
+            margin-top: 10px;
+        }
+        .fact {
+            background: var(--bg-soft);
+            border-radius: 10px;
+            padding: 16px;
+            font-size: .95rem;
+            color: var(--muted);
+        }
+        .fact strong { color: var(--text); display: block; margin-bottom: 4px; }
+
+        footer {
+            text-align: center;
+            padding: 30px 16px 50px;
+            color: var(--muted);
+            font-size: .9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" aria-hidden="true"></div>
+
+    <nav>
+        <a href="#o-que-foi">O que foi</a>
+        <a href="#protagonistas">Protagonistas</a>
+        <a href="#galeria">Galeria</a>
+        <a href="#linha-do-tempo">Linha do tempo</a>
+        <a href="#legado">Legado</a>
+        <a href="#curiosidades">Curiosidades</a>
+    </nav>
+
+    <header>
+        <span class="emoji">🚀</span>
+        <h1>A Corrida Espacial</h1>
+        <p class="sub">Entre o fim da Segunda Guerra e a queda do Muro de Berlim, Estados Unidos e União Soviética disputaram quem chegaria primeiro ao espaço — e essa disputa mudou o mundo.</p>
+        <span class="badge">1957 — 1975 · EUA × URSS</span>
+    </header>
+
+    <main>
+        <section id="o-que-foi">
+            <h2>🌍 O que foi?</h2>
+            <p>A <strong>Corrida Espacial</strong> foi a competição entre os Estados Unidos e a União Soviética para alcançar feitos cada vez mais ambiciosos em exploração espacial. Ela nasceu no calor da <strong>Guerra Fria</strong> (1947–1991), o confronto ideológico entre o capitalismo americano e o socialismo soviético — um embate que, em vez de usar armas diretamente, se desenrolava por meio de alianças, espionagem, propaganda e... foguetes.</p>
+            <p>Por que o espaço? Porque conquistar órbitas e foguetes era a prova definitiva de superioridade tecnológica. E os foguetes balísticos capazes de colocar satélites em órbita também podiam carregar ogivas nucleares — ou seja, era ao mesmo tempo símbolo de prestígio e instrumento de poder militar.</p>
+            <p>Para o mundo inteiro, a corrida foi transmitida ao vivo por rádio e televisiona: cada lançamento era um evento global de suspense, orgulho e, por vezes, tragédia.</p>
+        </section>
+
+        <section id="protagonistas">
+            <h2>⚔️ Os dois lados do duelo</h2>
+            <div class="duel">
+                <div class="country us">
+                    <h3>🇺🇸 Estados Unidos</h3>
+                    <p>A agência <strong>NASA</strong> (criada em 1958) liderou o esforço americano com o programa <strong>Apollo</strong>, cujo objetivo declarado pelo presidente Kennedy era levar um homem à Lua antes do fim da década de 1960.</p>
+                    <ul>
+                        <li>Programa Apollo — pousou na Lua 6 vezes (1969–1972)</li>
+                        <li>Estação Skylab (1973)</li>
+                        <li>Foguete Saturno V, o mais potente já voado em operação</li>
+                    </ul>
+                </div>
+                <div class="country ussr">
+                    <h3>🇷🇺 União Soviética</h3>
+                    <p>O <strong>Programa Espacial Soviético</strong>, liderado pelo engenheiro <strong>Serguei Koroliov</strong> (o "Arquiteto-Chefe"), usou os foguetes <strong>R-7</strong> para conquistar vários "primeiros" mundiais na década de 1960.</p>
+                    <ul>
+                        <li>Primeiro satélite: Sputnik (1957)</li>
+                        <li>Primeiro ser vivo: cachorra Laika (1957)</li>
+                        <li>Primeiro humano: Yuri Gagarin (1961)</li>
+                        <li>Primeira mulher e primeira saída ao vácuo</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="galeria">
+            <h2>📸 Fotos históricas</h2>
+            <p>Imagens do acervo público do Wikimedia Commons (projetos da NASA e arquivos soviéticos).</p>
+            <div class="gallery">
+                <div class="gallery-item">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Sputnik_1.jpg/500px-Sputnik_1.jpg" alt="Sputnik 1, o primeiro satélite artificial" loading="lazy">
+                    <p>Sputnik 1 — o primeiro satélite (1957)</p>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Yuri_Gagarin_%281961%29_-_Restoration.jpg/500px-Yuri_Gagarin_%281961%29_-_Restoration.jpg" alt="Yuri Gagarin, o primeiro humano no espaço" loading="lazy">
+                    <p>Yuri Gagarin, o primeiro humano no espaço (1961)</p>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Liftoff_of_the_Apollo_11_lunar_landing_mission.jpg/500px-Liftoff_of_the_Apollo_11_lunar_landing_mission.jpg" alt="Lançamento do foguete Saturno V da missão Apollo 11" loading="lazy">
+                    <p>Lançamento da missão Apollo 11 (1969)</p>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/NASA-Apollo8-Dec24-Earthrise-b.jpg/500px-NASA-Apollo8-Dec24-Earthrise-b.jpg" alt="Earthrise — a Terra surgindo atrás da Lua" loading="lazy">
+                    <p>"Earthrise" — a Terra vista da Lua (Apollo 8, 1968)</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="linha-do-tempo">
+            <h2>📅 Linha do tempo</h2>
+            <ul class="timeline">
+                <li>
+                    <div class="year">1957 · <span class="flag-ussr">URSS</span></div>
+                    <p><strong>Sputnik 1</strong> — o primeiro satélite artificial — entra em órbita, emitindo seu famoso bip. O mundo toma conhecimento: a URSS chegou primeiro, e o pânico chega às manchetes americanas.</p>
+                </li>
+                <li>
+                    <div class="year">1957 · <span class="flag-ussr">URSS</span></div>
+                    <p><strong>Laika</strong>, uma cachorra vagante de Moscou, se torna o primeiro ser vivo a orbitar a Terra (infelizmente, sem retornar — os sistemas de vida do satélite ainda eram rudimentares).</p>
+                </li>
+                <li>
+                    <div class="year">1961 · <span class="flag-ussr">URSS</span></div>
+                    <p><strong>Yuri Gagarin</strong>, a bordo da cápsula Vostok 1, completa a primeira órbita tripulada da história. "A Terra é azul!", ele teria dito. A frase virou símbolo do país.</p>
+                </li>
+                <li>
+                    <div class="year">1961 · <span class="flag-us">EUA</span></div>
+                    <p>O presidente <strong>John F. Kennedy</strong> declara perante o Congresso que os EUA levarão um homem à Lua antes que termine a década — nasce o programa Apollo com orçamento recorde.</p>
+                </li>
+                <li>
+                    <div class="year">1961 · <span class="flag-us">EUA</span></div>
+                    <p><strong>Alan Shepard</strong> se torna o primeiro americano no espaço, em um breve voo suborbital de 15 minutos, no foguete Freedom 7.</p>
+                </li>
+                <li>
+                    <div class="year">1963 · <span class="flag-ussr">URSS</span></div>
+                    <p><strong>Valentina Tereshkova</strong> é a primeira mulher no espaço, orbitando a Terra 48 vezes em três dias a bordo da Vostok 6.</p>
+                </li>
+                <li>
+                    <div class="year">1965 · <span class="flag-ussr">URSS</span></div>
+                    <p><strong>Alexei Leonov</strong> sai da cápsula Voskhod 2 e faz a primeira caminhada espacial da história (o "spacewalk").</p>
+                </li>
+                <li>
+                    <div class="year">1969 · <span class="flag-us">EUA</span></div>
+                    <p><strong>Apollo 11</strong> — a grande virada. Em 20 de julho, <strong>Neil Armstrong</strong> pisa na Lua e declara: "Um pequeno passo para o homem, um salto de gigante para a humanidade". Mais de 600 milhões de pessoas assistem pela TV.</p>
+                </li>
+                <li>
+                    <div class="year">1971 · <span class="flag-ussr">URSS</span></div>
+                    <p>A <strong>Salyut 1</strong> se torna a primeira estação espacial da história. O programa Apollo, porém, é cortado após o sucesso do Apollo 11 — os EUA chegam à Lua, mas não constroem sua própria estação em grande escala.</p>
+                </li>
+                <li>
+                    <div class="year">1975 · <span class="flag-us">EUA</span> <span class="flag-ussr">×</span> <span class="flag-ussr">URSS</span></div>
+                    <p>O projeto <strong>Apollo–Soyuz</strong>: as duas cápsulas se acoplam no espaço. Um gesto de cooperação que encerra simbolicamente a corrida e anuncia a era de colaboração — caminho que levaria à <strong>Estação Espacial Internacional</strong> (1998 em diante).</p>
+                </li>
+            </ul>
+        </section>
+
+        <section id="legado">
+            <h2>🌱 Por que isso importa?</h2>
+            <p>Muitos consideram a Corrida Espacial uma competição "sem vencidos" — o planeta inteiro ganhou. O que nasceu de rivalidade ideológica produziu tecnologia que usamos todos os dias:</p>
+            <ul style="margin: 12px 0 0 18px; color: var(--muted);">
+                <li>📡 <strong>GPS e satélites de comunicação</strong> — sem eles, nem navegação, nem previsão do tempo moderna;</li>
+                <li>🖥️ <strong>Avanços em computação, materiais e medicina</strong> — de memórias à microeletrônica, de tecidos especiais a monitores portáteis;</li>
+                <li>🎓 <strong>Uma geração inteira de cientistas</strong> — milhões de estudantes foram atraídos para ciências e engenharia;</li>
+                <li>🤝 <strong>Precedente de cooperação internacional</strong> — hoje a ISS é habitada por tripulações de mais de uma dezena de países.</li>
+            </ul>
+            <p>E há um novo capítulo: a partir do século XXI, <strong>nova corrida</strong> começou — agora com China, Europa, Japão e empresas privadas como a SpaceX disputando o retorno à Lua (programa Artemis) e a primeira viagem tripulada a <strong>Marte</strong>.</p>
+        </section>
+
+        <section id="curiosidades">
+            <h2>✨ Curiosidades</h2>
+            <div class="facts">
+                <div class="fact"><strong>O bip de Sputnik</strong>O satélite tinha apenas 58 cm de diâmetro, mas sua simples transmissão de rádio espalhou o alarme pelos EUA.</div>
+                <div class="fact"><strong>Kennedy tinha urgência real</strong>Em 1961, os EUA já sabiam que a URSS tinha foguetes maiores — a corrida à Lua era também corrida armamentista.</div>
+                <div class="fact"><strong>O programa mais caro da história</strong>O Apollo custou ~25 bilhões de dólares da época — ajustado pela inflação, mais de 150 bilhões de dólares de hoje.</div>
+                <div class="fact"><strong>A Terra, vista de lá</strong>Foi na Apollo 8 (1968) que a humanidade viu, pela primeira vez, a Terra inteira surgindo atrás da Lua — a famosa foto do "Earthrise".</div>
+                <div class="fact"><strong>Koroliov era um segredo</strong>O líder do programa soviético tinha seu nome desclassificado durante anos — os jornalistas só conheciam o "Diretor-Chefe Anônimo".</div>
+                <div class="fact"><strong>A Lua guarda 384 kg de amostras</strong>As missões Apollo trouxeram 382 kg de rochas lunares — estudadas até hoje e base de descobertas sobre a história do Sistema Solar.</div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>🚀 Página criada para fins educativos · A Corrida Espacial, EUA × URSS (1957–1975)</p>
+    </footer>
+
+    <script>
+        // Revela os itens da linha do tempo ao rolar
+        const items = document.querySelectorAll('.timeline li');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.2 });
+        items.forEach((item) => observer.observe(item));
+    </script>
+</body>
+</html>

@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simuladores Interativos — laboratório aberto</title>
+<meta name="description" content="Simuladores e laboratórios interativos de engenharia, IA, eletrônica, história da computação e 3D. Roda no navegador, sem instalação.">
+<meta property="og:title" content="Simuladores Interativos">
+<meta property="og:description" content="Laboratórios interativos de IA, engenharia, eletrônica e história da computação — abertos no navegador.">
+<meta property="og:image" content="assets/thumbs/fog.jpg">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧪</text></svg>">
+<style>
+  :root{
+    --bg:#0a0c14; --bg2:#111527; --card:#141a2e; --card2:#1a2140;
+    --ink:#e9edff; --muted:#9aa4cc; --line:#28304f;
+    --accent:#7c5cff; --accent2:#ff5c8a; --ok:#37e0a0;
+    --radius:16px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:
+      radial-gradient(1100px 600px at 12% -10%, rgba(124,92,255,.22), transparent 60%),
+      radial-gradient(900px 500px at 92% 0%, rgba(255,92,138,.14), transparent 55%),
+      var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,Roboto,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 24px}
+
+  /* ---------- header ---------- */
+  header{padding:72px 0 32px}
+  .badge{
+    display:inline-flex; align-items:center; gap:8px; font-size:12px; letter-spacing:.14em;
+    text-transform:uppercase; color:#b9c2e8; border:1px solid var(--line);
+    background:rgba(124,92,255,.10); padding:7px 13px; border-radius:999px;
+  }
+  .badge i{width:7px;height:7px;border-radius:50%;background:var(--ok); box-shadow:0 0 10px var(--ok)}
+  h1{
+    font-size:clamp(34px,6vw,62px); line-height:1.03; margin:22px 0 0; letter-spacing:-.025em;
+    font-weight:800;
+  }
+  h1 em{
+    font-style:normal;
+    background:linear-gradient(96deg,var(--accent) 10%,var(--accent2) 85%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .lede{color:var(--muted); font-size:clamp(15px,1.7vw,19px); line-height:1.6; max-width:64ch; margin:18px 0 0}
+  .lede b{color:#d5dbf5; font-weight:600}
+  .meta{display:flex; flex-wrap:wrap; gap:10px; margin-top:26px; font-size:13px; color:var(--muted)}
+  .meta span{border:1px solid var(--line); border-radius:999px; padding:6px 12px; background:rgba(255,255,255,.02)}
+
+  /* ---------- toolbar ---------- */
+  .toolbar{
+    position:sticky; top:0; z-index:20; margin-top:36px; padding:14px 0;
+    backdrop-filter:blur(14px); background:rgba(10,12,20,.78);
+    border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+  }
+  .toolbar .wrap{display:flex; gap:14px; align-items:center; flex-wrap:wrap}
+  .search{
+    flex:1 1 240px; min-width:200px; display:flex; align-items:center; gap:10px;
+    border:1px solid var(--line); background:var(--card); border-radius:12px; padding:10px 14px;
+  }
+  .search svg{opacity:.55; flex:none}
+  .search input{
+    background:none; border:none; outline:none; color:var(--ink); font-size:15px; width:100%;
+    font-family:inherit;
+  }
+  .search input::placeholder{color:#6b76a0}
+  .chips{display:flex; gap:8px; flex-wrap:wrap}
+  .chip{
+    font:inherit; font-size:13px; color:var(--muted); cursor:pointer;
+    background:var(--card); border:1px solid var(--line); border-radius:999px; padding:9px 15px;
+    transition:.18s;
+  }
+  .chip:hover{color:var(--ink); border-color:#3d4780}
+  .chip[aria-pressed="true"]{
+    color:#fff; border-color:transparent;
+    background:linear-gradient(96deg,var(--accent),#5a8bff);
+    box-shadow:0 6px 22px rgba(124,92,255,.35);
+  }
+
+  /* ---------- grid ---------- */
+  main{padding:38px 0 20px}
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); gap:22px}
+  .card{
+    display:flex; flex-direction:column; overflow:hidden; text-decoration:none;
+    background:linear-gradient(180deg,var(--card),var(--card2));
+    border:1px solid var(--line); border-radius:var(--radius);
+    transition:transform .22s ease, border-color .22s, box-shadow .22s;
+  }
+  .card:hover{transform:translateY(-4px); border-color:#41508f; box-shadow:0 18px 44px rgba(0,0,0,.45)}
+  .card:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
+  .thumb{
+    position:relative; aspect-ratio:16/9; overflow:hidden;
+    display:grid; place-items:center; border-bottom:1px solid var(--line);
+    background:linear-gradient(135deg,#1b2246,#101530);
+  }
+  .thumb img{width:100%; height:100%; object-fit:cover; object-position:center 35%; display:block}
+  .thumb .glyph{font-size:52px; line-height:1; filter:drop-shadow(0 8px 22px rgba(0,0,0,.5))}
+  .thumb::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg,transparent 55%,rgba(10,12,20,.55))}
+  .body{padding:18px 18px 20px; display:flex; flex-direction:column; gap:10px; flex:1}
+  .card h2{font-size:17.5px; margin:0; letter-spacing:-.01em; line-height:1.3; display:flex; gap:8px; align-items:baseline}
+  .card h2 .arrow{margin-left:auto; color:var(--muted); font-size:15px; transition:transform .2s, color .2s}
+  .card:hover h2 .arrow{transform:translate(2px,-2px); color:var(--accent2)}
+  .card p{margin:0; color:var(--muted); font-size:14px; line-height:1.55}
+  .tags{display:flex; gap:6px; flex-wrap:wrap; margin-top:auto; padding-top:6px}
+  .tag{font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:#a9b3dd;
+       border:1px solid var(--line); border-radius:999px; padding:4px 9px; background:rgba(255,255,255,.03)}
+  .tag.hot{color:#c9bfff; border-color:#4b3ea0; background:rgba(124,92,255,.14)}
+
+  .empty{display:none; text-align:center; color:var(--muted); padding:60px 0; font-size:15px}
+  .empty.on{display:block}
+
+  footer{border-top:1px solid var(--line); margin-top:46px; padding:30px 0 56px; color:var(--muted); font-size:13.5px}
+  footer .wrap{display:flex; gap:18px; justify-content:space-between; flex-wrap:wrap; align-items:center}
+  footer a{text-decoration:none; color:#c3cbee; border-bottom:1px solid #3a4470}
+  footer a:hover{color:#fff; border-color:var(--accent)}
+
+  @media (max-width:600px){
+    header{padding:48px 0 24px}
+    .wrap{padding:0 16px}
+    .grid{grid-template-columns:1fr}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none!important; animation:none!important}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <span class="badge"><i></i> laboratório aberto · uso livre em aula</span>
+    <h1>Simuladores<br><em>Interativos</em></h1>
+    <p class="lede">
+      Uma coleção de <b>laboratórios que rodam no navegador</b>: assinatura de mísseis em 3D, CPU Z80 e Apple&nbsp;1,
+      redes neurais treinando XOR na sua frente, ponto de operação de transistores, jogos e pequenas aulas visuais.
+      Sem instalação, sem build, sem servidor — clique e use.
+    </p>
+    <div class="meta">
+      <span>12 simuladores</span>
+      <span>HTML + WebGL · nada de dependências externas</span>
+      <span>PT / EN</span>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="wrap">
+      <label class="search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="Buscar por nome, tema ou tecnologia…" autocomplete="off">
+      </label>
+      <div class="chips" id="chips">
+        <button class="chip" data-filter="all" aria-pressed="true">Todos</button>
+        <button class="chip" data-filter="3D" aria-pressed="false">3D</button>
+        <button class="chip" data-filter="IA" aria-pressed="false">IA</button>
+        <button class="chip" data-filter="CPU" aria-pressed="false">CPU</button>
+        <button class="chip" data-filter="Eletrônica" aria-pressed="false">Eletrônica</button>
+        <button class="chip" data-filter="Jogos" aria-pressed="false">Jogos</button>
+        <button class="chip" data-filter="História" aria-pressed="false">História</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="grid" id="grid">
+
+    <a class="card" href="apps/fog-mpm-3d/" data-tags="3D engenharia defesa" data-title="FOG-MPM míssil avibras fibra óptica three.js 3d">
+      <div class="thumb"><img src="assets/thumbs/fog.jpg" alt="FOG-MPM em vista de corte" loading="lazy"></div>
+      <div class="body">
+        <h2>FOG-MPM · Explorador 3D <span class="arrow">↗</span></h2>
+        <p>O míssil guiado por fibra óptica da Avibras em sete capítulos: anatomia com corte e raio-X, sequência de lançamento, jammer de RF ignorado pelo fio e engajamento de 12&nbsp;km com telemetria e vídeo do seeker.</p>
+        <div class="tags"><span class="tag hot">3D</span><span class="tag">WebGL</span><span class="tag">PT</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="apps/v2-a4/" data-tags="3D história engenharia" data-title="V-2 A4 foguete alemão 1942 modelo 3d glb corte explodido">
+      <div class="thumb"><img src="assets/thumbs/v2.jpg" alt="V-2 em vista explodida" loading="lazy"></div>
+      <div class="body">
+        <h2>V-2 / A4 · Modelo 3D <span class="arrow">↗</span></h2>
+        <p>Os 14 sistemas do míssil balístico de 1942 em modelo procedural: corte seccional, vista explodida com etiquetas, ficha técnica de cada componente e exportação GLB para Blender ou Unity.</p>
+        <div class="tags"><span class="tag hot">3D</span><span class="tag">WebGL</span><span class="tag">História</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="apps/z80-lab/z80.html" data-tags="CPU assembly" data-title="Z80 lab assembly lições assembler passo a passo">
+      <div class="thumb"><span class="glyph">🕹️</span></div>
+      <div class="body">
+        <h2>Z80 Lab <span class="arrow">↗</span></h2>
+        <p>Dez lições de assembly Z80 com assembler próprio, execução passo a passo, inspetor de memória, console e um verificador que confere o resultado dos seus programas.</p>
+        <div class="tags"><span class="tag hot">CPU</span><span class="tag">Assembly</span><span class="tag">EN</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="apps/apple1-lab/a1.html" data-tags="CPU assembly história" data-title="Apple 1 lab 6502 assembly woz monitor lições">
+      <div class="thumb"><span class="glyph">🍎</span></div>
+      <div class="body">
+        <h2>Apple 1 Lab <span class="arrow">↗</span></h2>
+        <p>Dez lições de 6502 na máquina que começou a Apple: Woz Monitor, tela e teclado mapeados, montagem de programas, execução controlada e verificação automática dos exercícios.</p>
+        <div class="tags"><span class="tag hot">CPU</span><span class="tag">6502</span><span class="tag">EN</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="apps/deep-learning/" data-tags="IA" data-title="deep learning rede neural xor backpropagation ativações simulador bilíngue">
+      <div class="thumb"><span class="glyph">🧠</span></div>
+      <div class="body">
+        <h2>Simulador de Deep Learning <span class="arrow">↗</span></h2>
+        <p>Neurônio, funções de ativação, propagação à frente e backpropagation — com treino de XOR ao vivo, curva de aprendizado e fronteira de decisão desenhada no plano. Bilíngue PT/EN.</p>
+        <div class="tags"><span class="tag hot">IA</span><span class="tag">PT / EN</span><span class="tag">Interativo</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="apps/transformer-executivo/" data-tags="IA" data-title="transformer atenção briefing executivo ia generativa">
+      <div class="thumb"><span class="glyph">✨</span></div>
+      <div class="body">
+        <h2>Transformer em 3 minutos <span class="arrow">↗</span></h2>
+        <p>O mecanismo por trás da IA generativa traduzido para a linguagem de negócios, com uma demonstração interativa de atenção palavra por palavra.</p>
+        <div class="tags"><span class="tag hot">IA</span><span class="tag">PT</span><span class="tag">Aula</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="apps/llm-predictor/" data-tags="IA ferramenta" data-title="preditor performance llm local apple silicon memória tokens por segundo">
+      <div class="thumb"><span class="glyph">📊</span></div>
+      <div class="body">
+        <h2>Preditor de LLM local <span class="arrow">↗</span></h2>
+        <p>Estima tokens/s, tempo até o primeiro token, memória, contexto que cabe e energia de 23 modelos e 12 quantizações no Apple Silicon — antes de baixar os pesos.</p>
+        <div class="tags"><span class="tag">IA</span><span class="tag">Ferramenta</span><span class="tag">PT / EN</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="apps/polarizacao-transistores/" data-tags="Eletrônica" data-title="polarização transistor bjt ponto q reta de carga calculadora">
+      <div class="thumb"><span class="glyph">⚡</span></div>
+      <div class="body">
+        <h2>Polarização de Transistores <span class="arrow">↗</span></h2>
+        <p>Como fixar o ponto de operação do BJT: regiões de operação, reta de carga DC, métodos de polarização e calculadoras que atualizam os diagramas enquanto você ajusta os resistores.</p>
+        <div class="tags"><span class="tag hot">Eletrônica</span><span class="tag">PT</span><span class="tag">Calculadoras</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="apps/corrida-espacial/" data-tags="História" data-title="corrida espacial eua urss 1957 1975 linha do tempo">
+      <div class="thumb"><span class="glyph">🚀</span></div>
+      <div class="body">
+        <h2>A Corrida Espacial <span class="arrow">↗</span></h2>
+        <p>EUA × URSS de 1957 a 1975: protagonistas, galeria, linha do tempo dos marcos e o legado tecnológico da disputa que colocou o homem na Lua.</p>
+        <div class="tags"><span class="tag hot">História</span><span class="tag">PT</span><span class="tag">Aula</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="apps/corrida-espacial-en/" data-tags="História" data-title="space race usa ussr timeline english">
+      <div class="thumb"><span class="glyph">🌍</span></div>
+      <div class="body">
+        <h2>The Space Race <span class="arrow">↗</span></h2>
+        <p>A versão em inglês do mesmo material: quem eram os protagonistas, os marcos de 1957 a 1975 e o que sobrou dessa disputa na tecnologia de hoje.</p>
+        <div class="tags"><span class="tag">História</span><span class="tag">EN</span><span class="tag">Aula</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="apps/tetris/" data-tags="Jogos" data-title="tetris jogo teclado toque">
+      <div class="thumb"><span class="glyph">🎮</span></div>
+      <div class="body">
+        <h2>Tetris <span class="arrow">↗</span></h2>
+        <p>O clássico em um arquivo só: peças, próximas peças, pontuação e níveis. Teclado no desktop, controles de toque no celular.</p>
+        <div class="tags"><span class="tag hot">Jogos</span><span class="tag">Canvas</span><span class="tag">PT / EN</span></div>
+      </div>
+    </a>
+
+    <a class="card" href="apps/paciencia/" data-tags="Jogos" data-title="paciência klondike solitaire cartas arrastar">
+      <div class="thumb"><span class="glyph">🃏</span></div>
+      <div class="body">
+        <h2>Paciência · Klondike <span class="arrow">↗</span></h2>
+        <p>O jogo de cartas de sempre, com arrastar e soltar, movimentação automática para as fundações e vitória comemorada.</p>
+        <div class="tags"><span class="tag hot">Jogos</span><span class="tag">PT</span><span class="tag">Arrastar</span></div>
+      </div>
+    </a>
+
+  </div>
+  <div class="empty" id="empty">Nenhum simulador encontrado com esse filtro.</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Feito para aula e estudo · modelos 3D e números são reconstruções esquemáticas, não documentação oficial.</span>
+    <a href="https://github.com/Mjrovai/simuladores-interativos" target="_blank" rel="noopener">Código no GitHub ↗</a>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const cards = [...document.querySelectorAll('.card')];
+  const chips = [...document.querySelectorAll('.chip')];
+  const q = document.getElementById('q');
+  const empty = document.getElementById('empty');
+  let filter = 'all';
+
+  const norm = s => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+  function apply() {
+    const term = norm(q.value.trim());
+    let shown = 0;
+    cards.forEach(card => {
+      const hay = norm(card.dataset.title + ' ' + card.dataset.tags + ' ' + card.textContent);
+      const tags = norm(card.dataset.tags);
+      const okFilter = filter === 'all' || tags.includes(norm(filter));
+      const okTerm = !term || hay.includes(term);
+      const show = okFilter && okTerm;
+      card.style.display = show ? '' : 'none';
+      if (show) shown++;
+    });
+    empty.classList.toggle('on', shown === 0);
+  }
+
+  chips.forEach(chip => chip.addEventListener('click', () => {
+    filter = chip.dataset.filter;
+    chips.forEach(c => c.setAttribute('aria-pressed', String(c === chip)));
+    apply();
+  }));
+  q.addEventListener('input', apply);
+  q.addEventListener('keydown', e => { if (e.key === 'Escape') { q.value = ''; apply(); } });
+  document.addEventListener('keydown', e => {
+    if (e.key === '/' && document.activeElement !== q) { e.preventDefault(); q.focus(); }
+  });
+  apply();
+})();
+</script>
+</body>
+</html>

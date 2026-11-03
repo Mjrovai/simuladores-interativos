@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador de Deep Learning — Aprenda interativo</title>
+<style>
+  :root{
+    --bg:#0f1226; --bg2:#151a35; --card:#1b2148; --card2:#222a5e;
+    --ink:#e7ecff; --muted:#9aa3d6; --line:#31396e;
+    --accent:#7c5cff; --accent2:#ff5c8a; --ok:#37e0a0; --warn:#ffb547;
+    --hi:#ffb03a; --lo:#3aa0ff;
+    --sh:0 8px 30px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+    background:radial-gradient(1200px 600px at 80% -10%,#241f5e 0,transparent 55%),
+               radial-gradient(900px 500px at -10% 110%,#16385f 0,transparent 50%),
+               var(--bg);
+    color:var(--ink);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  header{
+    padding:28px 24px 8px; max-width:1180px; margin:0 auto;
+  }
+  header h1{
+    margin:0; font-size:clamp(24px,3vw,34px); letter-spacing:-.5px;
+    background:linear-gradient(90deg,#8e7bff,#ff7aa8,#3aa0ff);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  header p{color:var(--muted); max-width:70ch; margin:8px 0 0}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 24px 60px}
+
+  .tabs{
+    display:flex; gap:8px; flex-wrap:wrap;
+    position:sticky; top:0; z-index:20;
+    background:linear-gradient(180deg,rgba(15,18,38,.96),rgba(15,18,38,.72));
+    backdrop-filter:blur(8px);
+    padding:14px 0; margin-top:14px; border-bottom:1px solid var(--line);
+  }
+  .tab{
+    border:1px solid var(--line); background:var(--card); color:var(--muted);
+    padding:10px 16px; border-radius:12px; cursor:pointer; font-size:14px;
+    font-weight:600; transition:.18s; display:flex; gap:8px; align-items:center;
+  }
+  .tab .num{font-size:11px; opacity:.7; background:rgba(255,255,255,.06); padding:2px 6px; border-radius:6px}
+  .tab:hover{color:var(--ink); border-color:#48508f; transform:translateY(-1px)}
+  .tab.active{color:#fff; border-color:var(--accent);
+    background:linear-gradient(180deg,#2a2f66,#1e2450); box-shadow:0 0 0 1px var(--accent), var(--sh)}
+
+  section.panel{display:none; animation:fade .3s ease}
+  section.panel.active{display:block}
+  @keyframes fade{from{opacity:0; transform:translateY(6px)} to{opacity:1}}
+
+  .grid{display:grid; gap:18px; grid-template-columns:1.1fr .9fr}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+
+  .card{
+    background:linear-gradient(180deg,var(--card),var(--card2));
+    border:1px solid var(--line); border-radius:18px; padding:20px; box-shadow:var(--sh);
+  }
+  .card h2{margin:0 0 4px; font-size:18px; display:flex; align-items:center; gap:10px}
+  .card h3{margin:18px 0 8px; font-size:14px; color:var(--muted); text-transform:uppercase; letter-spacing:.12em}
+  .lead{color:var(--muted); font-size:14px}
+  .mono{font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace}
+  code{background:rgba(255,255,255,.06); padding:2px 6px; border-radius:6px; font-size:12.5px; color:#dfe6ff}
+  .eq{
+    background:rgba(255,255,255,.04); border:1px solid var(--line); border-left:3px solid var(--accent);
+    padding:12px 14px; border-radius:10px; font-size:14px; margin:10px 0;
+    font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace; overflow-x:auto;
+  }
+
+  /* controls */
+  .controls{display:flex; flex-direction:column; gap:14px}
+  .row{display:flex; align-items:center; gap:12px}
+  .row label{min-width:150px; font-size:13.5px; color:var(--muted)}
+  .row output{min-width:58px; text-align:right; font-family:ui-monospace,monospace; font-weight:700; color:#fff}
+  input[type=range]{flex:1; accent-color:var(--accent); height:22px}
+  select{
+    background:var(--card); color:var(--ink); border:1px solid var(--line);
+    border-radius:10px; padding:8px 10px; font-size:13px;
+  }
+  .btn{
+    border:1px solid var(--line); background:var(--card); color:var(--ink);
+    padding:9px 14px; border-radius:10px; cursor:pointer; font-weight:600; font-size:13.5px;
+    transition:.15s;
+  }
+  .btn:hover{border-color:#5560a0; transform:translateY(-1px)}
+  .btn.primary{background:linear-gradient(90deg,var(--accent),#5a8bff); border:none; color:#fff}
+  .btn.danger{background:linear-gradient(90deg,#ff5c8a,#ff8a4a); border:none; color:#fff}
+  .btnrow{display:flex; gap:10px; flex-wrap:wrap; margin-top:6px}
+
+  .pill{display:inline-flex; gap:8px; align-items:center; background:rgba(255,255,255,.05);
+    border:1px solid var(--line); padding:6px 10px; border-radius:999px; font-size:12.5px}
+  .dot{width:10px; height:10px; border-radius:50%}
+
+  canvas{width:100%; background:rgba(0,0,0,.18); border-radius:14px; border:1px solid var(--line);
+    touch-action:none; cursor:crosshair}
+
+  .out{
+    display:flex; justify-content:space-between; align-items:center; gap:12px;
+    background:rgba(0,0,0,.22); border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-top:12px;
+  }
+  .out .val{font-size:26px; font-weight:800}
+  .out .val small{font-size:12px; color:var(--muted); font-weight:500}
+
+  .steps{list-style:none; margin:10px 0 0; padding:0; display:flex; flex-direction:column; gap:8px}
+  .steps li{display:flex; gap:12px; align-items:flex-start; font-size:13.5px; color:var(--muted)}
+  .steps .k{flex:0 0 auto; width:26px; height:26px; border-radius:8px; background:var(--accent);
+    color:#fff; display:grid; place-items:center; font-weight:700; font-size:12px}
+  .steps b{color:var(--ink)}
+
+  .note{font-size:12.5px; color:var(--muted); margin-top:10px}
+  .legend{display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--muted); margin-top:10px}
+  .legend span{display:inline-flex; gap:6px; align-items:center}
+
+  .badge{font-size:11px; padding:3px 8px; border-radius:999px; background:rgba(124,92,255,.18);
+    color:#c8baff; border:1px solid rgba(124,92,255,.4)}
+  .kv{display:grid; grid-template-columns:1fr 1fr; gap:8px 18px; font-size:13.5px}
+  .kv div{display:flex; justify-content:space-between; border-bottom:1px dashed var(--line); padding-bottom:6px}
+  .kv b{color:#fff}
+  table.gridtbl{border-collapse:collapse; width:100%; font-size:12.5px; margin-top:8px}
+  table.gridtbl th,table.gridtbl td{border:1px solid var(--line); padding:5px 8px; text-align:center}
+  table.gridtbl th{color:var(--muted)}
+
+     /* language toggle */
+     .langtoggle{display:inline-flex; gap:4px; margin-top:16px; background:var(--card);
+     border:1px solid var(--line); border-radius:10px; padding:4px}
+     .langbtn{border:none; background:transparent; color:var(--muted); padding:6px 14px;
+     border-radius:7px; cursor:pointer; font-weight:700; font-size:12.5px; transition:.15s}
+     .langbtn:hover{color:var(--ink)}
+     .langbtn.active{background:linear-gradient(90deg,var(--accent),#5a8bff); color:#fff;
+     box-shadow:0 2px 8px rgba(124,92,255,.4)}
+</style>
+</head>
+<body>
+<header>
+  <h1 data-i18n="headerTitle">🧠 Simulador de Deep Learning</h1>
+  <p data-i18n="headerLead" data-html="1">Um passeio interativo pelos blocos fundamentais de uma rede neural: neurônio, funções
+     de ativação, propagação à frente e o treinamento por <b>backpropagation</b> com
+     <b>descida do gradiente</b>. Ajuste os controles e veja a matemática ganhar vida.
+     Não é preciso instalar nada — é apenas um <code>.html</code>.</p>
+     <div class="langtoggle" role="group" aria-label="Idioma / Language">
+       <button class="langbtn" data-lang="pt">PT</button>
+       <button class="langbtn" data-lang="en">EN</button>
+     </div>
+</header>
+
+<div class="wrap">
+  <nav class="tabs" id="tabs">
+    <div class="tab active" data-tab="neuron"><span class="num">1</span> <span data-i18n="tab.neuron">Neurônio</span></div>
+    <div class="tab" data-tab="activation"><span class="num">2</span> <span data-i18n="tab.activation">Funções de Ativação</span></div>
+    <div class="tab" data-tab="forward"><span class="num">3</span> <span data-i18n="tab.forward">Propagação à Frente</span></div>
+    <div class="tab" data-tab="train"><span class="num">4</span> <span data-i18n="tab.train">Treinamento & Backprop</span></div>
+    <div class="tab" data-tab="gloss"><span class="num">💡</span> <span data-i18n="tab.gloss">Glossário</span></div>
+  </nav>
+
+  <!-- ============ 1. NEURÔNIO ============ -->
+  <section class="panel active" id="neuron">
+    <div class="grid">
+      <div class="card">
+        <h2><span data-i18n="neuron.title" data-html="1">🔎 O Neurônio</span> <span class="badge" data-i18n="neuron.badge">perceptron</span></h2>
+        <p class="lead" data-i18n="neuron.lead" data-html="1">O menor "átomo" de uma rede neural. Um neurônio recebe várias
+          entradas, faz a <b>soma ponderada</b>, adiciona um <b>viés</b> (bias) e passa o
+          resultado por uma <b>função de ativação</b>. Ajuste os valores e observe a saída.</p>
+
+        <div class="eq" data-i18n="neuron.eq" data-html="1">z = Σ (w<sub>i</sub> · x<sub>i</sub>) + b&nbsp;&nbsp;→&nbsp;&nbsp;y = ativação(z)</div>
+
+        <div class="controls">
+          <div class="row"><label data-i18n="n.x1">Entrada x₁</label><input id="n_x1" type="range" min="-2" max="2" step="0.01" value="1"><output id="n_x1o">1.00</output></div>
+          <div class="row"><label data-i18n="n.w1">Peso w₁</label><input id="n_w1" type="range" min="-3" max="3" step="0.01" value="1.5"><output id="n_w1o">1.50</output></div>
+          <div class="row"><label data-i18n="n.x2">Entrada x₂</label><input id="n_x2" type="range" min="-2" max="2" step="0.01" value="-0.5"><output id="n_x2o">-0.50</output></div>
+          <div class="row"><label data-i18n="n.w2">Peso w₂</label><input id="n_w2" type="range" min="-3" max="3" step="0.01" value="-1"><output id="n_w2o">-1.00</output></div>
+          <div class="row"><label data-i18n="n.b">Viés b</label><input id="n_b" type="range" min="-3" max="3" step="0.01" value="-0.5"><output id="n_bo">-0.50</output></div>
+          <div class="row"><label data-i18n="n.act">Ativação</label>
+            <select id="n_act">
+              <option value="sigmoid">Sigmoid</option>
+              <option value="tanh">Tanh</option>
+              <option value="relu">ReLU</option>
+              <option value="leaky" data-i18n="opt.leaky">ReLU vazada</option>
+              <option value="swish">Swish</option>
+            </select>
+            <span class="pill"><span class="dot" style="background:var(--accent)"></span><span data-i18n="pill.nonlin">função não-linear</span></span>
+          </div>
+        </div>
+
+        <div class="out">
+          <div><span data-i18n="out.z">Soma ponderada</span> <span class="mono">z</span></div>
+          <div class="val" id="n_z">— <small>antes da ativação</small></div>
+        </div>
+        <div class="out">
+          <div><span data-i18n="out.y">Saída do neurônio</span> <span class="mono">y = a(z)</span></div>
+          <div class="val" id="n_y" style="color:var(--ok)">—</div>
+        </div>
+
+        <ul class="steps">
+          <li><span class="k">1</span><span data-i18n="neuron.step1" data-html="1">Multiplica cada <b>entrada</b> pelo seu <b>peso</b> (quanto ela "conta").</span></li>
+          <li><span class="k">2</span><span data-i18n="neuron.step2" data-html="1">Soma os produtos e adiciona o <b>viés</b>: é o ponto <b class="mono">z</b> onde estamos.</span></li>
+          <li><span class="k">3</span><span data-i18n="neuron.step3" data-html="1">Aplica a <b>ativação</b>: a curva do gráfico transforma <b class="mono">z</b> em <b class="mono">y</b>.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2 data-i18n="neuron.title2">📈 Mapa ativação → saída</h2>
+        <p class="lead" data-i18n="neuron.lead2" data-html="1">O traço vertical laranja marca o <b class="mono">z</b> atual; a altura do ponto mostra a
+          saída <b class="mono">y</b>. A <b>curvatura</b> é o que permite à rede modelar relações
+          complicadas — <b>sem ela, empilhar camadas não adiantaria</b>.</p>
+        <canvas id="n_canvas" height="300"></canvas>
+        <div class="legend">
+          <span><span class="dot" style="background:#3aa0ff"></span><span data-i18n="leg.zinput">z (entrada da ativação)</span></span>
+          <span><span class="dot" style="background:#ffb03a"></span><span data-i18n="leg.point">ponto atual (z, y)</span></span>
+          <span><span class="dot" style="background:#9aa3d6"></span><span data-i18n="leg.curve">curva de ativação</span></span>
+        </div>
+        <p class="note" data-i18n="neuron.note" data-html="1">💡 <b>Por que uma função curva?</b> Puxe w₁ e w₂ e observe: uma soma
+          linear sozinha só desenha retas. A ativação emenda essas retas em formas complexas,
+          e é isso que dá poder a uma rede com muitas camadas.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 2. FUNÇÕES DE ATIVAÇÃO ============ -->
+  <section class="panel" id="activation">
+    <div class="grid">
+      <div class="card">
+        <h2 data-i18n="act.title">🎚️ Funções de Ativação</h2>
+        <p class="lead" data-i18n="act.lead">A escolha da ativação decide como a rede aprende. Compare as principais
+          e clique/arraste no gráfico para mover o ponto de leitura e ler os valores.</p>
+
+        <div class="controls">
+          <div class="row"><label data-i18n="act.xpoint">Ponto x =</label><input id="a_x" type="range" min="-5" max="5" step="0.01" value="-2"><output id="a_xo">-2.00</output></div>
+        </div>
+        <canvas id="a_canvas" height="320"></canvas>
+        <table class="gridtbl">
+          <tr><th data-i18n="act.thFunc">Função</th><th data-i18n="act.thVal">Valor em x</th><th data-i18n="act.thDer">Derivada</th><th data-i18n="act.thChar">Características</th></tr>
+          <tr><td class="mono">sigmoid</td><td id="a_v_sigmoid">—</td><td id="a_d_sigmoid">—</td><td style="color:var(--muted)" data-i18n="act.charSig">Saída 0–1, tipo probabilidade; mora na saturação.</td></tr>
+          <tr><td class="mono">tanh</td><td id="a_v_tanh">—</td><td id="a_d_tanh">—</td><td style="color:var(--muted)" data-i18n="act.charTan">Saída −1…1, centrada; saturação nas pontas.</td></tr>
+          <tr><td class="mono">ReLU</td><td id="a_v_relu">—</td><td id="a_d_relu">—</td><td style="color:var(--muted)" data-i18n="act.charRelu">Rápida e barata; ativa acima de 0, nula abaixo.</td></tr>
+          <tr><td class="mono">swish</td><td id="a_v_swish">—</td><td id="a_d_swish">—</td><td style="color:var(--muted)" data-i18n="act.charSwish">Suave e auto-regulada; favorita em modelos grandes.</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2 data-i18n="act.title2">🧭 O que importa</h2>
+        <ul class="steps">
+          <li><span class="k">N</span><span data-i18n="act.stepNonlin" data-html="1"><b>Por que não-linear:</b> sem uma curva, empilhar camadas só produz uma soma linear —
+           a rede fica igual a um único neurônio. A não-linearidade é o "poder de representação".</span></li>
+          <li><span class="k">S</span><span data-i18n="act.stepSat" data-html="1"><b>Sigmoid/Tanh</b> saturam: valores extremos congelam a derivada em 0,
+           matando o aprendizado (problema do <i>desvanecimento do gradiente</i>).</span></li>
+          <li><span class="k">R</span><span data-i18n="act.stepRelu" data-html="1"><b>ReLU</b> é o padrão em camadas ocultas:
+           derivada igual a 1 ou 0, barata e sem saturação do lado positivo.</span></li>
+          <li><span class="k">W</span><span data-i18n="act.stepSwish" data-html="1"><b>Swish (x·σ(x))</b> suaviza a quebra do ReLU e tende a generalizar melhor.</span></li>
+          <li><span class="k">D</span><span data-i18n="act.stepDeriv" data-html="1"><b>Derivada</b> é usada no backprop: onde ela fica próxima de 0,
+           os pesos quase não se atualizam. Isso aparece no Módulo 4.</span></li>
+        </ul>
+        <div class="note" data-i18n="act.note">💡 Clique ou arraste sobre o gráfico para mover o ponto de leitura.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 3. PROPAGAÇÃO À FRENTE ============ -->
+  <section class="panel" id="forward">
+    <div class="grid">
+      <div class="card">
+        <h2><span data-i18n="fwd.title" data-html="1">🕸️ Rede 2 → 3 → 1 (XOR)</span> <span class="badge" data-i18n="fwd.badge">forward pass</span></h2>
+        <p class="lead" data-i18n="fwd.lead">Uma rede com 2 entradas, 3 neurônios ocultos e 1 saída. Defina as entradas
+          e a propagação à frente calcula, camada por camada, cada ativação. A cor de cada
+          neurônio mostra o quão ativo ele está.</p>
+
+        <div class="controls">
+          <div class="row"><label>x₁</label><input id="f_x1" type="range" min="0" max="1" step="0.01" value="1"><output id="f_x1o">1.00</output></div>
+          <div class="row"><label>x₂</label><input id="f_x2" type="range" min="0" max="1" step="0.01" value="0"><output id="f_x2o">0.00</output></div>
+          <div class="row"><label data-i18n="fwd.hidact">Ativação oculta</label>
+            <select id="f_act"><option>sigmoid</option><option>tanh</option><option>relu</option></select>
+          </div>
+          <div class="btnrow">
+            <button class="btn primary" id="f_rand" data-i18n="fwd.random">🎲 Pesos aleatórios</button>
+            <button class="btn" id="f_zero" data-i18n="fwd.zero">Zerar</button>
+            <button class="btn" id="f_reset" data-i18n="fwd.reset">Reiniciar demo</button>
+          </div>
+        </div>
+
+        <div class="out">
+          <div class="kv" style="flex:1">
+            <div><span data-i18n="fwd.kvh1">Neurônio oculto h₁</span><b id="f_h1">—</b></div>
+            <div><span data-i18n="fwd.kvh2">Neurônio oculto h₂</span><b id="f_h2">—</b></div>
+            <div><span data-i18n="fwd.kvh3">Neurônio oculto h₃</span><b id="f_h3">—</b></div>
+            <div><span data-i18n="fwd.kvOut" data-html="1">Saída <b>y</b></span><b id="f_y" style="color:var(--ok)">—</b></div>
+          </div>
+        </div>
+        <p class="note" data-i18n="fwd.note" data-html="1">💡 O problema <b>XOR</b> é não-linear: a saída só é 1 quando os dois bits
+          são diferentes. Nenhuma combinação linear separa os 4 pontos — por isso precisamos
+          da camada escondida, que "deforma" o espaço para uma reta então resolver.</p>
+      </div>
+
+      <div class="card">
+        <h2 data-i18n="fwd.title2">🔍 Fluxo de cálculo</h2>
+        <canvas id="f_canvas" height="360"></canvas>
+        <div class="legend">
+          <span><span class="dot" style="background:var(--lo)"></span><span data-i18n="leg.low">baixa</span></span>
+          <span><span class="dot" style="background:var(--hi)"></span><span data-i18n="leg.high">alta</span></span>
+          <span><span class="dot" style="background:#37e0a0"></span><span data-i18n="leg.xorTarget">alvo do XOR</span></span>
+        </div>
+        <div class="note" data-i18n="fwd.note2">Espessura da aresta = |peso|; a etiqueta mostra o valor do peso.
+          A cor de cada neurônio vai do azul (baixa) ao laranja (alta).</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 4. TREINAMENTO ============ -->
+  <section class="panel" id="train">
+    <div class="grid">
+      <div class="card">
+        <h2><span data-i18n="trn.title" data-html="1">⚙️ Backpropagation em ação</span> <span class="badge" data-i18n="trn.badge">descida do gradiente</span></h2>
+        <p class="lead" data-i18n="trn.lead" data-html="1">Ensinamos a mesma rede 2→3→1 a resolver o XOR com backpropagation.
+          Cada época recalcula a saída, mede o <b>erro</b>, propaga os gradientes de volta
+          pela rede e ajusta os pesos na direção que <b>diminui o erro</b>. Com <b>momentum</b> (deslize) o algoritmo "ganha inércia", evitando os mínimos locais de saddle em que o XOR costuma ficar preso.</p>
+
+        <div class="controls">
+          <div class="row"><label data-i18n="trn.lr">Taxa de aprendizado</label><input id="t_lr" type="range" min="0.01" max="3" step="0.01" value="1.5"><output id="t_lro">1.50</output></div>
+          <div class="row"><label data-i18n="trn.epochs">Épocas por passo</label><input id="t_step" type="range" min="1" max="50" step="1" value="10"><output id="t_stepe">10</output></div>
+          <div class="row"><label data-i18n="trn.hidact">Ativação oculta</label><select id="t_act"><option>sigmoid</option><option>tanh</option><option>relu</option></select></div>
+          <div class="row"><label data-i18n="trn.mom">Momentum</label><input id="t_mom" type="range" min="0" max="0.99" step="0.01" value="0.9"><output id="t_momo">0.90</output></div>
+          <div class="btnrow">
+            <button class="btn primary" id="t_play" data-i18n="trn.train">▶ Treinar</button>
+            <button class="btn" id="t_stepb" data-i18n="trn.step1">Avançar 1 passo</button>
+            <button class="btn danger" id="t_reset" data-i18n="trn.reset">↺ Reiniciar pesos</button>
+          </div>
+        </div>
+        <div class="kv" style="margin-top:14px">
+          <div><span data-i18n="trn.epoch">Época atual</span><b id="t_epoch">0</b></div>
+          <div><span data-i18n="trn.loss">Erro total (MSE)</span><b id="t_loss" style="color:var(--warn)">—</b></div>
+          <div><span data-i18n="trn.acc">Acurácia</span><b id="t_acc" style="color:var(--ok)">—</b></div>
+          <div><span data-i18n="trn.state">Estado</span><b id="t_state" data-i18n="trn.stateInitial">pronto</b></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 data-i18n="trn.titleLoss">📉 Curva de aprendizado</h2>
+        <canvas id="t_losscanvas" height="150"></canvas>
+        <h3 data-i18n="trn.h3b">Fronteira de decisão no plano (x₁, x₂)</h3>
+        <canvas id="t_bndcanvas" height="300"></canvas>
+        <div class="legend">
+          <span><span class="dot" style="background:#3aa0ff"></span><span data-i18n="trn.leg0">rede diz "0"</span></span>
+          <span><span class="dot" style="background:#ff5c8a"></span><span data-i18n="trn.leg1">rede diz "1"</span></span>
+          <span><span class="dot" style="background:#37e0a0"></span><span data-i18n="trn.legP">pontos de treino</span></span>
+        </div>
+        <p class="note" data-i18n="trn.note">A fronteira começa aleatória e se curva enquanto o erro cai —
+          é a camada oculta separando o espaço em regiões. No fim, cada ponto de treino cai no lado certo.</p>
+      </div>
+
+      <div class="card" style="grid-column:1/-1">
+        <h2 data-i18n="trn.titlePts">🔬 Os 4 pontos de treino (verificação XOR)</h2>
+        <table class="gridtbl" id="t_table">
+          <tr><th>x₁</th><th>x₂</th><th data-i18n="trn.thTgt">Alvo</th><th data-i18n="trn.thPred">Predição</th><th data-i18n="trn.thErr">Erro</th></tr>
+          <tr><td>0</td><td>0</td><td>0</td><td id="t_p0">—</td><td id="t_e0">—</td></tr>
+          <tr><td>1</td><td>1</td><td>0</td><td id="t_p2">—</td><td id="t_e2">—</td></tr>
+          <tr><td>0</td><td>1</td><td>1</td><td id="t_p3">—</td><td id="t_e3">—</td></tr>
+          <tr><td>1</td><td>0</td><td>1</td><td id="t_p1">—</td><td id="t_e1">—</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ GLOSSÁRIO ============ -->
+  <section class="panel" id="gloss">
+    <div class="card">
+      <h2 data-i18n="gloss.title">💡 Glossário rápido</h2>
+      <div class="kv" style="grid-template-columns:1fr">
+        <div><span data-i18n="g.entrada.t">Entrada / features</span><b data-i18n="g.entrada.d">Os números de entrada (imagem, texto, etc.).</b></div>
+        <div><span data-i18n="g.peso.t">Peso (weight)</span><b data-i18n="g.peso.d">Importância relativa de cada caminho; aprendidos no treino.</b></div>
+        <div><span data-i18n="g.vies.t">Viés (bias)</span><b data-i18n="g.vies.d">Um "empurrão" livre em cada neurônio.</b></div>
+        <div><span data-i18n="g.activacao.t">Ativação</span><b data-i18n="g.activacao.d">Função não-linear que limita/quebra a saída (ReLU, sigmoid…).</b></div>
+        <div><span data-i18n="g.camada.t">Camada (layer)</span><b data-i18n="g.camada.d">Um grupo de neurônios que compartilha um conjunto de pesos.</b></div>
+        <div><span data-i18n="g.forward.t">Forward pass</span><b data-i18n="g.forward.d">Cálculo das saídas das entradas até a saída, camada a camada.</b></div>
+        <div><span data-i18n="g.perda.t">Perda (loss)</span><b data-i18n="g.perda.d">Quão errada a saída foi (ex.: MSE, erro quadrático médio).</b></div>
+        <div><span data-i18n="g.backprop.t">Backpropagation</span><b data-i18n="g.backprop.d">Deriva os gradientes de cada peso a partir da perda.</b></div>
+        <div><span data-i18n="g.grad.t">Descida do gradiente</span><b data-i18n="g.grad.d">Ajusta os pesos na direção que diminui a perda.</b></div>
+        <div><span data-i18n="g.lr.t">Taxa de aprendizado</span><b data-i18n="g.lr.d">Quão grandes são os passos a cada época.</b></div>
+        <div><span data-i18n="g.epoch.t">Época (epoch)</span><b data-i18n="g.epoch.d">Uma passada completa sobre todo o conjunto de treino.</b></div>
+        <div><span data-i18n="g.overfit.t">Overfitting</span><b data-i18n="g.overfit.d">Aprende os exemplos mas falha em casos novos.</b></div>
+        <div><span data-i18n="g.deep.t">Deep Learning</span><b data-i18n="g.deep.d">Redes com MUITAS camadas que aprendem representações sozinhas.</b></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+  var __T={
+    pt:{ preAct:'antes da ativa\u00e7\u00e3o', waiting:'aguardando o treino\u2026',
+         lossTitle:'erro (MSE) ao longo das \u00e9pocas', training:'treinando\u2026',
+         paused:'pausado', converged:'convergido \u2713', playBtn:'\u25b6 Treinar', pauseBtn:'\u23f8 Pausar' },
+    en:{ preAct:'before activation', waiting:'waiting for training\u2026',
+         lossTitle:'error (MSE) over epochs', training:'training\u2026',
+         paused:'paused', converged:'converged \u2713', playBtn:'\u25b6 Train', pauseBtn:'\u23f8 Pause' }
+    };
+  var __lang='pt';
+  try{ var saved=localStorage.getItem('dl_lang'); if(saved && __T[saved]) __lang=saved; }catch(e){}
+  window.__lang=__lang; window.__T=__T;
+  window.T=function(){ return __T[window.__lang] || __T.pt; };
+})();
+</script>
+<script>
+/* ========================= util ========================= */
+const $ = id => document.getElementById(id);
+const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+function lerp(a,b,t){return a+(b-a)*t}
+function mixColor(t){ // t in 0..1 blue->orange
+  const lo=[58,160,255], hi=[255,176,58];
+  const c=lo.map((x,i)=>Math.round(lerp(x,hi[i],clamp(t,0,1))));
+  return `rgb(${c[0]},${c[1]},${c[2]})`;
+}
+
+/* ---------- activation functions ---------- */
+const act = {
+  sigmoid:  z => 1/(1+Math.exp(-z)),
+  tanh:     z => Math.tanh(z),
+  relu:     z => Math.max(0,z),
+  leaky:    z => z>0?z:0.1*z,
+  swish:    z => z/(1+Math.exp(-z)),
+};
+const actDer = {
+  sigmoid: z => { const s=act.sigmoid(z); return s*(1-s); },
+  tanh:    z => 1-Math.tanh(z)**2,
+  relu:    z => z>0?1:0,
+  leaky:   z => z>0?1:0.1,
+  swish:   z => { const s=act.sigmoid(z); return s+z*s*(1-s); },
+};
+
+/* global redraw hooks so tab switch redraws canvases after resize */
+window.__redraw = {};
+
+/* ========================= 1. NEURÔNIO ========================= */
+(function neuron(){
+  const ids=['n_x1','n_w1','n_x2','n_w2','n_b','n_act'];
+  function draw(){
+    const x1=+$('n_x1').value, w1=+$('n_w1').value,
+          x2=+$('n_x2').value, w2=+$('n_w2').value,
+          b=+$('n_b').value, name=$('n_act').value;
+    const z = w1*x1 + w2*x2 + b;
+    const y = act[name](z);
+    $('n_x1o').value=x1.toFixed(2); $('n_w1o').value=w1.toFixed(2);
+    $('n_x2o').value=x2.toFixed(2); $('n_w2o').value=w2.toFixed(2);
+    $('n_bo').value=b.toFixed(2);
+    $('n_z').innerHTML = z.toFixed(3)+' <small>'+T().preAct+'</small>';
+    $('n_y').textContent = y.toFixed(4);
+    drawAct('n_canvas', name, z);
+  }
+  function drawAct(id,name,z){
+    const c=$(id), dpr=window.devicePixelRatio||1, W=c.clientWidth, H=300;
+    if(!W) return;
+    c.width=W*dpr; c.height=H*dpr; const g=c.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0);
+    g.clearRect(0,0,W,H);
+    const pad=36, xMin=-5, xMax=5, plot=z=>pad+z*(W-2*pad)/(xMax-xMin);
+    // axes
+    g.strokeStyle='#31396e'; g.lineWidth=1;
+    g.beginPath(); g.moveTo(pad,H-pad); g.lineTo(W-pad,H-pad); g.stroke();
+    g.fillStyle='#9aa3d6'; g.fillRect(plot(0),8,1,H-pad-8);
+    g.font='11px monospace'; g.textAlign='center';
+    for(let x=xMin;x<=xMax;x++){ g.fillText(x, plot(x), H-pad+16); }
+    g.textAlign='left';
+    // curve
+    g.strokeStyle='#9aa3d6'; g.lineWidth=2.4; g.beginPath();
+    for(let px=pad;px<=W-pad;px++){
+      const x=xMin+(px-pad)/(W-2*pad)*(xMax-xMin);
+      const v=clamp(act[name](x),-6,6);
+      const yy=pad+(6-v)/12*(H-2*pad);
+      px===pad?g.moveTo(px,yy):g.lineTo(px,yy);
+    }
+    g.stroke();
+    // marker
+    const zx=clamp(z,xMin,xMax), yp=pad+(6-act[name](zx))/12*(H-2*pad);
+    g.strokeStyle='rgba(58,160,255,.6)'; g.setLineDash([4,4]); g.lineWidth=1;
+    g.beginPath(); g.moveTo(plot(zx),10); g.lineTo(plot(zx),H-pad); g.stroke(); g.setLineDash([]);
+    g.fillStyle='#ffb03a'; g.beginPath(); g.arc(plot(zx),yp,5,0,7); g.fill();
+    g.fillStyle='#ff8a4a'; g.font='12px monospace';
+    g.fillText(`z=${z.toFixed(2)}`, plot(zx)+8, 18);
+    g.fillStyle='#37e0a0'; g.fillText(`y=${act[name](z).toFixed(3)}`, plot(zx)+8, 34);
+  }
+  ids.forEach(i=>$(i).addEventListener('input',draw));
+  window.__redraw.neuron=draw;
+  draw();
+})();
+
+/* ========================= 2. FUNÇÕES DE ATIVAÇÃO ========================= */
+(function activation(){
+  const c=$('a_canvas'), c2=$('a_x');
+  const series=[
+    ['sigmoid','#7c5cff'],['tanh','#3aa0ff'],['relu','#ffb03a'],['swish','#37e0a0']
+  ];
+  function draw(){
+    const x=+c2.value; $('a_xo').value=x.toFixed(2);
+    const dpr=window.devicePixelRatio||1, W=c.clientWidth, H=320;
+    if(!W) return;
+    c.width=W*dpr; c.height=H*dpr; const g=c.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0);
+    g.clearRect(0,0,W,H);
+    const pad=40, xMin=-5, xMax=5,
+          xAt=v=>pad+(v-xMin)/(xMax-xMin)*(W-2*pad),
+          yAt=v=>pad+(6-v)/12*(H-2*pad);
+    g.strokeStyle='#31396e'; g.lineWidth=1;
+    g.beginPath(); g.moveTo(pad,yAt(0)); g.lineTo(W-pad,yAt(0)); g.stroke();
+    g.fillRect(xAt(0),6,1,H-12);
+    g.fillStyle='#9aa3d6'; g.font='11px monospace';
+    for(let v=-4;v<=4;v+=2){ g.fillText(v, xAt(v)-3, H-pad+12); }
+    for(let v=-4;v<=4;v+=2){ g.fillText(v, 6, yAt(v)+3); }
+    series.forEach(([name,col])=>{
+      g.strokeStyle=col; g.lineWidth=2.4; g.beginPath();
+      for(let px=pad;px<=W-pad;px++){
+        const xx=xMin+(px-pad)/(W-2*pad)*(xMax-xMin);
+        const v=clamp(act[name](xx),-6,6);
+        px===pad?g.moveTo(px,yAt(v)):g.lineTo(px,yAt(v));
+      }
+      g.stroke();
+      const yv=clamp(act[name](x),-6,6);
+      g.fillStyle=col; g.beginPath(); g.arc(xAt(x),yAt(yv),4,0,7); g.fill();
+      $('a_v_'+name).textContent = yv.toFixed(3);
+      const d=actDer[name](x);
+      $('a_d_'+name).textContent = (isFinite(d)?d:0).toFixed(3);
+    });
+    // vertical cursor
+    g.strokeStyle='rgba(255,255,255,.25)'; g.setLineDash([3,3]);
+    g.beginPath(); g.moveTo(xAt(x),6); g.lineTo(xAt(x),H-6); g.stroke(); g.setLineDash([]);
+  }
+  function click(e){
+    const r=c.getBoundingClientRect(); const px=e.clientX-r.left;
+    const pad=40, xMin=-5, xMax=5;
+    const x=clamp(xMin+(px-pad)/(c.clientWidth-2*pad)*(xMax-xMin),xMin,xMax);
+    c2.value=x.toFixed(2); draw();
+  }
+  c2.addEventListener('input',draw);
+  let dragging=false;
+  c.addEventListener('pointerdown',e=>{dragging=true; click(e);});
+  c.addEventListener('pointermove',e=>{ if(dragging) click(e);});
+  window.addEventListener('pointerup',()=>dragging=false);
+  window.__redraw.activation=draw;
+  draw();
+})();
+
+/* ========================= 3. PROPAGAÇÃO À FRENTE ========================= */
+(function forward(){
+  // 2-3-1 network
+  let W1=[[0.5,0.5],[-0.5,0.5],[0.5,-0.5]], B1=[0.1,0.2,-0.1],
+      W2=[0.5,-0.5,0.5], B2=0.1;
+
+  function draw(){
+    const x1=+$('f_x1').value, x2=+$('f_x2').value, name=$('f_act').value;
+    $('f_x1o').value=x1.toFixed(2); $('f_x2o').value=x2.toFixed(2);
+    // forward pass
+    const zh = B1.map((b,i)=>b + W1[i][0]*x1 + W1[i][1]*x2);
+    const a  = zh.map(z=>act[name](z));
+    const y  = act.sigmoid( a[0]*W2[0] + a[1]*W2[1] + a[2]*W2[2] + B2 );
+    $('f_h1').textContent=a[0].toFixed(3);
+    $('f_h2').textContent=a[1].toFixed(3);
+    $('f_h3').textContent=a[2].toFixed(3);
+    $('f_y').textContent = y.toFixed(3);
+    render(x1,x2,a,W1,W2,B1,name,y);
+  }
+  function render(x1,x2,a,W1,W2,B1,name,y){
+    const c=$('f_canvas'), dpr=window.devicePixelRatio||1, W=c.clientWidth, H=360;
+    if(!W) return;
+    c.width=W*dpr; c.height=H*dpr; const g=c.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0);
+    g.clearRect(0,0,W,H);
+    const cols=[
+      {x:60,  ys:[80,H-80]},
+      {x:W/2, ys:[(H-160)/2, H/2, H/2+(H-160)/2]},
+      {x:W-60, ys:[H/2]}
+    ];
+    const labels=[['x₁','x₂'],['h₁','h₂','h₃'],['y']];
+    const vals=[ [x1,x2], a, [y] ];
+    // edges input->hidden
+    for(let i=0;i<3;i++){
+      for(let j=0;j<2;j++){
+        drawEdge(g, cols[0].x+18, cols[0].ys[j], cols[1].x-16, cols[1].ys[i], W1[i][j]);
+      }
+    }
+    // edges hidden->output
+    for(let i=0;i<3;i++){
+      drawEdge(g, cols[1].x+16, cols[1].ys[i], cols[2].x-18, cols[2].ys[0], W2[i]);
+    }
+    // nodes
+    cols.forEach((layer,li)=>{
+      layer.ys.forEach((yy,i)=>{
+        const shape = li===0?'circle':'hex';
+        node(g, layer.x, yy, shape, vals[li][i], labels[li][i]);
+      });
+    });
+  }
+  function drawEdge(g,x1,y1,x2,y2,w){
+    const t=clamp(Math.abs(w)/2,0,1);
+    g.strokeStyle=`rgba(${255*t|0},${(180*(1-t)+150)|0},${255*(1-t)|0},${0.15+0.85*t})`;
+    g.lineWidth=1+3*t; g.beginPath(); g.moveTo(x1,y1); g.lineTo(x2,y2); g.stroke();
+    const mx=(x1+x2)/2, my=(y1+y2)/2;
+    g.fillStyle='rgba(255,255,255,.6)'; g.font='10px monospace';
+    const txt=(w<0?'':'-')+Math.abs(w).toFixed(1);
+    g.fillText(txt, mx+3, my-2);
+  }
+  function node(g,x,y,shape,val,label){
+    const t=(val+1)/2;
+    const col=mixColor(clamp(t,0,1));
+    g.fillStyle=col; g.strokeStyle='#ffffff30'; g.lineWidth=1.5;
+    if(shape==='circle'){ g.beginPath(); g.arc(x,y,18,0,7); }
+    else{
+      g.beginPath();
+      for(let i=0;i<6;i++){ const ang=Math.PI/3*i-Math.PI/2, rx=x+18*Math.cos(ang), ry=y+18*Math.sin(ang);
+        i?g.lineTo(rx,ry):g.moveTo(rx,ry);}
+      g.closePath();
+    }
+    g.fill(); g.stroke();
+    g.fillStyle= t<0.5?'#fff':'#111'; g.font='11px monospace'; g.textAlign='center';
+    g.fillText(val.toFixed(2), x, y+4);
+    g.fillStyle='#9aa3d6'; g.font='12px sans-serif'; g.fillText(label, x, y-26);
+    g.textAlign='left';
+  }
+  function randomize(){
+    const R=()=> (Math.random()*2-1)*1.5;
+    W1=[[R(),R()],[R(),R()],[R(),R()]];
+    B1=[R(),R(),R()];
+    W2=[R(),R(),R()]; B2=R();
+  }
+  $('f_rand').onclick=()=>{ randomize(); draw(); };
+  $('f_zero').onclick=()=>{ W1=W1.map(r=>r.map(()=>0)); B1=[0,0,0]; W2=[0,0,0]; B2=0; draw(); };
+  $('f_reset').onclick=()=>{
+    W1=[[0.5,0.5],[-0.5,0.5],[0.5,-0.5]]; B1=[0.1,0.2,-0.1]; W2=[0.5,-0.5,0.5]; B2=0.1;
+    draw();
+  };
+  ['f_x1','f_x2','f_act'].forEach(i=>$(i).addEventListener('input',draw));
+  window.__redraw.forward=draw;
+  draw();
+})();
+
+/* ========================= 4. TREINAMENTO ========================= */
+(function train(){
+  const DATA=[[0,0,0],[1,1,0],[0,1,1],[1,0,1]];
+  let W1, B1, W2, B2;
+  let vW1, vB1, vW2, vB2;                // velocidade (momentum)
+  let epoch=0, lossHistory=[], playing=false, timer=null;
+
+  function randomize(){
+      // init Xavier/Glorot — melhor que zeros ou aleatório grande
+    const R1=()=> (Math.random()*2-1)/Math.sqrt(2);
+    const R2=()=> (Math.random()*2-1)/Math.sqrt(3);
+    W1=[[R1(),R1()],[R1(),R1()],[R1(),R1()]]; B1=[0,0,0];
+    W2=[R2(),R2(),R2()]; B2=0;
+    vW1=[[0,0],[0,0],[0,0]]; vB1=[0,0,0]; vW2=[0,0,0]; vB2=0;
+    lossHistory=[]; epoch=0;
+    }
+  function forwardPass(x1,x2,name){
+    const zh = B1.map((b,i)=>b + W1[i][0]*x1 + W1[i][1]*x2);
+    const a   = zh.map(z=>act[name](z));
+    const zout = a[0]*W2[0] + a[1]*W2[1] + a[2]*W2[2] + B2;
+    const out = act.sigmoid(zout);
+    return {a, zh, zout, out};
+    }
+  function hiddenDer(name,a,zh,i){
+    if(name==='tanh')  return 1-a[i]*a[i];
+    if(name==='relu')  return zh[i]>0?1:0;
+    return a[i]*(1-a[i]); // sigmoid (padrão)
+    }
+  function trainOne(){
+    const lr=+$('t_lr').value, mom=+$('t_mom').value, name=$('t_act').value;
+    let dW1=[[0,0],[0,0],[0,0]], dB1=[0,0,0], dW2=[0,0,0], dB2=0;
+    let totalLoss=0;
+    for(const [x1,x2,target] of DATA){
+      const {a, zh, out}=forwardPass(x1,x2,name);
+      const err = out - target;               // perda = erro (sigmoid + MSE)
+      totalLoss += err*err;
+       // gradiente na saída: dL/dz_out = 2·err·out·(1-out)
+      const g = 2*err*out*(1-out);
+      dW2[0]+=g*a[0]; dW2[1]+=g*a[1]; dW2[2]+=g*a[2];
+      dB2    +=g;
+       // backpropagation para a camada oculta
+      for(let i=0;i<3;i++){
+        const da  = hiddenDer(name,a,zh,i);
+        const gdh = g*W2[i]*da;
+        dW1[i][0]+=gdh*x1;
+        dW1[i][1]+=gdh*x2;
+        dB1[i]    +=gdh;
+       }
+     }
+      // média sobre os 4 exemplos e passo de descida com momentum
+    for(let i=0;i<3;i++){ for(let j=0;j<2;j++){ dW1[i][j]/=4; } dB1[i]/=4; }
+    for(let i=0;i<3;i++){ dW2[i]/=4; } dB2/=4;
+    for(let i=0;i<3;i++){ for(let j=0;j<2;j++){ vW1[i][j]=mom*vW1[i][j]-lr*dW1[i][j]; W1[i][j]+=vW1[i][j]; } vB1[i]=mom*vB1[i]-lr*dB1[i]; B1[i]+=vB1[i]; }
+    for(let i=0;i<3;i++){ vW2[i]=mom*vW2[i]-lr*dW2[i]; W2[i]+=vW2[i]; }
+    vB2=mom*vB2-lr*dB2; B2+=vB2;
+    totalLoss/=4;
+    epoch++;
+    lossHistory.push(totalLoss);
+    }
+  function accuracy(){
+    const name=$('t_act').value;
+    let correct=0;
+    DATA.forEach(([x1,x2,t])=>{ const {out}=forwardPass(x1,x2,name); if((out>=0.5?1:0)===t) correct++; });
+    return correct/DATA.length;
+    }
+  function refresh(){
+    const name=$('t_act').value;
+     $('t_lro').value = (+$('t_lr').value).toFixed(2);
+     $('t_momo').value = (+$('t_mom').value).toFixed(2);
+     $('t_stepe').textContent = $('t_step').value;
+     $('t_epoch').textContent=epoch;
+    const last = lossHistory.length?lossHistory[lossHistory.length-1]:null;
+     $('t_loss').textContent = last!=null ? last.toFixed(5) : '—';
+     $('t_acc').textContent = (accuracy()*100).toFixed(0)+'%';
+    DATA.forEach((row,i)=>{
+      const [x1,x2,t]=row;
+      const {out}=forwardPass(x1,x2,name);
+      const err=Math.abs(out-t), pred=out>=0.5?1:0;
+      const cellP=$('t_p'+i), cellE=$('t_e'+i);
+      if(!cellP) return;
+      cellP.textContent = out.toFixed(3)+' ('+pred+')';
+      cellP.style.color = pred===t?'#37e0a0':'#ffb547';
+      cellE.textContent = err.toFixed(4);
+     });
+    drawBoundary(name);
+    drawLossCurve();
+    }
+  function drawLossCurve(){
+    const c=$('t_losscanvas'), dpr=window.devicePixelRatio||1, W=c.clientWidth, H=150;
+    if(!W) return;
+    c.width=W*dpr; c.height=H*dpr; const g=c.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0);
+    g.clearRect(0,0,W,H);
+    g.strokeStyle='#31396e'; g.strokeRect(0,0,W,H);
+    g.fillStyle='#9aa3d6'; g.font='10px monospace';
+    if(lossHistory.length<2){ g.fillText(T().waiting, 10, H/2); return; }
+    let maxL=0; lossHistory.forEach(l=>{ if(l>maxL) maxL=l; }); maxL=Math.max(maxL,1e-9);
+    g.strokeStyle='#ffb03a'; g.lineWidth=2; g.beginPath();
+    lossHistory.forEach((l,i)=>{
+      const x=W*(i/(lossHistory.length-1));
+      const y=H - clamp(l/maxL,0,0.96)*H;
+      i?g.lineTo(x,y):g.moveTo(x,y);
+     });
+    g.stroke();
+    g.fillStyle='#ffb03a'; g.fillText(T().lossTitle, 8, 14);
+    }
+  function drawBoundary(name){
+    const c=$('t_bndcanvas'), dpr=window.devicePixelRatio||1, W=c.clientWidth, H=300;
+    if(!W) return;
+    c.width=W*dpr; c.height=H*dpr; const g=c.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0);
+    g.clearRect(0,0,W,H);
+    const cols=40, rows=30;
+    for(let i=0;i<cols;i++) for(let j=0;j<rows;j++){
+      const x1=(i+0.5)/cols, x2=1-(j+0.5)/rows;
+      const {out}=forwardPass(x1,x2,name);
+      const t=clamp(out,0,1);
+      g.fillStyle=`rgba(${(255*t)|0},${((1-t)*58+128*t)|0},${((1-t)*255+80*t)|0},${0.16+0.64*t})`;
+      g.fillRect(i*(W/cols), j*(H/rows), W/cols+1, H/rows+1);
+     }
+    DATA.forEach(([x1,x2,t])=>{
+      const px=x1*W, py=(1-x2)*H, col=t?'#37e0a0':'#ffffff';
+      g.fillStyle=col; g.strokeStyle='#111'; g.lineWidth=2;
+      g.beginPath(); g.arc(px,py,7,0,7); g.fill(); g.stroke();
+      g.fillStyle=col; g.font='11px monospace';
+      g.fillText(`(${x1},${x2})→${t}`, px+10, py-8);
+     });
+    g.strokeStyle='rgba(255,255,255,.12)'; g.strokeRect(0,0,W,H);
+    g.fillStyle='#9aa3d6'; g.font='11px sans-serif';
+    g.fillText('x₂ ↑',6,14); g.fillText('x₁ →', W-40, H-6);
+    }
+  function play(){
+    if(playing) return;
+    playing=true; $('t_state').textContent=T().training; $('t_play').textContent=T().pauseBtn;
+    const n=+$('t_step').value;
+    timer=setInterval(()=>{
+      for(let k=0;k<n;k++) trainOne();
+      refresh();
+      const last=lossHistory[lossHistory.length-1];
+      if(epoch>=3000 || (last<1e-4 && epoch>150)){ pause(true); }
+     }, 25);
+    }
+  function pause(done){
+    playing=false; clearInterval(timer); $('t_play').textContent=T().playBtn;
+     $('t_state').textContent = done ? T().converged : T().paused;
+    }
+   $('t_play').onclick=()=> playing? pause() : play();
+   $('t_stepb').onclick=()=>{ const n=+$('t_step').value; for(let k=0;k<n;k++) trainOne(); refresh(); };
+   $('t_reset').onclick=()=>{ if(playing) pause(true); randomize(); refresh(); };
+   ['t_lr','t_step','t_act','t_mom'].forEach(i=>{ const el=$(i); if(el) el.addEventListener('input',()=>{ if(!playing) refresh(); }); });
+  window.__redraw.train=refresh;
+  randomize(); refresh();
+})();
+
+/* ========================= TABS ========================= */
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.onclick=()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    tab.classList.add('active');
+    const key=tab.dataset.tab;
+    const sec=document.getElementById(key);
+    if(sec) sec.classList.add('active');
+    const fn=window.__redraw[key];
+    if(fn) requestAnimationFrame(fn); // redraw after the panel becomes visible
+  };
+});
+</script>
+<script>
+(function(){
+  const I18N = {
+ "pt": {
+  "headerTitle": "🧠 Simulador de Deep Learning",
+  "headerLead": "Um passeio interativo pelos blocos fundamentais de uma rede neural: neurônio, funções de ativação, propagação à frente e o treinamento por <b>backpropagation</b> com <b>descida do gradiente</b>. Ajuste os controles e veja a matemática ganhar vida. Não é preciso instalar nada — é apenas um <code>.html</code>.",
+  "tab.neuron": "Neurônio",
+  "tab.activation": "Funções de Ativação",
+  "tab.forward": "Propagação à Frente",
+  "tab.train": "Treinamento & Backprop",
+  "tab.gloss": "Glossário",
+  "neuron.title": "🔎 O Neurônio",
+  "neuron.badge": "perceptron",
+  "neuron.lead": "O menor “átomo” de uma rede neural. Um neurônio recebe várias entradas, faz a <b>soma ponderada</b>, adiciona um <b>viés</b> (bias) e passa o resultado por uma <b>função de ativação</b>. Ajuste os valores e observe a saída.",
+  "neuron.eq": "z = Σ (w<sub>i</sub> · x<sub>i</sub>) + b&nbsp;&nbsp;→&nbsp;&nbsp;y = ativação(z)",
+  "n.x1": "Entrada x₁",
+  "n.w1": "Peso w₁",
+  "n.x2": "Entrada x₂",
+  "n.w2": "Peso w₂",
+  "n.b": "Viés b",
+  "n.act": "Ativação",
+  "opt.leaky": "ReLU vazada",
+  "pill.nonlin": "função não-linear",
+  "out.z": "Soma ponderada",
+  "out.y": "Saída do neurônio",
+  "neuron.step1": "Multiplica cada <b>entrada</b> pelo seu <b>peso</b> (quanto ela “counta”).",
+  "neuron.step2": "Soma os produtos e adiciona o <b>viés</b>: é o ponto <b class=\"mono\">z</b> onde estamos.",
+  "neuron.step3": "Aplica a <b>ativação</b>: a curva do gráfico transforma <b class=\"mono\">z</b> em <b class=\"mono\">y</b>.",
+  "neuron.title2": "📈 Mapa ativação → saída",
+  "neuron.lead2": "O traço vertical laranja marca o <b class=\"mono\">z</b> atual; a altura do ponto mostra a saída <b class=\"mono\">y</b>. A <b>curvatura</b> é o que permite à rede modelar relações complicadas — <b>sem ela, empilhar camadas não adiantaria</b>.",
+  "leg.zinput": "z (entrada da ativação)",
+  "leg.point": "ponto atual (z, y)",
+  "leg.curve": "curva de ativação",
+  "neuron.note": "💡 <b>Por que uma função curva?</b> Puxe w₁ e w₂ e observe: uma soma linear sozinha só desenha retas. A ativação emenda essas retas em formas complexas, e é isso que dá poder a uma rede com muitas camadas.",
+  "act.title": "🎚️ Funções de Ativação",
+  "act.lead": "A escolha da ativação decide como a rede aprende. Compare as principais e clique/arraste no gráfico para mover o ponto de leitura e ler os valores.",
+  "act.xpoint": "Ponto x =",
+  "act.thFunc": "Função",
+  "act.thVal": "Valor em x",
+  "act.thDer": "Derivada",
+  "act.thChar": "Características",
+  "act.charSig": "Saída 0–1, tipo probabilidade; mora na saturação.",
+  "act.charTan": "Saída −1…1, centrada; saturação nas pontas.",
+  "act.charRelu": "Rápida e barata; ativa acima de 0, nula abaixo.",
+  "act.charSwish": "Suave e auto-regulada; favorita em modelos grandes.",
+  "act.title2": "🧭 O que importa",
+  "act.stepNonlin": "<b>Por que não-linear:</b> sem uma curva, empilhar camadas só produz uma soma linear — a rede fica igual a um único neurônio. A não-linearidade é o “poder de representação”.",
+  "act.stepSat": "<b>Sigmoid/Tanh</b> saturam: valores extremos congelam a derivada em 0, matando o aprendizado (problema do <i>desvanecimento do gradiente</i>).",
+  "act.stepRelu": "<b>ReLU</b> é o padrão em camadas ocultas: derivada igual a 1 ou 0, barata e sem saturação do lado positivo.",
+  "act.stepSwish": "<b>Swish (x·σ(x))</b> suaviza a quebra do ReLU e tende a generalizar melhor.",
+  "act.stepDeriv": "<b>Derivada</b> é usada no backprop: onde ela fica próxima de 0, os pesos quase não se atualizam. Isso aparece no Módulo 4.",
+  "act.note": "💡 Clique ou arraste sobre o gráfico para mover o ponto de leitura.",
+  "fwd.badge": "forward pass",
+  "fwd.title": "🕸️ Rede 2 → 3 → 1 (XOR)",
+  "fwd.lead": "Uma rede com 2 entradas, 3 neurônios ocultos e 1 saída. Defina as entradas e a propagação à frente calcula, camada por camada, cada ativação. A cor de cada neurônio mostra o quão ativo ele está.",
+  "fwd.hidact": "Ativação oculta",
+  "fwd.random": "🎲 Pesos aleatórios",
+  "fwd.zero": "Zerar",
+  "fwd.reset": "Reiniciar demo",
+  "fwd.kvh1": "Neurônio oculto h₁",
+  "fwd.kvh2": "Neurônio oculto h₂",
+  "fwd.kvh3": "Neurônio oculto h₃",
+  "fwd.kvOut": "Saída <b>y</b>",
+  "fwd.note": "💡 O problema <b>XOR</b> é não-linear: a saída só é 1 quando os dois bits são diferentes. Nenhuma combinação linear separa os 4 pontos — por isso precisamos da camada escondida, que “deforma” o espaço para uma reta então resolver.",
+  "fwd.title2": "🔍 Fluxo de cálculo",
+  "leg.low": "baixa",
+  "leg.high": "alta",
+  "leg.xorTarget": "alvo do XOR",
+  "fwd.note2": "Espessura da aresta = |peso|; a etiqueta mostra o valor do peso. A cor de cada neurônio vai do azul (baixa) ao laranja (alta).",
+  "trn.badge": "descida do gradiente",
+  "trn.title": "⚙️ Backpropagation em ação",
+  "trn.lead": "Ensinamos a mesma rede 2→3→1 a resolver o XOR com backpropagation. Cada época recalcula a saída, mede o <b>erro</b>, propaga os gradientes de volta pela rede e ajusta os pesos na direção que <b>diminui o erro</b>. Com <b>momentum</b> (deslize) o algoritmo “ganha inércia”, evitando os mínimos locais de saddle em que o XOR costuma ficar preso.",
+  "trn.lr": "Taxa de aprendizado",
+  "trn.epochs": "Épocas por passo",
+  "trn.hidact": "Ativação oculta",
+  "trn.mom": "Momentum",
+  "trn.train": "▶ Treinar",
+  "trn.step1": "Avançar 1 passo",
+  "trn.reset": "↺ Reiniciar pesos",
+  "trn.epoch": "Época atual",
+  "trn.loss": "Erro total (MSE)",
+  "trn.acc": "Acurácia",
+  "trn.state": "Estado",
+  "trn.stateInitial": "pronto",
+  "trn.titleLoss": "📉 Curva de aprendizado",
+  "trn.h3b": "Fronteira de decisão no plano (x₁, x₂)",
+  "trn.leg0": "rede diz “0”",
+  "trn.leg1": "rede diz “1”",
+  "trn.legP": "pontos de treino",
+  "trn.note": "A fronteira começa aleatória e se curva enquanto o erro cai — é a camada oculta separando o espaço em regiões. No fim, cada ponto de treino cai no lado certo.",
+  "trn.titlePts": "🔬 Os 4 pontos de treino (verificação XOR)",
+  "trn.thTgt": "Alvo",
+  "trn.thPred": "Predição",
+  "trn.thErr": "Erro",
+  "gloss.title": "💡 Glossário rápido",
+  "gloss.lead": "Os termos que você encontra aqui, em linguagem simples.",
+  "g.entrada.t": "Entrada / features",
+  "g.entrada.d": "Os números de entrada (imagem, texto, etc.).",
+  "g.peso.t": "Peso (weight)",
+  "g.peso.d": "Importância relativa de cada caminho; aprendidos no treino.",
+  "g.vies.t": "Viés (bias)",
+  "g.vies.d": "Um “empurrão” livre em cada neurônio.",
+  "g.activacao.t": "Ativação",
+  "g.activacao.d": "Função não-linear que limita/quebra a saída (ReLU, sigmoid…).",
+  "g.funcao.t": "Função",
+  "g.funcao.d": "Mapa de entrada → saída. A não-linear é o que permite aprender patterns.",
+  "g.neuronio.t": "Neurônio",
+  "g.neuronio.d": "A unidade que soma, ativa e vaza informação.",
+  "g.camada.t": "Camada (layer)",
+  "g.camada.d": "Um grupo de neurônios que compartilha um conjunto de pesos.",
+  "g.forward.t": "Forward pass",
+  "g.forward.d": "Cálculo das saídas das entradas até a saída, camada a camada.",
+  "g.perda.t": "Perda (loss)",
+  "g.perda.d": "Quão errada a saída foi (ex.: MSE, erro quadrático médio).",
+  "g.backprop.t": "Backpropagation",
+  "g.backprop.d": "Deriva os gradientes de cada peso a partir da perda.",
+  "g.grad.t": "Descida do gradiente",
+  "g.grad.d": "Ajusta os pesos na direção que diminui a perda.",
+   "g.lr.t": "Taxa de aprendizado",
+   "g.lr.d": "Quão grandes são os passos a cada época.",
+  "g.epoch.t": "Época (epoch)",
+  "g.epoch.d": "Uma passada completa sobre todo o conjunto de treino.",
+  "g.overfit.t": "Overfitting",
+  "g.overfit.d": "Aprende os exemplos mas falha em casos novos.",
+  "g.deep.t": "Deep Learning",
+  "g.deep.d": "Redes com MUITAS camadas que aprendem representações sozinhas."
+ },
+ "en": {
+  "headerTitle": "🧠 Deep Learning Simulator",
+  "headerLead": "An interactive tour of the building blocks of a neural network: the neuron, activation functions, forward propagation, and training via <b>backpropagation</b> with <b>gradient descent</b>. Adjust the controls and watch the math come alive. Nothing to install — it is just a <code>.html</code> file.",
+  "tab.neuron": "Neuron",
+  "tab.activation": "Activation Functions",
+  "tab.forward": "Forward Propagation",
+  "tab.train": "Training & Backprop",
+  "tab.gloss": "Glossary",
+  "neuron.title": "🔎 The Neuron",
+  "neuron.badge": "perceptron",
+  "neuron.lead": "The smallest “atom” of a neural network. A neuron takes several inputs, performs a <b>weighted sum</b>, adds a <b>bias</b>, and pushes the result through an <b>activation function</b>. Adjust the values and watch the output.",
+  "neuron.eq": "z = Σ (w<sub>i</sub> · x<sub>i</sub>) + b&nbsp;&nbsp;→&nbsp;&nbsp;y = activation(z)",
+  "n.x1": "Input x₁",
+  "n.w1": "Weight w₁",
+  "n.x2": "Input x₂",
+  "n.w2": "Weight w₂",
+  "n.b": "Bias b",
+  "n.act": "Activation",
+  "opt.leaky": "Leaky ReLU",
+  "pill.nonlin": "non-linear function",
+  "out.z": "Weighted sum",
+  "out.y": "Neuron output",
+  "neuron.step1": "Multiplies each <b>input</b> by its <b>weight</b> (how much it “counts”).",
+  "neuron.step2": "Sums the products and adds the <b>bias</b>: this is the point <b class=\"mono\">z</b> where we are.",
+  "neuron.step3": "Applies the <b>activation</b>: the curve on the plot turns <b class=\"mono\">z</b> into <b class=\"mono\">y</b>.",
+  "neuron.title2": "📈 Activation map → output",
+  "neuron.lead2": "The orange vertical line marks the current <b class=\"mono\">z</b>; the point's height shows the output <b class=\"mono\">y</b>. The <b>curvature</b> is what lets the network model complex relations — <b>without it, stacking layers would do nothing</b>.",
+  "leg.zinput": "z (activation input)",
+  "leg.point": "current point (z, y)",
+  "leg.curve": "activation curve",
+  "neuron.note": "💡 <b>Why a curved function?</b> Drag w₁ and w₂ and watch: a linear sum alone only draws straight lines. The activation joins these lines into complex shapes, and that is what gives power to a network with many layers.",
+  "act.title": "🎚️ Activation Functions",
+  "act.lead": "The choice of activation decides how the network learns. Compare the main ones and click/drag on the plot to move the reading point and read the values.",
+  "act.xpoint": "Point x =",
+  "act.thFunc": "Function",
+  "act.thVal": "Value at x",
+  "act.thDer": "Derivative",
+  "act.thChar": "Characteristics",
+  "act.charSig": "0–1 output, probability-like; prone to saturation.",
+  "act.charTan": "−1…1 output, centered; saturates at the ends.",
+  "act.charRelu": "Fast and cheap; active above 0, zero below.",
+  "act.charSwish": "Smooth and self-regulating; a favorite in large models.",
+  "act.title2": "🧭 What matters",
+  "act.stepNonlin": "<b>Why non-linear:</b> without a curve, stacking layers only produces a single linear sum — the network becomes one neuron. Non-linearity is the “representation power”.",
+  "act.stepSat": "<b>Sigmoid/Tanh</b> saturate: extreme values freeze the derivative to 0, killing learning (the <i>vanishing gradient</i> problem).",
+  "act.stepRelu": "<b>ReLU</b> is the standard in hidden layers: derivative of 1 or 0, cheap, and no positive-side saturation.",
+  "act.stepSwish": "<b>Swish (x·σ(x))</b> smooths the ReLU kink and tends to generalize better.",
+  "act.stepDeriv": "<b>Derivative</b> is used in backprop: where it is near 0, the weights barely update. This shows up in Module 4.",
+  "act.note": "💡 Click or drag on the plot to move the reading point.",
+  "fwd.badge": "forward pass",
+  "fwd.title": "🕸️ Network 2 → 3 → 1 (XOR)",
+  "fwd.lead": "A network with 2 inputs, 3 hidden neurons, and 1 output. Set the inputs and forward propagation computes, layer by layer, every activation. Each neuron's color shows how active it is.",
+  "fwd.hidact": "Hidden activation",
+  "fwd.random": "🎲 Random weights",
+  "fwd.zero": "Zero",
+  "fwd.reset": "Reset demo",
+  "fwd.kvh1": "Hidden neuron h₁",
+  "fwd.kvh2": "Hidden neuron h₂",
+  "fwd.kvh3": "Hidden neuron h₃",
+  "fwd.kvOut": "Output <b>y</b>",
+  "fwd.note": "💡 The <b>XOR</b> problem is non-linear: the output is 1 only when the two bits differ. No linear combination separates the 4 points — that is why we need the hidden layer, which “warp”s the space so a single line can then separate them.",
+  "fwd.title2": "🔍 Computation flow",
+  "leg.low": "low",
+  "leg.high": "high",
+  "leg.xorTarget": "XOR target",
+  "fwd.note2": "Edge thickness = |weight|; the label shows the weight value. Each neuron's color runs from blue (low) to orange (high).",
+  "trn.badge": "gradient descent",
+  "trn.title": "⚙️ Backpropagation in action",
+  "trn.lead": "We teach the same 2→3→1 network to solve XOR with backpropagation. Each epoch recomputes the output, measures the <b>error</b>, propagates the gradients back through the network, and adjusts the weights in the direction that <b>reduces the error</b>. With <b>momentum</b> (slider) the algorithm “gains inertia”, escaping the saddle points where XOR usually stalls.",
+  "trn.lr": "Learning rate",
+  "trn.epochs": "Epochs per step",
+  "trn.hidact": "Hidden activation",
+  "trn.mom": "Momentum",
+  "trn.train": "▶ Train",
+  "trn.step1": "Step +1",
+  "trn.reset": "↺ Reset weights",
+  "trn.epoch": "Current epoch",
+  "trn.loss": "Total error (MSE)",
+  "trn.acc": "Accuracy",
+  "trn.state": "Status",
+  "trn.stateInitial": "ready",
+  "trn.titleLoss": "📉 Learning curve",
+  "trn.h3b": "Decision boundary in the (x₁, x₂) plane",
+  "trn.leg0": "network says “0”",
+  "trn.leg1": "network says “1”",
+  "trn.legP": "training points",
+  "trn.note": "The boundary starts random and bends as the error drops — it is the hidden layer splitting the space into regions. In the end, every training point lands on the right side.",
+  "trn.titlePts": "🔬 The 4 training points (XOR check)",
+  "trn.thTgt": "Target",
+  "trn.thPred": "Prediction",
+  "trn.thErr": "Error",
+  "gloss.title": "💡 Quick Glossary",
+  "gloss.lead": "The terms you meet here, in plain language.",
+  "g.entrada.t": "Input / features",
+  "g.entrada.d": "The input numbers (image, text, etc.).",
+  "g.peso.t": "Weight",
+  "g.peso.d": "Relative importance of each path; learned in training.",
+  "g.vies.t": "Bias",
+  "g.vies.d": "A free “nudge” in each neuron.",
+  "g.activacao.t": "Activation",
+  "g.activacao.d": "Non-linear function that squashes/breaks the output (ReLU, sigmoid…).",
+  "g.funcao.t": "Function",
+  "g.funcao.d": "An input → output map. The non-linearity is what lets it learn patterns.",
+  "g.neuronio.t": "Neuron",
+  "g.neuronio.d": "The unit that sums, activates, and passes information.",
+  "g.camada.t": "Layer",
+  "g.camada.d": "A group of neurons that shares a set of weights.",
+  "g.forward.t": "Forward pass",
+  "g.forward.d": "Computing outputs from the inputs to the end, layer by layer.",
+  "g.perda.t": "Loss",
+  "g.perda.d": "How wrong the output was (e.g., MSE, mean squared error).",
+  "g.backprop.t": "Backpropagation",
+  "g.backprop.d": "Computes each weight's gradient from the loss.",
+  "g.grad.t": "Gradient descent",
+  "g.grad.d": "Adjusts weights in the direction that reduces the loss.",
+   "g.lr.t": "Learning rate",
+   "g.lr.d": "How big the step is for each epoch.",
+  "g.epoch.t": "Epoch",
+  "g.epoch.d": "One full pass over the entire training set.",
+  "g.overfit.t": "Overfitting",
+  "g.overfit.d": "Learns the examples but fails on new cases.",
+  "g.deep.t": "Deep Learning",
+  "g.deep.d": "Networks with MANY layers that learn representations on their own."
+ }
+};
+  function applyLang(l){
+    window.__lang=l;
+    document.documentElement.lang = (l==='pt') ? 'pt-BR' : 'en';
+    document.querySelectorAll('[data-i18n]').forEach(function(el){
+      var k=el.getAttribute('data-i18n'), v=I18N[l][k];
+      if(v==null) return;
+      if(el.dataset.html) el.innerHTML=v; else el.textContent=v;
+       });
+    document.querySelectorAll('.langbtn').forEach(function(b){
+      b.classList.toggle('active', b.getAttribute('data-lang')===l);
+       });
+    try{ localStorage.setItem('dl_lang', l); }catch(e){}
+    var r=window.__redraw||{};
+    Object.keys(r).forEach(function(k){ if(typeof r[k]==='function') r[k](); });
+     }
+  document.querySelectorAll('.langbtn').forEach(function(b){
+      b.onclick=function(){ applyLang(b.getAttribute('data-lang')); };
+       });
+  applyLang(window.__lang || 'pt');
+})();
+</script>
+
+</body>
+</html>

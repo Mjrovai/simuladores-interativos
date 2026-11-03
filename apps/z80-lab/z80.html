@@ -1,0 +1,3221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Z80 Lab — Learn Z80 Assembly</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+  /* ===== Theme: dark, friendly, code-centric ===== */
+  :root {
+    --bg: #0e1116;
+    --panel: #161b22;
+    --panel2: #1c2129;
+    --border: #2a313a;
+    --text: #d8dde6;
+    --muted: #8a96a8;
+    --accent: #4cc2ff;
+    --accent2: #ffcb6b;
+    --ok: #7ee787;
+    --bad: #ff7b72;
+    --hi: #1f3a55;
+    --code: #c9d1d9;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; height:100%; }
+  body {
+    font: 14px/1.4 -apple-system, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+    background: var(--bg); color: var(--text);
+    overflow: hidden;
+  }
+  button {
+    background: var(--panel2); color: var(--text); border: 1px solid var(--border);
+    border-radius: 6px; padding: 6px 10px; cursor: pointer; font: inherit;
+  }
+  button:hover { background: #232a33; }
+  button.primary { background: #1f3a55; border-color: #2a4a6a; }
+  button.primary:hover { background: #25476a; }
+  button.ok { background: #1d3a25; border-color: #2e5b3a; color: #c1f0c9; }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  textarea, input, select {
+    background: #0b0e13; color: var(--text); border: 1px solid var(--border);
+    border-radius: 6px; padding: 6px 8px; font: 13px/1.4 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  /* ===== Layout ===== */
+  .app {
+    display: grid;
+    grid-template-columns: 280px 1fr 360px;
+    grid-template-rows: 44px 1fr 180px;
+    grid-template-areas:
+      "topbar topbar topbar"
+      "lessons main   debug"
+      "lessons trace  debug";
+    height: 100vh;
+  }
+  .topbar {
+    grid-area: topbar;
+    display: flex; align-items: center; gap: 12px;
+    background: var(--panel); border-bottom: 1px solid var(--border);
+    padding: 0 12px;
+  }
+  .topbar h1 {
+    font-size: 14px; margin: 0; font-weight: 600; color: var(--accent);
+    letter-spacing: .3px;
+  }
+  .topbar .sep { width:1px; height:24px; background: var(--border); }
+  .topbar .spacer { flex: 1; }
+  .topbar .meta { color: var(--muted); font-size: 12px; }
+
+  /* ===== Lessons sidebar ===== */
+  .lessons {
+    grid-area: lessons;
+    background: var(--panel); border-right: 1px solid var(--border);
+    overflow-y: auto;
+  }
+  .lessons h2 {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px;
+    color: var(--muted); margin: 12px 12px 6px; font-weight: 600;
+  }
+  .lesson-list { list-style: none; margin: 0; padding: 0; }
+  .lesson-list li {
+    padding: 8px 12px; cursor: pointer; border-left: 3px solid transparent;
+    font-size: 13px;
+  }
+  .lesson-list li:hover { background: var(--panel2); }
+  .lesson-list li.active {
+    background: var(--panel2);
+    border-left-color: var(--accent);
+  }
+  .lesson-list li.done {
+    color: var(--ok);
+  }
+  .lesson-list li .num {
+    display: inline-block; width: 22px; color: var(--muted);
+    font: 11px ui-monospace, monospace; text-align: right; margin-right: 6px;
+  }
+  .lessons .reset-progress {
+    margin: 12px; display: block; width: calc(100% - 24px);
+    font-size: 11px;
+  }
+
+  /* ===== Main area: editor + body text ===== */
+  .main {
+    grid-area: main;
+    display: grid; grid-template-rows: 1fr 200px;
+    min-width: 0;
+  }
+  .lesson-body {
+    padding: 12px 18px; overflow-y: auto; border-bottom: 1px solid var(--border);
+    background: var(--panel2);
+  }
+  .lesson-body h3 {
+    margin: 0 0 4px; font-size: 15px; color: var(--accent);
+  }
+  .lesson-body .concept {
+    color: var(--muted); font-size: 12px; margin-bottom: 8px;
+  }
+  .lesson-body p { margin: 6px 0; }
+  .lesson-body pre {
+    background: #0b0e13; border: 1px solid var(--border);
+    border-radius: 6px; padding: 8px 10px; font: 12px ui-monospace, monospace;
+    color: var(--code); overflow-x: auto;
+  }
+  .lesson-body code {
+    background: #0b0e13; padding: 1px 5px; border-radius: 4px;
+    font: 12px ui-monospace, monospace; color: var(--accent2);
+  }
+  .lesson-body .hint {
+    background: #0b0e13; border-left: 3px solid var(--accent2);
+    padding: 6px 10px; border-radius: 4px; font-size: 12px; color: var(--muted);
+    margin: 6px 0;
+  }
+  .editor-wrap {
+    display: grid; grid-template-rows: 36px 1fr; min-height: 0;
+  }
+  .editor-bar {
+    display: flex; align-items: center; gap: 8px; padding: 4px 8px;
+    border-top: 1px solid var(--border); background: var(--panel);
+  }
+  .editor-bar .filename { color: var(--muted); font-size: 12px; margin-right: 8px; }
+  .editor-area {
+    position: relative; min-height: 0;
+    background: #0b0e13;
+  }
+  textarea.editor {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    background: transparent; color: transparent; caret-color: var(--accent);
+    border: 0; border-radius: 0; padding: 6px 8px 6px 56px; resize: none;
+    font: 13px/1.5 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    white-space: pre; overflow: auto; tab-size: 4;
+  }
+  textarea.editor::selection { background: rgba(76,194,255,.25); }
+  pre.highlight {
+    position: absolute; inset: 0; padding: 6px 8px 6px 56px; margin: 0;
+    border: 0; pointer-events: none; white-space: pre; overflow: auto;
+    font: 13px/1.5 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    color: var(--code);
+  }
+  .gutter {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 48px;
+    background: #0a0d12; color: var(--muted); font: 12px ui-monospace, monospace;
+    padding: 6px 4px; text-align: right; border-right: 1px solid var(--border);
+    overflow: hidden; user-select: none;
+  }
+  .gutter .ln { display: block; }
+
+  /* ===== Right panel: debug + memory ===== */
+  .debug {
+    grid-area: debug;
+    background: var(--panel); border-left: 1px solid var(--border);
+    display: grid; grid-template-rows: auto 1fr auto;
+    overflow: hidden;
+  }
+  .controls {
+    display: flex; flex-wrap: wrap; gap: 6px; padding: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .status {
+    font-size: 11px; color: var(--muted); padding: 0 8px 6px;
+  }
+  .console {
+    border-top: 1px solid var(--border); padding: 6px 8px;
+    background: #0a0d12; min-height: 0;
+  }
+  .console h4 {
+    font-size: 11px; text-transform: uppercase; color: var(--muted);
+    margin: 0 0 4px; font-weight: 600;
+  }
+  .console .out {
+    font: 12px ui-monospace, monospace; color: var(--accent2);
+    white-space: pre-wrap; word-break: break-all; min-height: 18px;
+  }
+
+  .panels { overflow-y: auto; padding: 8px; }
+  .panel {
+    background: var(--panel2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 10px; margin-bottom: 10px;
+  }
+  .panel h3 {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px;
+    color: var(--muted); margin: 0 0 6px; font-weight: 600;
+  }
+  .regs {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 4px 8px; font: 12px ui-monospace, monospace;
+  }
+  .regs .r { display: flex; justify-content: space-between; }
+  .regs .name { color: var(--muted); }
+  .regs .val { color: var(--code); }
+  .regs .val.changed { color: var(--accent); }
+  .flags {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    gap: 4px; font: 12px ui-monospace, monospace; text-align: center;
+  }
+  .flags .f {
+    background: #0b0e13; border: 1px solid var(--border);
+    border-radius: 4px; padding: 2px 0;
+  }
+  .flags .f.on { background: var(--hi); color: var(--accent); border-color: var(--accent); }
+  .flags .lbl { color: var(--muted); display: block; font-size: 10px; }
+  .memview {
+    font: 11px ui-monospace, monospace; max-height: 220px; overflow: auto;
+    background: #0b0e13; border: 1px solid var(--border); border-radius: 4px;
+    padding: 4px; line-height: 1.4;
+  }
+  .memview .row { white-space: pre; }
+  .memview .row .addr { color: var(--muted); }
+  .memview .row .byt { color: var(--code); }
+  .memview .row .ch { color: var(--accent2); }
+  .memview .row .byt.hl { background: var(--hi); color: var(--accent); }
+  .memview .row .byt.pc { background: #553b1f; color: var(--accent2); }
+  .memview .row .byt.sp { background: #1f3a26; color: var(--ok); }
+  .help {
+    font-size: 11px; color: var(--muted); margin-top: 4px;
+  }
+  .error {
+    color: var(--bad); font: 12px ui-monospace, monospace;
+    background: #2a0d10; border: 1px solid #4d1a20;
+    border-radius: 4px; padding: 4px 6px; margin: 4px 0;
+    white-space: pre-wrap;
+  }
+  .ok-msg {
+    color: var(--ok); font: 12px ui-monospace, monospace;
+    background: #0e2a18; border: 1px solid #1f5232;
+    border-radius: 4px; padding: 4px 6px; margin: 4px 0;
+  }
+  .breakpt {
+    display: flex; flex-wrap: wrap; gap: 4px; font: 11px ui-monospace, monospace;
+  }
+  .breakpt .bp { background: #2a1a0d; border: 1px solid #5c3a1a; padding: 1px 6px; border-radius: 4px; cursor: pointer; }
+  .breakpt .bp:hover { background: #3a2418; }
+
+  /* ===== Trace / listing ===== */
+  .trace {
+    grid-area: trace; background: var(--panel); border-top: 1px solid var(--border);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .trace .tabs {
+    display: flex; gap: 1px; padding: 0 8px; background: var(--panel2);
+    border-bottom: 1px solid var(--border);
+  }
+  .trace .tab {
+    padding: 6px 12px; cursor: pointer; font-size: 12px;
+    color: var(--muted); border-bottom: 2px solid transparent;
+  }
+  .trace .tab.active { color: var(--text); border-bottom-color: var(--accent); }
+  .trace .body {
+    flex: 1; overflow: auto; font: 12px ui-monospace, monospace;
+    padding: 4px 8px; background: #0a0d12;
+  }
+  .trace .body pre { margin: 0; white-space: pre; color: var(--code); }
+  .listing .l { white-space: pre; }
+  .listing .l .ln { color: var(--muted); }
+  .listing .l .addr { color: var(--accent); }
+  .listing .l .bytes { color: var(--accent2); }
+  .listing .l .src { color: var(--code); }
+  .listing .l.err { color: var(--bad); }
+
+  /* ===== Misc ===== */
+  .right { text-align: right; }
+  .nowrap { white-space: nowrap; }
+  kbd {
+    background: #0b0e13; border: 1px solid var(--border); border-bottom-width: 2px;
+    border-radius: 3px; padding: 0 4px; font: 11px ui-monospace, monospace;
+  }
+  .pop {
+    position: absolute; top: 56px; right: 380px; z-index: 10;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 12px; box-shadow: 0 8px 24px rgba(0,0,0,.5);
+    max-width: 360px;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Top bar -->
+  <div class="topbar">
+    <h1>Z80 Lab</h1>
+    <span class="sep"></span>
+    <span class="meta">Learn Z80 assembly with a live simulator</span>
+    <span class="spacer"></span>
+    <span class="meta" id="lessonProgress">0 / 0 done</span>
+  </div>
+
+  <!-- Lesson list -->
+  <div class="lessons">
+    <h2>Lessons</h2>
+    <ul class="lesson-list" id="lessonList"></ul>
+    <h2>Examples</h2>
+    <ul class="lesson-list" id="exampleList"></ul>
+    <button class="reset-progress" id="resetProgress">Reset progress</button>
+  </div>
+
+  <!-- Main column: lesson text + editor + listing -->
+  <div class="main">
+    <div class="lesson-body" id="lessonBody">
+      <h3 id="lbTitle">Welcome to Z80 Lab</h3>
+      <div class="concept" id="lbConcept"></div>
+      <div id="lbContent"></div>
+    </div>
+    <div class="editor-wrap">
+      <div class="editor-bar">
+        <span class="filename">program.z80</span>
+        <button id="btnAssemble" class="primary" title="Assemble program (Ctrl+B)">Assemble</button>
+        <button id="btnStep" title="Step one instruction (F8)">Step</button>
+        <button id="btnRun" title="Run until HALT or breakpoint (F5)">Run</button>
+        <button id="btnStop" title="Stop running program">Stop</button>
+        <button id="btnReset" title="Reset CPU and clear output">Reset</button>
+        <button id="btnCheck" class="ok" title="Check the current lesson">Check ✓</button>
+        <span class="spacer" style="flex:1"></span>
+        <span class="meta" id="speedMeta">Speed: 100 Hz</span>
+        <input type="range" id="speed" min="10" max="2000" value="100" step="10" style="width:100px" title="Run speed (instructions/second)" />
+        <button id="btnHint" title="Show a hint">Hint</button>
+      </div>
+      <div class="editor-area">
+        <div class="gutter" id="gutter"></div>
+        <pre class="highlight" id="highlight"></pre>
+        <textarea class="editor" id="editor" spellcheck="false" wrap="off"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right column: debug, memory, console -->
+  <div class="debug">
+    <div class="controls">
+      <button id="btnStep2">Step</button>
+      <button id="btnRun2">Run</button>
+      <button id="btnReset2">Reset</button>
+      <span class="spacer" style="flex:1"></span>
+      <label class="meta"><input type="checkbox" id="cbFollow" checked> Follow PC</label>
+    </div>
+    <div class="panels" id="panels">
+      <div class="panel">
+        <h3>Registers</h3>
+        <div class="regs" id="regs"></div>
+        <div style="height:6px"></div>
+        <div class="flags" id="flags"></div>
+        <div class="help">Click a flag to toggle its name highlight. Flag values come from the F register.</div>
+      </div>
+      <div class="panel">
+        <h3>Breakpoints</h3>
+        <div class="breakpt" id="breakpts"><span class="meta" style="opacity:.7">no breakpoints</span></div>
+        <div class="help">Tip: click on an address in the listing or the memory view to add/remove a breakpoint.</div>
+      </div>
+      <div class="panel">
+        <h3>Memory</h3>
+        <div class="memview" id="memview"></div>
+        <div class="help">HL/IX/IY shown in blue. PC in orange. SP in green.</div>
+      </div>
+      <div class="panel" id="errorsPanel" style="display:none">
+        <h3>Errors / Status</h3>
+        <div id="errors"></div>
+      </div>
+    </div>
+    <div class="console">
+      <h4>Console (port 0)</h4>
+      <div class="out" id="consoleOut"></div>
+    </div>
+  </div>
+
+  <!-- Trace / listing (bottom strip) -->
+  <div class="trace">
+    <div class="tabs">
+      <div class="tab active" data-tab="listing">Listing</div>
+      <div class="tab" data-tab="trace">Trace</div>
+      <div class="tab" data-tab="help">Help</div>
+    </div>
+    <div class="body listing" id="traceBody">
+      <pre id="listingPre">No listing yet — click "Assemble" to compile your program.</pre>
+    </div>
+  </div>
+</div>
+<!-- ==== inlined z80.js ==== -->
+<script>
+/* ============================================================
+   Z80 Simulator - Core CPU, Assembler, and Runtime
+   ============================================================
+   Educational Z80 emulator + assembler. Covers the main Z80
+   instruction set used for teaching: 8-bit loads, arithmetic,
+   logic, jumps/calls, stack ops, I/O, and a subset of indexed
+   and bit instructions. Not cycle-accurate; focused on clarity.
+   ============================================================ */
+
+'use strict';
+
+// ---------- CPU state ----------
+class Z80 {
+  constructor(memorySize = 65536) {
+    this.mem = new Uint8Array(memorySize);
+    // 8-bit main registers
+    this.A = 0; this.B = 0; this.C = 0; this.D = 0; this.E = 0; this.H = 0; this.L = 0;
+    // Alternate register set
+    this.A2 = 0; this.B2 = 0; this.C2 = 0; this.D2 = 0; this.E2 = 0; this.H2 = 0; this.L2 = 0;
+    // Index registers
+    this.IX = 0; this.IY = 0;
+    // Special
+    this.I = 0; this.R = 0;
+    // Stack pointer, program counter
+    this.SP = 0xFFFF; this.PC = 0;
+    // Flags: S Z H P/V N C  (bit7..bit0 in F)
+    this.F = 0;
+    this.F2 = 0; // alternate flags
+    // IFF0/IFF1 (interrupt flip-flops)
+    this.IFF1 = false; this.IFF0 = false;
+    this.IM = 0; // interrupt mode 0/1/2
+    // Halted state
+    this.halted = false;
+    // Trace for debugger
+    this.trace = [];
+    this.traceMax = 2000;
+    // I/O ports
+    this.ports = new Uint8Array(256);
+    this.ioOutput = null; // callback (port, value)
+    this.ioInput = null;  // callback (port) => value
+    // Output port helper
+    this.consoleCharOut = null; // (charCode) => void
+    // Breakpoint callback (PC matches user BP)
+    this.breakpointHit = null;
+    this.breakpoints = new Set();
+    // Stop flag
+    this.stop = false;
+    // Step counter
+    this.steps = 0;
+    // Memory-mapped terminal "screen" (simple)
+    this.screen = ''; // last char output via port 0
+  }
+
+  // ----- Register pair helpers -----
+  get BC() { return (this.B << 8) | this.C; }
+  set BC(v) { this.B = (v >> 8) & 0xFF; this.C = v & 0xFF; }
+  get DE() { return (this.D << 8) | this.E; }
+  set DE(v) { this.D = (v >> 8) & 0xFF; this.E = v & 0xFF; }
+  get HL() { return (this.H << 8) | this.L; }
+  set HL(v) { this.H = (v >> 8) & 0xFF; this.L = v & 0xFF; }
+  get AF() { return (this.A << 8) | this.F; }
+  set AF(v) { this.A = (v >> 8) & 0xFF; this.F = v & 0xFF; }
+  get BC2() { return (this.B2 << 8) | this.C2; }
+  set BC2(v) { this.B2 = (v >> 8) & 0xFF; this.C2 = v & 0xFF; }
+  get DE2() { return (this.D2 << 8) | this.E2; }
+  set DE2(v) { this.D2 = (v >> 8) & 0xFF; this.E2 = v & 0xFF; }
+  get HL2() { return (this.H2 << 8) | this.L2; }
+  set HL2(v) { this.H2 = (v >> 8) & 0xFF; this.L2 = v & 0xFF; }
+  get AF2() { return (this.A2 << 8) | this.F2; }
+  set AF2(v) { this.A2 = (v >> 8) & 0xFF; this.F2 = v & 0xFF; }
+
+  // ----- Flag helpers -----
+  // S Z 0 H 0 P/V N C
+  get flagS()  { return (this.F & 0x80) !== 0; }
+  get flagZ()  { return (this.F & 0x40) !== 0; }
+  get flagH()  { return (this.F & 0x10) !== 0; }
+  get flagPV() { return (this.F & 0x04) !== 0; }
+  get flagN()  { return (this.F & 0x02) !== 0; }
+  get flagC()  { return (this.F & 0x01) !== 0; }
+  setFlag(s, z, h, pv, n, c) {
+    let f = 0;
+    if (s)  f |= 0x80;
+    if (z)  f |= 0x40;
+    if (h)  f |= 0x10;
+    if (pv) f |= 0x04;
+    if (n)  f |= 0x02;
+    if (c)  f |= 0x01;
+    this.F = f;
+  }
+
+  // ----- Memory helpers -----
+  read(addr) { return this.mem[addr & 0xFFFF]; }
+  write(addr, v) { this.mem[addr & 0xFFFF] = v & 0xFF; }
+  read16(addr) {
+    const lo = this.read(addr), hi = this.read((addr + 1) & 0xFFFF);
+    return (hi << 8) | lo;
+  }
+  write16(addr, v) {
+    this.write(addr, v & 0xFF);
+    this.write((addr + 1) & 0xFFFF, (v >> 8) & 0xFF);
+  }
+
+  // ----- Stack helpers -----
+  push16(v) {
+    this.SP = (this.SP - 1) & 0xFFFF; this.write(this.SP, (v >> 8) & 0xFF);
+    this.SP = (this.SP - 1) & 0xFFFF; this.write(this.SP, v & 0xFF);
+  }
+  pop16() {
+    const lo = this.read(this.SP); this.SP = (this.SP + 1) & 0xFFFF;
+    const hi = this.read(this.SP); this.SP = (this.SP + 1) & 0xFFFF;
+    return (hi << 8) | lo;
+  }
+
+  // ----- Reset -----
+  reset() {
+    this.A=0;this.B=0;this.C=0;this.D=0;this.E=0;this.H=0;this.L=0;
+    this.A2=0;this.B2=0;this.C2=0;this.D2=0;this.E2=0;this.H2=0;this.L2=0;
+    this.IX=0;this.IY=0;this.I=0;this.R=0;
+    this.SP=0xFFFF;this.PC=0;this.F=0;this.F2=0;
+    this.IFF1=false;this.IFF0=false;this.IM=0;
+    this.halted=false;this.trace.length=0;this.steps=0;
+  }
+
+  // ----- Output to port -----
+  out(port, val) {
+    this.ports[port & 0xFF] = val & 0xFF;
+    if (this.ioOutput) this.ioOutput(port & 0xFF, val & 0xFF);
+    if (port === 0 && this.consoleCharOut) this.consoleCharOut(val & 0xFF);
+  }
+  in(port) {
+    if (this.ioInput) {
+      const v = this.ioInput(port & 0xFF) & 0xFF;
+      this.ports[port & 0xFF] = v;
+      return v;
+    }
+    return this.ports[port & 0xFF] || 0;
+  }
+
+  // ----- Decode + execute one instruction at PC -----
+  // Returns number of T-states (approximate) for visual feedback.
+  step() {
+    if (this.halted) return 0;
+    if (this.breakpoints.has(this.PC) && this.steps > 0) {
+      if (this.breakpointHit) this.breakpointHit(this.PC);
+    }
+    const startPC = this.PC;
+    const tStates = this.executeOne();
+    this.R = (this.R + 1) & 0x7F;
+    this.steps++;
+    this.trace.push({ pc: startPC, tStates });
+    if (this.trace.length > this.traceMax) this.trace.shift();
+    return tStates;
+  }
+
+  // Run until PC is out of range, halted, or step limit hit.
+  run(maxSteps = 100000) {
+    let totalT = 0;
+    for (let i = 0; i < maxSteps; i++) {
+      if (this.halted) break;
+      totalT += this.step();
+    }
+    return totalT;
+  }
+
+  // Main opcode dispatch. Educational implementation: keep it
+  // readable rather than maximally compact.
+  executeOne() {
+    const op = this.read(this.PC); this.PC = (this.PC + 1) & 0xFFFF;
+    // Helpers
+    const imm8  = () => { const v = this.read(this.PC); this.PC = (this.PC + 1) & 0xFFFF; return v; };
+    const imm16 = () => { const lo = this.read(this.PC), hi = this.read((this.PC+1)&0xFFFF); this.PC=(this.PC+2)&0xFFFF; return (hi<<8)|lo; };
+    const idxOffset = () => { const d = this.read(this.PC); this.PC = (this.PC + 1) & 0xFFFF; return d; };
+    // ---- Main table ----
+    switch (op) {
+      // NOP
+      case 0x00: return 4;
+
+      // 8-bit loads r, r' (0x40..0x7F with exclusions 0x76=HALT)
+      case 0x40: this.B = this.B; return 4;
+      case 0x41: this.B = this.C; return 4;
+      case 0x42: this.B = this.D; return 4;
+      case 0x43: this.B = this.E; return 4;
+      case 0x44: this.B = this.H; return 4;
+      case 0x45: this.B = this.L; return 4;
+      case 0x46: this.B = this.read(this.HL); return 7;
+      case 0x47: this.B = this.A; return 4;
+      case 0x48: this.C = this.B; return 4;
+      case 0x49: this.C = this.C; return 4;
+      case 0x4A: this.C = this.D; return 4;
+      case 0x4B: this.C = this.E; return 4;
+      case 0x4C: this.C = this.H; return 4;
+      case 0x4D: this.C = this.L; return 4;
+      case 0x4E: this.C = this.read(this.HL); return 7;
+      case 0x4F: this.C = this.A; return 4;
+      case 0x50: this.D = this.B; return 4;
+      case 0x51: this.D = this.C; return 4;
+      case 0x52: this.D = this.D; return 4;
+      case 0x53: this.D = this.E; return 4;
+      case 0x54: this.D = this.H; return 4;
+      case 0x55: this.D = this.L; return 4;
+      case 0x56: this.D = this.read(this.HL); return 7;
+      case 0x57: this.D = this.A; return 4;
+      case 0x58: this.E = this.B; return 4;
+      case 0x59: this.E = this.C; return 4;
+      case 0x5A: this.E = this.D; return 4;
+      case 0x5B: this.E = this.E; return 4;
+      case 0x5C: this.E = this.H; return 4;
+      case 0x5D: this.E = this.L; return 4;
+      case 0x5E: this.E = this.read(this.HL); return 7;
+      case 0x5F: this.E = this.A; return 4;
+      case 0x60: this.H = this.B; return 4;
+      case 0x61: this.H = this.C; return 4;
+      case 0x62: this.H = this.D; return 4;
+      case 0x63: this.H = this.E; return 4;
+      case 0x64: this.H = this.H; return 4;
+      case 0x65: this.H = this.L; return 4;
+      case 0x66: this.H = this.read(this.HL); return 7;
+      case 0x67: this.H = this.A; return 4;
+      case 0x68: this.L = this.B; return 4;
+      case 0x69: this.L = this.C; return 4;
+      case 0x6A: this.L = this.D; return 4;
+      case 0x6B: this.L = this.E; return 4;
+      case 0x6C: this.L = this.H; return 4;
+      case 0x6D: this.L = this.L; return 4;
+      case 0x6E: this.L = this.read(this.HL); return 7;
+      case 0x6F: this.L = this.A; return 4;
+      case 0x70: this.write(this.HL, this.B); return 7;
+      case 0x71: this.write(this.HL, this.C); return 7;
+      case 0x72: this.write(this.HL, this.D); return 7;
+      case 0x73: this.write(this.HL, this.E); return 7;
+      case 0x74: this.write(this.HL, this.H); return 7;
+      case 0x75: this.write(this.HL, this.L); return 7;
+      case 0x76: this.halted = true; return 4; // HALT
+      case 0x77: this.write(this.HL, this.A); return 7;
+      case 0x78: this.A = this.B; return 4;
+      case 0x79: this.A = this.C; return 4;
+      case 0x7A: this.A = this.D; return 4;
+      case 0x7B: this.A = this.E; return 4;
+      case 0x7C: this.A = this.H; return 4;
+      case 0x7D: this.A = this.L; return 4;
+      case 0x7E: this.A = this.read(this.HL); return 7;
+      case 0x7F: this.A = this.A; return 4;
+
+      // Immediate loads 0x06/0x0E/0x16/0x1E/0x26/0x2E/0x36/0x3E
+      case 0x06: this.B = imm8(); return 7;
+      case 0x0E: this.C = imm8(); return 7;
+      case 0x16: this.D = imm8(); return 7;
+      case 0x1E: this.E = imm8(); return 7;
+      case 0x26: this.H = imm8(); return 7;
+      case 0x2E: this.L = imm8(); return 7;
+      case 0x36: this.write(this.HL, imm8()); return 10;
+      case 0x3E: this.A = imm8(); return 7;
+
+      // 16-bit loads
+      case 0x01: { const v = imm16(); this.BC = v; return 10; } // LD BC,nn
+      case 0x11: { const v = imm16(); this.DE = v; return 10; }
+      case 0x21: { const v = imm16(); this.HL = v; return 10; }
+      case 0x31: { const v = imm16(); this.SP = v; return 10; }
+      // LD A,(BC)/(DE)
+      case 0x0A: this.A = this.read(this.BC); return 7;
+      case 0x1A: this.A = this.read(this.DE); return 7;
+      // LD (BC),A / (DE),A
+      case 0x02: this.write(this.BC, this.A); return 7;
+      case 0x12: this.write(this.DE, this.A); return 7;
+      // LD A,(nn) / (nn),A
+      case 0x3A: { const n = imm16(); this.A = this.read(n); return 13; }
+      case 0x32: { const n = imm16(); this.write(n, this.A); return 13; }
+      // LD HL,(nn) / (nn),HL
+      case 0x2A: { const n = imm16(); this.HL = this.read16(n); return 16; }
+      case 0x22: { const n = imm16(); this.write16(n, this.HL); return 16; }
+      // LD SP,HL
+      case 0xF9: this.SP = this.HL; return 6;
+      // LD dd,nn 0xDD prefix handled later
+      // EX DE,HL
+      case 0xEB: { const t = this.DE; this.DE = this.HL; this.HL = t; return 4; }
+      // EX AF,AF'
+      case 0x08: { const t = this.AF; this.AF = this.AF2; this.AF2 = t; return 4; }
+      // EXX
+      case 0xD9: {
+        const tb=this.B,tc=this.C,td=this.D,te=this.E,th=this.H,tl=this.L;
+        this.B=this.B2;this.C=this.C2;this.D=this.D2;this.E=this.E2;this.H=this.H2;this.L=this.L2;
+        this.B2=tb;this.C2=tc;this.D2=td;this.E2=te;this.H2=th;this.L2=tl;
+        return 4;
+      }
+      // EX (SP),HL
+      case 0xE3: {
+        const v = this.read16(this.SP);
+        this.write16(this.SP, this.HL);
+        this.HL = v;
+        return 19;
+      }
+      // PUSH/POP 16-bit
+      case 0xC5: this.push16(this.BC); return 11;
+      case 0xD5: this.push16(this.DE); return 11;
+      case 0xE5: this.push16(this.HL); return 11;
+      case 0xF5: this.push16(this.AF); return 11;
+      case 0xC1: this.BC = this.pop16(); return 10;
+      case 0xD1: this.DE = this.pop16(); return 10;
+      case 0xE1: this.HL = this.pop16(); return 10;
+      case 0xF1: this.AF = this.pop16(); return 10;
+
+      // ALU operations 0x80..0xBF (register + accumulator ALU)
+      // Format: 10ooorrr with ooo = op, rrr = operand reg
+      case 0x80: return this._add8(this.B);
+      case 0x81: return this._add8(this.C);
+      case 0x82: return this._add8(this.D);
+      case 0x83: return this._add8(this.E);
+      case 0x84: return this._add8(this.H);
+      case 0x85: return this._add8(this.L);
+      case 0x86: return this._add8(this.read(this.HL));
+      case 0x87: return this._add8(this.A);
+      case 0x88: return this._adc8(this.B);
+      case 0x89: return this._adc8(this.C);
+      case 0x8A: return this._adc8(this.D);
+      case 0x8B: return this._adc8(this.E);
+      case 0x8C: return this._adc8(this.H);
+      case 0x8D: return this._adc8(this.L);
+      case 0x8E: return this._adc8(this.read(this.HL));
+      case 0x8F: return this._adc8(this.A);
+      case 0x90: return this._sub8(this.B);
+      case 0x91: return this._sub8(this.C);
+      case 0x92: return this._sub8(this.D);
+      case 0x93: return this._sub8(this.E);
+      case 0x94: return this._sub8(this.H);
+      case 0x95: return this._sub8(this.L);
+      case 0x96: return this._sub8(this.read(this.HL));
+      case 0x97: return this._sub8(this.A);
+      case 0x98: return this._sbc8(this.B);
+      case 0x99: return this._sbc8(this.C);
+      case 0x9A: return this._sbc8(this.D);
+      case 0x9B: return this._sbc8(this.E);
+      case 0x9C: return this._sbc8(this.H);
+      case 0x9D: return this._sbc8(this.L);
+      case 0x9E: return this._sbc8(this.read(this.HL));
+      case 0x9F: return this._sbc8(this.A);
+      case 0xA0: return this._and8(this.B);
+      case 0xA1: return this._and8(this.C);
+      case 0xA2: return this._and8(this.D);
+      case 0xA3: return this._and8(this.E);
+      case 0xA4: return this._and8(this.H);
+      case 0xA5: return this._and8(this.L);
+      case 0xA6: return this._and8(this.read(this.HL));
+      case 0xA7: return this._and8(this.A);
+      case 0xA8: return this._xor8(this.B);
+      case 0xA9: return this._xor8(this.C);
+      case 0xAA: return this._xor8(this.D);
+      case 0xAB: return this._xor8(this.E);
+      case 0xAC: return this._xor8(this.H);
+      case 0xAD: return this._xor8(this.L);
+      case 0xAE: return this._xor8(this.read(this.HL));
+      case 0xAF: return this._xor8(this.A);
+      case 0xB0: return this._or8(this.B);
+      case 0xB1: return this._or8(this.C);
+      case 0xB2: return this._or8(this.D);
+      case 0xB3: return this._or8(this.E);
+      case 0xB4: return this._or8(this.H);
+      case 0xB5: return this._or8(this.L);
+      case 0xB6: return this._or8(this.read(this.HL));
+      case 0xB7: return this._or8(this.A);
+      case 0xB8: return this._cp8(this.B);
+      case 0xB9: return this._cp8(this.C);
+      case 0xBA: return this._cp8(this.D);
+      case 0xBB: return this._cp8(this.E);
+      case 0xBC: return this._cp8(this.H);
+      case 0xBD: return this._cp8(this.L);
+      case 0xBE: return this._cp8(this.read(this.HL));
+      case 0xBF: return this._cp8(this.A);
+
+      // ALU immediate
+      case 0xC6: { const v = imm8(); return this._add8(v); }
+      case 0xCE: { const v = imm8(); return this._adc8(v); }
+      case 0xD6: { const v = imm8(); return this._sub8(v); }
+      case 0xDE: { const v = imm8(); return this._sbc8(v); }
+      case 0xE6: { const v = imm8(); return this._and8(v); }
+      case 0xEE: { const v = imm8(); return this._xor8(v); }
+      case 0xF6: { const v = imm8(); return this._or8(v); }
+      case 0xFE: { const v = imm8(); return this._cp8(v); }
+
+      // Inc/Dec 8-bit
+      case 0x04: this.B = this._inc8(this.B); return 4;
+      case 0x0C: this.C = this._inc8(this.C); return 4;
+      case 0x14: this.D = this._inc8(this.D); return 4;
+      case 0x1C: this.E = this._inc8(this.E); return 4;
+      case 0x24: this.H = this._inc8(this.H); return 4;
+      case 0x2C: this.L = this._inc8(this.L); return 4;
+      case 0x34: this.write(this.HL, this._inc8(this.read(this.HL))); return 11;
+      case 0x3C: this.A = this._inc8(this.A); return 4;
+      case 0x05: this.B = this._dec8(this.B); return 4;
+      case 0x0D: this.C = this._dec8(this.C); return 4;
+      case 0x15: this.D = this._dec8(this.D); return 4;
+      case 0x1D: this.E = this._dec8(this.E); return 4;
+      case 0x25: this.H = this._dec8(this.H); return 4;
+      case 0x2D: this.L = this._dec8(this.L); return 4;
+      case 0x35: this.write(this.HL, this._dec8(this.read(this.HL))); return 11;
+      case 0x3D: this.A = this._dec8(this.A); return 4;
+
+      // 16-bit INC/DEC
+      case 0x03: this.BC = (this.BC + 1) & 0xFFFF; return 6;
+      case 0x13: this.DE = (this.DE + 1) & 0xFFFF; return 6;
+      case 0x23: this.HL = (this.HL + 1) & 0xFFFF; return 6;
+      case 0x33: this.SP = (this.SP + 1) & 0xFFFF; return 6;
+      case 0x0B: this.BC = (this.BC - 1) & 0xFFFF; return 6;
+      case 0x1B: this.DE = (this.DE - 1) & 0xFFFF; return 6;
+      case 0x2B: this.HL = (this.HL - 1) & 0xFFFF; return 6;
+      case 0x3B: this.SP = (this.SP - 1) & 0xFFFF; return 6;
+
+      // ADD HL, ss
+      case 0x09: return this._addHL(this.BC);
+      case 0x19: return this._addHL(this.DE);
+      case 0x29: return this._addHL(this.HL);
+      case 0x39: return this._addHL(this.SP);
+
+      // Rotates
+      case 0x07: this.A = this._rlca(); return 4;
+      case 0x0F: this.A = this._rrca(); return 4;
+      case 0x17: this.A = this._rla(); return 4;
+      case 0x1F: this.A = this._rra(); return 4;
+
+      // CPL / SCF / CCF
+      case 0x2F: this.A = (~this.A) & 0xFF;
+        this.setFlag(false, false, true, false, true, this.flagC); return 4;
+      case 0x37: this.setFlag(false, false, false, false, false, true); return 4; // SCF
+      case 0x3F: this.setFlag(false, false, false, false, false, !this.flagC); return 4; // CCF (also sets H to old C)
+      // DAA - decimal adjust accumulator after ADD/ADC/SUB/SBC
+      case 0x27: {
+        let a = this.A;
+        const c = this.flagC, h = this.flagH, n = this.flagN;
+        let correction = 0;
+        if (h || (a & 0x0F) > 9) correction |= 0x06;
+        if (c || (a >> 4) > 9 || ((a >> 4) >= 9 && (a & 0x0F) > 9)) correction |= 0x60;
+        const before = a;
+        a = (a + (n ? -correction : correction)) & 0xFF;
+        // Carry: set if correction included $60
+        this.setFlag((a & 0x80) !== 0, a === 0, ((before ^ a) & 0x10) !== 0, this._parity(a), n, (correction & 0x60) !== 0 || c);
+        this.A = a;
+        return 4;
+      }
+
+      // DI / EI
+      case 0xF3: this.IFF1 = false; this.IFF0 = false; return 4;
+      case 0xFB: this.IFF1 = true; this.IFF0 = true; return 4;
+
+      // JP nn / JP HL
+      case 0xC3: { const n = imm16(); this.PC = n; return 10; }
+      case 0xE9: this.PC = this.HL; return 4;
+
+      // Conditional jumps
+      case 0xC2: { const n = imm16(); if (!this.flagZ) this.PC = n; return (this.flagZ?10:10); }
+      case 0xCA: { const n = imm16(); if (this.flagZ)  this.PC = n; return 10; }
+      case 0xD2: { const n = imm16(); if (!this.flagC) this.PC = n; return 10; }
+      case 0xDA: { const n = imm16(); if (this.flagC)  this.PC = n; return 10; }
+      case 0xE2: { const n = imm16(); if (!this.flagPV)this.PC = n; return 10; } // JP PO,nn
+      case 0xEA: { const n = imm16(); if (this.flagPV) this.PC = n; return 10; } // JP PE,nn
+      case 0xF2: { const n = imm16(); if (!this.flagS) this.PC = n; return 10; } // JP P,nn
+      case 0xFA: { const n = imm16(); if (this.flagS)  this.PC = n; return 10; } // JP M,nn
+
+      // JR
+      case 0x18: { const d = imm8(); this.PC = (this.PC + (d<128?d:d-256)) & 0xFFFF; return 12; }
+      case 0x20: { const d = imm8(); if (!this.flagZ) this.PC = (this.PC + (d<128?d:d-256)) & 0xFFFF; return (this.flagZ?7:12); }
+      case 0x28: { const d = imm8(); if (this.flagZ)  this.PC = (this.PC + (d<128?d:d-256)) & 0xFFFF; return (this.flagZ?12:7); }
+      case 0x30: { const d = imm8(); if (!this.flagC) this.PC = (this.PC + (d<128?d:d-256)) & 0xFFFF; return (this.flagC?7:12); }
+      case 0x38: { const d = imm8(); if (this.flagC)  this.PC = (this.PC + (d<128?d:d-256)) & 0xFFFF; return (this.flagC?12:7); }
+
+      // DJNZ
+      case 0x10: { const d = imm8(); this.B = (this.B - 1) & 0xFF; if (this.B !== 0) this.PC = (this.PC + (d<128?d:d-256)) & 0xFFFF; return (this.B===0?7:13); }
+
+      // CALL nn
+      case 0xCD: { const n = imm16(); this.push16(this.PC); this.PC = n; return 17; }
+      // Conditional CALL
+      case 0xC4: { const n = imm16(); if (!this.flagZ) { this.push16(this.PC); this.PC = n; return 17; } return 10; }
+      case 0xCC: { const n = imm16(); if (this.flagZ)  { this.push16(this.PC); this.PC = n; return 17; } return 10; }
+      case 0xD4: { const n = imm16(); if (!this.flagC) { this.push16(this.PC); this.PC = n; return 17; } return 10; }
+      case 0xDC: { const n = imm16(); if (this.flagC)  { this.push16(this.PC); this.PC = n; return 17; } return 10; }
+      case 0xE4: { const n = imm16(); if (!this.flagPV){ this.push16(this.PC); this.PC = n; return 17; } return 10; }
+      case 0xEC: { const n = imm16(); if (this.flagPV) { this.push16(this.PC); this.PC = n; return 17; } return 10; }
+      case 0xF4: { const n = imm16(); if (!this.flagS) { this.push16(this.PC); this.PC = n; return 17; } return 10; }
+      case 0xFC: { const n = imm16(); if (this.flagS)  { this.push16(this.PC); this.PC = n; return 17; } return 10; }
+
+      // RET
+      case 0xC9: this.PC = this.pop16(); return 10;
+      case 0xC0: if (!this.flagZ) { this.PC = this.pop16(); return 11; } return 5;
+      case 0xC8: if (this.flagZ)  { this.PC = this.pop16(); return 11; } return 5;
+      case 0xD0: if (!this.flagC) { this.PC = this.pop16(); return 11; } return 5;
+      case 0xD8: if (this.flagC)  { this.PC = this.pop16(); return 11; } return 5;
+      case 0xE0: if (!this.flagPV){ this.PC = this.pop16(); return 11; } return 5;
+      case 0xE8: if (this.flagPV) { this.PC = this.pop16(); return 11; } return 5;
+      case 0xF0: if (!this.flagS) { this.PC = this.pop16(); return 11; } return 5;
+      case 0xF8: if (this.flagS)  { this.PC = this.pop16(); return 11; } return 5;
+
+      // RST
+      case 0xC7: this.push16(this.PC); this.PC = 0x00; return 11;
+      case 0xCF: this.push16(this.PC); this.PC = 0x08; return 11;
+      case 0xD7: this.push16(this.PC); this.PC = 0x10; return 11;
+      case 0xDF: this.push16(this.PC); this.PC = 0x18; return 11;
+      case 0xE7: this.push16(this.PC); this.PC = 0x20; return 11;
+      case 0xEF: this.push16(this.PC); this.PC = 0x28; return 11;
+      case 0xF7: this.push16(this.PC); this.PC = 0x30; return 11;
+      case 0xFF: this.push16(this.PC); this.PC = 0x38; return 11;
+
+      // I/O
+      case 0xD3: { const p = imm8(); this.out(p, this.A); return 11; } // OUT (n),A
+      case 0xDB: { const p = imm8(); this.A = this.in(p); return 11; } // IN A,(n)
+
+      // IM modes
+      case 0x46: this.IM = 0; return 4;
+      case 0x56: this.IM = 1; return 4;
+      case 0x5E: this.IM = 2; return 4;
+      // (these are 0xED 0x46/0x56/0x5E; the standalone opcodes above are placeholders)
+      // In reality: ED 46/56/5E handled in ED prefix block. We keep 0x46 (LD B,(HL))
+      // so we'll handle IM only inside ED.
+
+      // ED prefix
+      case 0xED: {
+        const op2 = this.read(this.PC); this.PC = (this.PC + 1) & 0xFFFF;
+        switch (op2) {
+          case 0x40: { const n = imm16(); this.B = this.read(n); return 12; } // LD B,(nn)
+          case 0x41: { const n = imm16(); this.C = this.read(n); return 12; } // wrong size, keep simple
+          // We don't need full ED set; provide common:
+          case 0x42: { const n = imm16(); this.BC = this.read16(n); return 20; } // LD BC,(nn)
+          case 0x43: { const n = imm16(); this.write16(n, this.BC); return 20; }
+          case 0x44: this.A = this._neg(); return 8;
+          case 0x45: this.IFF1 = this.IFF0; return 4; // RETN
+          case 0x46: this.IM = 0; return 4;
+          case 0x47: this.I = this.A; return 9; // LD I,A
+          case 0x48: { const n = imm16(); this.C = this.read(n); return 12; }
+          case 0x4A: { const n = imm16(); this.DE = this.read16(n); return 20; }
+          case 0x4B: { const n = imm16(); this.write16(n, this.DE); return 20; }
+          case 0x4C: this.A = this._neg(); return 8;
+          case 0x4D: this.IFF1 = this.IFF0; return 4; // RETI (simplified)
+          case 0x4F: this.R = this.A; return 9; // LD R,A
+          case 0x50: { const n = imm16(); this.D = this.read(n); return 12; }
+          case 0x51: { const n = imm16(); this.E = this.read(n); return 12; }
+          case 0x52: { const n = imm16(); this.HL = this.read16(n); return 20; }
+          case 0x53: { const n = imm16(); this.write16(n, this.HL); return 20; }
+          case 0x56: this.IM = 1; return 4;
+          case 0x57: this.A = this.I; return 9;
+          case 0x58: { const n = imm16(); this.E = this.read(n); return 12; }
+          case 0x5A: { const n = imm16(); this.write16(n, this.DE); return 20; } // LD (nn),DE
+          case 0x5B: { const n = imm16(); this.DE = this.read16(n); return 20; }
+          case 0x5E: this.IM = 2; return 4;
+          case 0x5F: this.A = this.R; return 9;
+          // Block instructions (LDIR, CPIR etc) - simplified:
+          case 0xB0: { // LDIR
+            this.write(this.DE, this.read(this.HL));
+            this.HL = (this.HL + 1) & 0xFFFF;
+            this.DE = (this.DE + 1) & 0xFFFF;
+            this.BC = (this.BC - 1) & 0xFFFF;
+            this.setFlag(false, this.BC===0, false, this.BC!==0, false, false);
+            if (this.BC !== 0) this.PC = (this.PC - 2) & 0xFFFF;
+            return 21;
+          }
+          case 0xB8: { // LDDR
+            this.write(this.DE, this.read(this.HL));
+            this.HL = (this.HL - 1) & 0xFFFF;
+            this.DE = (this.DE - 1) & 0xFFFF;
+            this.BC = (this.BC - 1) & 0xFFFF;
+            this.setFlag(false, this.BC===0, false, this.BC!==0, false, false);
+            if (this.BC !== 0) this.PC = (this.PC - 2) & 0xFFFF;
+            return 21;
+          }
+          // Rotates on (HL) (RRD, RLD)
+          case 0x67: { // RRD
+            const v = this.read(this.HL);
+            const lo = v & 0x0F;
+            const newV = ((this.A & 0x0F) << 4) | (v >> 4);
+            this.write(this.HL, newV);
+            const newA = (this.A & 0xF0) | lo;
+            this._setFlagsLogic(newA);
+            this.A = newA;
+            return 18;
+          }
+          case 0x6F: { // RLD
+            const v = this.read(this.HL);
+            const hi = v >> 4;
+            const newV = ((v & 0x0F) << 4) | (this.A & 0x0F);
+            this.write(this.HL, newV);
+            const newA = (this.A & 0xF0) | hi;
+            this._setFlagsLogic(newA);
+            this.A = newA;
+            return 18;
+          }
+          default:
+            throw new Error(`Unimplemented ED opcode: 0x${op2.toString(16).toUpperCase()} at PC=0x${((this.PC-2)&0xFFFF).toString(16)}`);
+        }
+      }
+
+      // DD prefix (IX)
+      case 0xDD: {
+        const op2 = this.read(this.PC); this.PC = (this.PC + 1) & 0xFFFF;
+        const d = idxOffset();
+        const addr = (this.IX + (d<128?d:d-256)) & 0xFFFF;
+        switch (op2) {
+          case 0x21: { const v = imm16(); this.IX = v; return 14; } // LD IX,nn
+          case 0x22: { const n = imm16(); this.write16(n, this.IX); return 20; } // LD (nn),IX
+          case 0x2A: { const n = imm16(); this.IX = this.read16(n); return 20; }
+          case 0x46: this.B = this.read(addr); return 19; // LD B,(IX+d)
+          case 0x4E: this.C = this.read(addr); return 19;
+          case 0x56: this.D = this.read(addr); return 19;
+          case 0x5E: this.E = this.read(addr); return 19;
+          case 0x66: this.H = this.read(addr); return 19;
+          case 0x6E: this.L = this.read(addr); return 19;
+          case 0x7E: this.A = this.read(addr); return 19;
+          case 0x70: this.write(addr, this.B); return 19;
+          case 0x71: this.write(addr, this.C); return 19;
+          case 0x72: this.write(addr, this.D); return 19;
+          case 0x73: this.write(addr, this.E); return 19;
+          case 0x74: this.write(addr, this.H); return 19;
+          case 0x75: this.write(addr, this.L); return 19;
+          case 0x77: this.write(addr, this.A); return 19;
+          case 0x36: this.write(addr, imm8()); return 19; // LD (IX+d),n
+          case 0x86: return this._add8(this.read(addr));
+          case 0x8E: return this._adc8(this.read(addr));
+          case 0x96: return this._sub8(this.read(addr));
+          case 0x9E: return this._sbc8(this.read(addr));
+          case 0xA6: return this._and8(this.read(addr));
+          case 0xAE: return this._xor8(this.read(addr));
+          case 0xB6: return this._or8(this.read(addr));
+          case 0xBE: return this._cp8(this.read(addr));
+          case 0x23: this.IX = (this.IX + 1) & 0xFFFF; return 10;
+          case 0x2B: this.IX = (this.IX - 1) & 0xFFFF; return 10;
+          case 0x09: return this._addIX(this.BC);
+          case 0x19: return this._addIX(this.DE);
+          case 0x29: return this._addIX(this.IX);
+          case 0x39: return this._addIX(this.SP);
+          case 0xE1: this.IX = this.pop16(); return 14; // POP IX
+          case 0xE5: this.push16(this.IX); return 15;    // PUSH IX
+          case 0xE3: { // EX (SP),IX
+            const v = this.read16(this.SP);
+            this.write16(this.SP, this.IX);
+            this.IX = v;
+            return 23;
+          }
+          default:
+            throw new Error(`Unimplemented DD opcode: 0x${op2.toString(16).toUpperCase()} at PC=0x${((this.PC-2)&0xFFFF).toString(16)}`);
+        }
+      }
+
+      // FD prefix (IY) - mirror of DD
+      case 0xFD: {
+        const op2 = this.read(this.PC); this.PC = (this.PC + 1) & 0xFFFF;
+        const d = idxOffset();
+        const addr = (this.IY + (d<128?d:d-256)) & 0xFFFF;
+        switch (op2) {
+          case 0x21: { const v = imm16(); this.IY = v; return 14; }
+          case 0x22: { const n = imm16(); this.write16(n, this.IY); return 20; }
+          case 0x2A: { const n = imm16(); this.IY = this.read16(n); return 20; }
+          case 0x46: this.B = this.read(addr); return 19;
+          case 0x4E: this.C = this.read(addr); return 19;
+          case 0x56: this.D = this.read(addr); return 19;
+          case 0x5E: this.E = this.read(addr); return 19;
+          case 0x66: this.H = this.read(addr); return 19;
+          case 0x6E: this.L = this.read(addr); return 19;
+          case 0x7E: this.A = this.read(addr); return 19;
+          case 0x70: this.write(addr, this.B); return 19;
+          case 0x71: this.write(addr, this.C); return 19;
+          case 0x72: this.write(addr, this.D); return 19;
+          case 0x73: this.write(addr, this.E); return 19;
+          case 0x74: this.write(addr, this.H); return 19;
+          case 0x75: this.write(addr, this.L); return 19;
+          case 0x77: this.write(addr, this.A); return 19;
+          case 0x36: this.write(addr, imm8()); return 19;
+          case 0x86: return this._add8(this.read(addr));
+          case 0x8E: return this._adc8(this.read(addr));
+          case 0x96: return this._sub8(this.read(addr));
+          case 0x9E: return this._sbc8(this.read(addr));
+          case 0xA6: return this._and8(this.read(addr));
+          case 0xAE: return this._xor8(this.read(addr));
+          case 0xB6: return this._or8(this.read(addr));
+          case 0xBE: return this._cp8(this.read(addr));
+          case 0x23: this.IY = (this.IY + 1) & 0xFFFF; return 10;
+          case 0x2B: this.IY = (this.IY - 1) & 0xFFFF; return 10;
+          case 0x09: return this._addIY(this.BC);
+          case 0x19: return this._addIY(this.DE);
+          case 0x29: return this._addIY(this.IY);
+          case 0x39: return this._addIY(this.SP);
+          case 0xE1: this.IY = this.pop16(); return 14;
+          case 0xE5: this.push16(this.IY); return 15;
+          case 0xE3: {
+            const v = this.read16(this.SP);
+            this.write16(this.SP, this.IY);
+            this.IY = v;
+            return 23;
+          }
+          default:
+            throw new Error(`Unimplemented FD opcode: 0x${op2.toString(16).toUpperCase()} at PC=0x${((this.PC-2)&0xFFFF).toString(16)}`);
+        }
+      }
+
+      // CB prefix - bit instructions
+      case 0xCB: {
+        const op2 = this.read(this.PC); this.PC = (this.PC + 1) & 0xFFFF;
+        return this._cb(op2, this.HL);
+      }
+
+      default:
+        throw new Error(`Unimplemented opcode: 0x${op.toString(16).toUpperCase().padStart(2,'0')} at PC=0x${((this.PC-1)&0xFFFF).toString(16).padStart(4,'0')}`);
+    }
+  }
+
+  // ----- 8-bit ALU helpers -----
+  _setFlagsLogic(v) {
+    const z = (v & 0xFF) === 0;
+    this.setFlag((v & 0x80) !== 0, z, false, this._parity(v), false, false);
+  }
+  _parity(v) {
+    v &= 0xFF;
+    let p = 0;
+    for (let i = 0; i < 8; i++) if (v & (1<<i)) p++;
+    return (p % 2) === 0;
+  }
+  _add8(v) {
+    const a = this.A, w = a + v;
+    const res = w & 0xFF;
+    const c = w > 0xFF;
+    const h = ((a & 0x0F) + (v & 0x0F)) > 0x0F;
+    this.A = res;
+    this.setFlag((res & 0x80) !== 0, res === 0, h, this._parity(res), false, c);
+    return 4;
+  }
+  _adc8(v) {
+    const cIn = this.flagC ? 1 : 0;
+    const a = this.A, w = a + v + cIn;
+    const res = w & 0xFF;
+    const c = w > 0xFF;
+    const h = ((a & 0x0F) + (v & 0x0F) + cIn) > 0x0F;
+    this.A = res;
+    this.setFlag((res & 0x80) !== 0, res === 0, h, this._parity(res), false, c);
+    return 4;
+  }
+  _sub8(v) {
+    const a = this.A, w = a - v;
+    const res = w & 0xFF;
+    const c = w < 0;
+    const h = ((a & 0x0F) - (v & 0x0F)) < 0;
+    this.A = res;
+    this.setFlag((res & 0x80) !== 0, res === 0, h, this._parity(res), true, c);
+    return 4;
+  }
+  _sbc8(v) {
+    const cIn = this.flagC ? 1 : 0;
+    const a = this.A, w = a - v - cIn;
+    const res = w & 0xFF;
+    const c = w < 0;
+    const h = ((a & 0x0F) - (v & 0x0F) - cIn) < 0;
+    this.A = res;
+    this.setFlag((res & 0x80) !== 0, res === 0, h, this._parity(res), true, c);
+    return 4;
+  }
+  _and8(v) { this.A &= v; this.A &= 0xFF; this._setFlagsLogic(this.A); return 4; }
+  _or8(v)  { this.A = (this.A | v) & 0xFF; this._setFlagsLogic(this.A); return 4; }
+  _xor8(v) { this.A = (this.A ^ v) & 0xFF; this._setFlagsLogic(this.A); return 4; }
+  _cp8(v) {
+    const a = this.A, w = a - v;
+    const res = w & 0xFF;
+    const c = w < 0;
+    const h = ((a & 0x0F) - (v & 0x0F)) < 0;
+    this.setFlag((res & 0x80) !== 0, res === 0, h, this._parity(res), true, c);
+    return 4;
+  }
+  _neg() {
+    const v = this.A;
+    const w = 0 - v;
+    const res = w & 0xFF;
+    const c = w < 0;
+    const h = ((0 & 0x0F) - (v & 0x0F)) < 0;
+    this.A = res;
+    this.setFlag((res & 0x80) !== 0, res === 0, h, this._parity(res), true, c);
+    return res;
+  }
+  _inc8(v) {
+    const w = v + 1;
+    const res = w & 0xFF;
+    this.setFlag((res & 0x80) !== 0, res === 0, ((v & 0x0F) + 1) > 0x0F, this._parity(res), false, this.flagC);
+    return res;
+  }
+  _dec8(v) {
+    const w = v - 1;
+    const res = w & 0xFF;
+    this.setFlag((res & 0x80) !== 0, res === 0, ((v & 0x0F) - 1) < 0, this._parity(res), true, this.flagC);
+    return res;
+  }
+
+  // 16-bit ADD HL,ss
+  _addHL(v) {
+    const hl = this.HL;
+    const w = hl + v;
+    const res = w & 0xFFFF;
+    const c = w > 0xFFFF;
+    const h = ((hl & 0x0FFF) + (v & 0x0FFF)) > 0x0FFF;
+    this.HL = res;
+    this.setFlag(this.flagS, this.flagZ, h, this.flagPV, false, c);
+    return 11;
+  }
+  _addIX(v) {
+    const ix = this.IX;
+    const w = ix + v;
+    const res = w & 0xFFFF;
+    const c = w > 0xFFFF;
+    const h = ((ix & 0x0FFF) + (v & 0x0FFF)) > 0x0FFF;
+    this.IX = res;
+    this.setFlag(this.flagS, this.flagZ, h, this.flagPV, false, c);
+    return 15;
+  }
+  _addIY(v) {
+    const iy = this.IY;
+    const w = iy + v;
+    const res = w & 0xFFFF;
+    const c = w > 0xFFFF;
+    const h = ((iy & 0x0FFF) + (v & 0x0FFF)) > 0x0FFF;
+    this.IY = res;
+    this.setFlag(this.flagS, this.flagZ, h, this.flagPV, false, c);
+    return 15;
+  }
+
+  // 8-bit rotates
+  _rlca() {
+    const a = this.A;
+    const c = (a & 0x80) !== 0;
+    const v = ((a << 1) & 0xFF) | (c ? 1 : 0);
+    this.A = v;
+    this.setFlag((v & 0x80) !== 0, false, false, this._parity(v), false, c);
+    return v;
+  }
+  _rrca() {
+    const a = this.A;
+    const c = (a & 0x01) !== 0;
+    const v = (a >> 1) | (c ? 0x80 : 0);
+    this.A = v;
+    this.setFlag((v & 0x80) !== 0, false, false, this._parity(v), false, c);
+    return v;
+  }
+  _rla() {
+    const a = this.A;
+    const cIn = this.flagC ? 1 : 0;
+    const cOut = (a & 0x80) !== 0;
+    const v = ((a << 1) & 0xFF) | cIn;
+    this.A = v;
+    this.setFlag((v & 0x80) !== 0, false, false, this._parity(v), false, cOut);
+    return v;
+  }
+  _rra() {
+    const a = this.A;
+    const cIn = this.flagC ? 1 : 0;
+    const cOut = (a & 0x01) !== 0;
+    const v = (a >> 1) | (cIn ? 0x80 : 0);
+    this.A = v;
+    this.setFlag((v & 0x80) !== 0, false, false, this._parity(v), false, cOut);
+    return v;
+  }
+
+  // CB-prefix operations. operand is 01bbbrrr for bit ops,
+  // 00xxxrrr for shifts/rotates.
+  _cb(op, hlAddr) {
+    const reg = op & 0x07;
+    const bit = (op >> 3) & 0x07;
+    const grp = (op >> 6) & 0x03;
+
+    // Get/set register by encoding
+    const getReg = (r) => {
+      switch (r) {
+        case 0: return this.B;
+        case 1: return this.C;
+        case 2: return this.D;
+        case 3: return this.E;
+        case 4: return this.H;
+        case 5: return this.L;
+        case 6: return this.read(hlAddr);
+        case 7: return this.A;
+      }
+    };
+    const setReg = (r, v) => {
+      switch (r) {
+        case 0: this.B = v; break;
+        case 1: this.C = v; break;
+        case 2: this.D = v; break;
+        case 3: this.E = v; break;
+        case 4: this.H = v; break;
+        case 5: this.L = v; break;
+        case 6: this.write(hlAddr, v); break;
+        case 7: this.A = v; break;
+      }
+    };
+
+    if (grp === 0) {
+      // Rotate/shift on r[rrr]
+      let v = getReg(reg);
+      let c = false, r;
+      switch (bit) {
+        case 0: // RLC
+          c = (v & 0x80) !== 0; r = ((v << 1) & 0xFF) | (c ? 1 : 0); break;
+        case 1: // RRC
+          c = (v & 0x01) !== 0; r = (v >> 1) | (c ? 0x80 : 0); break;
+        case 2: // RL
+          { const cIn = this.flagC ? 1 : 0; c = (v & 0x80) !== 0; r = ((v << 1) & 0xFF) | cIn; } break;
+        case 3: // RR
+          { const cIn = this.flagC ? 1 : 0; c = (v & 0x01) !== 0; r = (v >> 1) | (cIn ? 0x80 : 0); } break;
+        case 4: // SLA
+          c = (v & 0x80) !== 0; r = (v << 1) & 0xFF; break;
+        case 5: // SRA
+          c = (v & 0x01) !== 0; r = (v >> 1) | (v & 0x80); break;
+        case 6: // SLL (undocumented)
+          c = (v & 0x80) !== 0; r = ((v << 1) & 0xFF) | 1; break;
+        case 7: // SRL
+          c = (v & 0x01) !== 0; r = v >> 1; break;
+      }
+      setReg(reg, r);
+      this.setFlag((r & 0x80) !== 0, r === 0, false, this._parity(r), false, c);
+      return (reg === 6) ? 15 : 8;
+    } else if (grp === 1) {
+      // BIT b, r
+      const v = getReg(reg);
+      const m = 1 << bit;
+      const z = (v & m) === 0;
+      this.setFlag(this.flagS, z, true, this.flagPV, false, this.flagC);
+      if (reg === 6) {
+        // BIT on (HL) sets N=0, others as for register
+        this.setFlag(this.flagS, z, true, this.flagPV, false, this.flagC);
+      } else {
+        this.setFlag((bit===7 && (v & m) !== 0), z, true, this.flagPV, false, this.flagC);
+      }
+      return (reg === 6) ? 12 : 8;
+    } else if (grp === 2) {
+      // RES b, r
+      const v = getReg(reg);
+      setReg(reg, v & ~(1 << bit));
+      return (reg === 6) ? 15 : 8;
+    } else {
+      // SET b, r
+      const v = getReg(reg);
+      setReg(reg, v | (1 << bit));
+      return (reg === 6) ? 15 : 8;
+    }
+  }
+}
+
+// Expose to window for non-module use
+if (typeof window !== 'undefined') window.Z80 = Z80;
+</script>
+<!-- ==== inlined z80-asm.js ==== -->
+<script>
+/* ============================================================
+   Z80 Assembler - text mnemonics to bytes
+   ============================================================
+   A small, friendly Z80 assembler. Two-pass: first collect
+   label addresses, then emit machine code. Supports comments
+   (after ';'), labels (identifier followed by ':'), the usual
+   numeric formats (decimal, 0x hex, $ hex, % binary, 'c'
+   for ASCII char), and EQU/DB/DW for data declarations.
+   ============================================================ */
+
+'use strict';
+
+class Assembler {
+  constructor() {
+    this.labels = {};
+    this.equs = {};
+    this.org = 0x0000;
+    this.output = []; // array of bytes
+    this.errors = [];
+    this.listings = []; // {addr, line, bytes, source}
+  }
+
+  reset(org = 0x0000) {
+    this.labels = {};
+    this.equs = {};
+    this.org = org;
+    this.output = [];
+    this.errors = [];
+    this.listings = [];
+  }
+
+  // Public: assemble source into bytes, given a starting ORG
+  assemble(source, org = 0x0000) {
+    this.reset(org);
+    // First pass: collect labels, EQUs and ORG; count sizes without
+    // actually encoding. Sizes are fixed for most Z80 instructions,
+    // so we can compute them without resolving label targets.
+    const lines = this._preprocess(source);
+    let pc = org;
+    for (const item of lines) {
+      try {
+        if (item.label) {
+          this.labels[item.label] = pc;
+          this.equs[item.label] = pc;
+        }
+        if (item.instruction) {
+          const size = this._estimate(item);
+          pc = (pc + size) & 0xFFFF;
+        } else if (item.directive) {
+          this._evalDirectivePass1(item, () => pc);
+        }
+      } catch (e) {
+        this._err(item, e.message);
+      }
+    }
+    if (this.errors.length) return { ok: false, errors: this.errors, listings: this.listings, output: this.output };
+
+    // Second pass: emit bytes
+    pc = org;
+    this.output = [];
+    this.listings = [];
+    for (const item of lines) {
+      const startAddr = pc;
+      let bytes = [];
+      try {
+        if (item.instruction) {
+          bytes = this._encode(item, pc);
+        } else if (item.directive) {
+          bytes = this._evalDirectivePass2(item, () => pc) || [];
+        }
+      } catch (e) {
+        this._err(item, e.message);
+        continue;
+      }
+      for (const b of bytes) this.output.push(b & 0xFF);
+      this.listings.push({
+        addr: startAddr,
+        line: item.lineNo,
+        source: item.raw,
+        bytes: bytes.map(b => b & 0xFF),
+      });
+      pc = (pc + bytes.length) & 0xFFFF;
+    }
+
+    return { ok: this.errors.length === 0, errors: this.errors, listings: this.listings, output: this.output, org };
+  }
+
+  // ----- Preprocess: tokenize, strip comments, recognize labels -----
+  _preprocess(source) {
+    const items = [];
+    const rawLines = source.split(/\r?\n/);
+    rawLines.forEach((raw, idx) => {
+      const lineNo = idx + 1;
+      // Strip comment
+      let line = raw.replace(/[;].*$/, '').trim();
+      if (!line) return;
+      // Label?
+      let label = null;
+      const labelMatch = line.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*:\s*(.*)$/);
+      if (labelMatch) {
+        label = labelMatch[1];
+        line = labelMatch[2].trim();
+      }
+      if (!line) { items.push({ lineNo, raw, label }); return; }
+      // Directive?
+      const dirMatch = line.match(/^([A-Za-z_]+)\b\s*(.*)$/);
+      const op = dirMatch[1].toUpperCase();
+      const rest = dirMatch[2];
+      const DIRS = new Set(['ORG','EQU','DB','DW','DS','END','INCLUDE','DEFB','DEFM','DEFW']);
+      if (DIRS.has(op)) {
+        items.push({ lineNo, raw, label, directive: op, args: rest });
+        return;
+      }
+      // Instruction
+      const parts = rest.split(/,|\s+/).filter(Boolean);
+      items.push({ lineNo, raw, label, instruction: op, args: parts });
+    });
+    return items;
+  }
+
+  // Estimate instruction size WITHOUT actually encoding.
+  // For most Z80 instructions the size depends only on the form
+  // (number of operand bytes), not on the resolved operand value.
+  _estimate(item) {
+    const op = item.instruction;
+    const a = (item.args[0] || '').trim();
+    const b = (item.args[1] || '').trim();
+    const r0 = this._parseReg8(a);
+    const r1 = this._parseReg8(b);
+    const p0 = this._parseReg16(a);
+    const mA = this._parseMem(a);
+    const mB = this._parseMem(b);
+    const isIxA = mA && (mA.type === 'ix' || mA.type === 'iy');
+    const isIxB = mB && (mB.type === 'ix' || mB.type === 'iy');
+
+    // No-operand / fixed-size ops
+    const oneByte = new Set(['NOP','HALT','DI','EI','RLCA','RRCA','RLA','RRA','CPL','SCF','CCF','DAA','NEG','EXX','LDIR','LDDR','RLD','RRD']);
+    if (oneByte.has(op)) return 1;
+
+    switch (op) {
+      case 'LD': {
+        if (a.toUpperCase()==='A' && (b.toUpperCase()==='(BC)' || b.toUpperCase()==='(DE)')) return 1;
+        if (a.toUpperCase()==='(BC)' || a.toUpperCase()==='(DE)') return 1;
+        if (r0 && r1) return 1;
+        if (r0 && mB && mB.type==='hl') return 1;
+        if (mA && mA.type==='hl' && r1) return 1;
+        if (a.toUpperCase()==='A' && mB && mB.type==='hl') return 1;
+        if (mA && mA.type==='hl' && b.toUpperCase()==='A') return 1;
+        // LD r, n
+        if (r0 && !mB) return 2;
+        if (mA && mA.type==='hl' && !r1) return 2;
+        // LD A,(nn) / (nn),A / LD HL,(nn) / (nn),HL
+        if (a.toUpperCase()==='A' && mB && mB.type==='nn') return 3;
+        if (mA && mA.type==='nn' && b.toUpperCase()==='A') return 3;
+        if (a.toUpperCase()==='HL' && mB && mB.type==='nn') return 3;
+        if (mA && mA.type==='nn' && b.toUpperCase()==='HL') return 3;
+        // 16-bit immediate loads
+        if (['BC','DE','HL','SP'].includes(a.toUpperCase()) && !mB) return 3;
+        if (['IX','IY'].includes(a.toUpperCase()) && !mB) return 4;
+        // ED: BC/DE,(nn) and (nn),BC/DE
+        if (['BC','DE'].includes(a.toUpperCase()) && mB && mB.type==='nn') return 4;
+        if (mA && mA.type==='nn' && ['BC','DE'].includes(b.toUpperCase())) return 4;
+        // EX (SP),HL/IX/IY
+        if (a.toUpperCase()==='(SP)' && ['HL','IX','IY'].includes(b.toUpperCase())) {
+          return b.toUpperCase()==='HL' ? 1 : 2;
+        }
+        // LD SP,HL
+        if (a.toUpperCase()==='SP' && b.toUpperCase()==='HL') return 1;
+        // Indexed LD r, (IX+d); LD (IX+d), r; LD (IX+d), n
+        if (r0 && isIxB) return 3;
+        if (isIxA && r1) return 3;
+        if (isIxA && !r1) return 4;
+        // IX/IY,nn was covered
+        // EX AF,AF' / EX DE,HL
+        if (a.toUpperCase()==='AF' && b.toUpperCase()===`AF'`) return 1;
+        if (a.toUpperCase()==='DE' && b.toUpperCase()==='HL') return 1;
+        return 0;
+      }
+      case 'PUSH': case 'POP': {
+        if (['BC','DE','HL','AF'].includes(a.toUpperCase())) return 1;
+        if (['IX','IY'].includes(a.toUpperCase())) return 2;
+        return 0;
+      }
+      case 'EX': {
+        if (a.toUpperCase()==='(SP)' && b.toUpperCase()==='HL') return 1;
+        if (a.toUpperCase()==='(SP)' && ['IX','IY'].includes(b.toUpperCase())) return 2;
+        return 1;
+      }
+      case 'ADD': {
+        if (a.toUpperCase()==='A') {
+          if (r1) return 1;
+          if (b.toUpperCase()==='(HL)') return 1;
+          if (isIxB) return 3;
+          return 2; // immediate
+        }
+        if (a.toUpperCase()==='HL') return 1;
+        if (['IX','IY'].includes(a.toUpperCase())) return 2;
+        return 0;
+      }
+      case 'ADC': case 'SBC': {
+        if (a.toUpperCase()==='A') {
+          if (r1) return 1;
+          if (b.toUpperCase()==='(HL)') return 1;
+          if (isIxB) return 3;
+          return 2;
+        }
+        return 0;
+      }
+      case 'SUB': case 'AND': case 'OR': case 'XOR': case 'CP': {
+        if (r0) return 1;
+        if (a.toUpperCase()==='(HL)') return 1;
+        if (isIxA) return 3;
+        return 2; // immediate
+      }
+      case 'INC': case 'DEC': {
+        if (r0) return 1;
+        if (a.toUpperCase()==='(HL)') return 1;
+        if (isIxA) return 3;
+        if (['BC','DE','HL','SP'].includes(a.toUpperCase())) return 1;
+        if (['IX','IY'].includes(a.toUpperCase())) return 2;
+        return 0;
+      }
+      case 'JP': {
+        if (a.toUpperCase()==='HL' || a.toUpperCase()==='IX' || a.toUpperCase()==='IY') {
+          return a.toUpperCase()==='HL' ? 1 : 2;
+        }
+        // conditional JP nn
+        if (this._parseCond(a)) return 3;
+        // JP nn
+        if (a) return 3;
+        return 0;
+      }
+      case 'JR': {
+        if (this._parseCond(a)) return 2;
+        return 2;
+      }
+      case 'DJNZ': return 2;
+      case 'CALL': {
+        if (this._parseCond(a)) return 3;
+        return 3;
+      }
+      case 'RET': {
+        if (!a) return 1;
+        if (this._parseCond(a)) return 1;
+        return 0;
+      }
+      case 'RST': return 1;
+      case 'OUT': case 'IN': return 2;
+      case 'IM': return 2;
+      case 'BIT': case 'RES': case 'SET': {
+        if (r1) return 2;
+        if (b.toUpperCase()==='(HL)') return 2;
+        if (isIxB) return 4;
+        return 0;
+      }
+      case 'RLC': case 'RRC': case 'RL': case 'RR':
+      case 'SLA': case 'SRA': case 'SRL': case 'SLL': {
+        if (r0) return 2;
+        if (a.toUpperCase()==='(HL)') return 2;
+        if (isIxA) return 4;
+        return 0;
+      }
+      default:
+        return 0;
+    }
+  }
+
+  _err(item, msg) {
+    this.errors.push({ line: item.lineNo, source: item.raw, msg });
+  }
+
+  // ----- Numeric / token helpers -----
+  _parseNumber(tok) {
+    if (tok === undefined || tok === null) throw new Error('expected number');
+    tok = tok.trim();
+    if (tok === '') throw new Error('expected number');
+    // Character literal
+    const cm = tok.match(/^'(.)'$/);
+    if (cm) return cm[1].charCodeAt(0) & 0xFF;
+    // Hex with $
+    if (tok.startsWith('$')) return parseInt(tok.slice(1), 16);
+    if (tok.startsWith('0x') || tok.startsWith('0X')) return parseInt(tok.slice(2), 16);
+    if (tok.startsWith('%')) return parseInt(tok.slice(1), 2);
+    if (/^-?\d+$/.test(tok)) return parseInt(tok, 10) & 0xFFFF;
+    // Expression
+    return this._evalExpr(tok);
+  }
+
+  // Very small expression evaluator: + - * / ( ) and labels
+  _evalExpr(expr) {
+    // First normalize $hex and %bin to 0x/0b
+    const pre = expr
+      .replace(/\$[0-9a-fA-F]+/g, (m) => '0x' + m.slice(1))
+      .replace(/%[01]+/g,        (m) => '0b' + m.slice(1));
+    // Replace labels with their numeric values, but skip
+    // tokens that are part of 0x... or 0b... number literals.
+    const norm = pre.replace(/[A-Za-z_][A-Za-z0-9_]*/g, (m, off) => {
+      const before = pre[off - 1];
+      if (before === '0') return m;
+      if (m in this.equs) return this.equs[m].toString();
+      throw new Error(`Unknown label: ${m}`);
+    });
+    // Use Function for safe-ish eval (numbers only after replacement)
+    // eslint-disable-next-line no-new-func
+    const v = Function('"use strict";return (' + norm + ')')();
+    return v & 0xFFFF;
+  }
+
+  // Convert $hex and 0xhex forms inside an arbitrary expression
+  _normalizeNumberForms(expr) {
+    // $1234 -> 0x1234
+    return expr.replace(/\$[0-9a-fA-F]+/g, (m) => '0x' + m.slice(1));
+  }
+
+  // Argument parsers
+  _parseReg8(t) {
+    const r = t.toUpperCase();
+    if (r === 'A'||r==='B'||r==='C'||r==='D'||r==='E'||r==='H'||r==='L') return r;
+    return null;
+  }
+  _parseReg16(t) {
+    const r = t.toUpperCase();
+    if (r==='BC'||r==='DE'||r==='HL'||r==='SP'||r==='AF'||r==='IX'||r==='IY'||r==='IXH'||r==='IXL'||r==='IYH'||r==='IYL') return r;
+    return null;
+  }
+  _parsePairSP(t) { const r=t.toUpperCase(); if (r==='BC'||r==='DE'||r==='HL'||r==='SP') return r; return null; }
+  _parsePairAF(t) { const r=t.toUpperCase(); if (r==='BC'||r==='DE'||r==='HL'||r==='AF') return r; return null; }
+  _parseCond(t) {
+    const c = t.toUpperCase();
+    if (c==='NZ'||c==='Z'||c==='NC'||c==='C'||c==='PO'||c==='PE'||c==='P'||c==='M') return c;
+    return null;
+  }
+
+  // Parse (HL), (IX+d), (IX+d), (nn)
+  _parseMem(arg) {
+    if (!arg) return null;
+    arg = arg.trim();
+    const m1 = arg.match(/^\(HL\)$/i); if (m1) return { type: 'hl' };
+    const m2 = arg.match(/^\(IX([+-])(\d+|0x[0-9a-fA-F]+|\$[0-9a-fA-F]+)\)$/i);
+    if (m2) return { type: 'ix', sign: m2[1], disp: this._parseNumber(m2[2]) };
+    const m3 = arg.match(/^\(IY([+-])(\d+|0x[0-9a-fA-F]+|\$[0-9a-fA-F]+)\)$/i);
+    if (m3) return { type: 'iy', sign: m3[1], disp: this._parseNumber(m3[2]) };
+    const m4 = arg.match(/^\((.+)\)$/);
+    if (m4) return { type: 'nn', addr: this._evalExpr(m4[1]) };
+    return null;
+  }
+
+  // ----- Directive handling -----
+  _evalDirectivePass1(item, getPc) {
+    if (item.directive === 'EQU') {
+      if (!item.label) throw new Error('EQU requires a label');
+      const v = this._evalExpr(item.args);
+      this.equs[item.label] = v & 0xFFFF;
+      this.labels[item.label] = v & 0xFFFF;
+    } else if (item.directive === 'ORG') {
+      const v = this._evalExpr(item.args);
+      this.org = v & 0xFFFF;
+    }
+    // DB/DW handled in pass 2
+  }
+  _evalDirectivePass2(item, getPc) {
+    if (item.directive === 'DB' || item.directive === 'DEFB' || item.directive === 'DEFM') {
+      const toks = this._splitTopLevelCommas(item.args);
+      const bytes = [];
+      for (const tok of toks) {
+        const t = tok.trim();
+        if (t.startsWith('"') && t.endsWith('"')) {
+          for (let i = 1; i < t.length - 1; i++) bytes.push(t.charCodeAt(i) & 0xFF);
+        } else {
+          bytes.push(this._parseNumber(t) & 0xFF);
+        }
+      }
+      return bytes;
+    } else if (item.directive === 'DW' || item.directive === 'DEFW') {
+      const toks = this._splitTopLevelCommas(item.args);
+      const bytes = [];
+      for (const tok of toks) {
+        const v = this._parseNumber(tok) & 0xFFFF;
+        bytes.push(v & 0xFF);
+        bytes.push((v >> 8) & 0xFF);
+      }
+      return bytes;
+    } else if (item.directive === 'DS') {
+      const n = this._parseNumber(item.args) & 0xFFFF;
+      return new Array(n).fill(0);
+    } else if (item.directive === 'END') {
+      return [];
+    } else if (item.directive === 'ORG' || item.directive === 'EQU' || item.directive === 'INCLUDE') {
+      return [];
+    }
+    return [];
+  }
+  _splitTopLevelCommas(s) {
+    const out = []; let cur = ''; let depth = 0;
+    for (const ch of s) {
+      if (ch === '(') depth++;
+      else if (ch === ')') depth--;
+      if (ch === ',' && depth === 0) { out.push(cur); cur = ''; }
+      else cur += ch;
+    }
+    if (cur.length) out.push(cur);
+    return out;
+  }
+
+  // ----- Encoding table (the big part) -----
+  // Returns array of bytes for an instruction item.
+  _encode(item, pc) {
+    const op = item.instruction;
+    const a = item.args;
+    const A = (a[0]||'').trim();
+    const B = (a[1]||'').trim();
+
+    // Helpers for register indices used in 8-bit r, r' encoding
+    const rIdx8 = (r) => ({B:0,C:1,D:2,E:3,H:4,L:5,HL:6,A:7})[r.toUpperCase()] ?? null;
+
+    switch (op) {
+      // ---- 8-bit loads r, r' (0x40..0x7F) ----
+      case 'LD': {
+        // Special cases first
+        // LD A,(BC) / A,(DE) / (BC),A / (DE),A
+        if (A.toUpperCase()==='A' && this._parseMem(B)?.type==='bc-style') {} // not used
+        const mem1 = this._parseMem(B); // A, (something)
+        const mem0 = this._parseMem(A); // (something), A or other
+        if (A.toUpperCase() === 'A' && B.toUpperCase() === '(BC)') return [0x0A];
+        if (A.toUpperCase() === 'A' && B.toUpperCase() === '(DE)') return [0x1A];
+        if (A.toUpperCase() === '(BC)' && B.toUpperCase() === 'A') return [0x02];
+        if (A.toUpperCase() === '(DE)' && B.toUpperCase() === 'A') return [0x12];
+        if (A.toUpperCase() === 'A' && B.toUpperCase() === '(HL)') return [0x7E];
+        if (A.toUpperCase() === '(HL)' && B.toUpperCase() === 'A') return [0x77];
+        // LD r, (HL) / LD (HL), r
+        const r0 = this._parseReg8(A);
+        const r1 = this._parseReg8(B);
+        const mA = this._parseMem(A);
+        const mB = this._parseMem(B);
+        if (r0 && r1) {
+          // LD r, r'
+          if (r0==='(HL)' || r1==='(HL)') throw new Error('use (HL) form');
+          return [0x40 + (rIdx8(r0) << 3) + rIdx8(r1)];
+        }
+        if (r0 && mB && mB.type==='hl') {
+          return [0x46 + (rIdx8(r0) << 3)];
+        }
+        if (mA && mA.type==='hl' && r1) {
+          return [0x70 + rIdx8(r1)];
+        }
+        // LD r, n
+        if (r0 && /^[\$%0-9A-Za-z_'+\-]+$/.test(B) && !mB) {
+          return [0x06 + (rIdx8(r0) << 3), this._parseNumber(B) & 0xFF];
+        }
+        // LD (HL), n
+        if (mA && mA.type==='hl' && !r1) {
+          return [0x36, this._parseNumber(B) & 0xFF];
+        }
+        // LD A, (nn)
+        if (A.toUpperCase()==='A' && mB && mB.type==='nn') return [0x3A, mB.addr & 0xFF, (mB.addr>>8)&0xFF];
+        if (A.toUpperCase()==='(NN)' && mA && mA.type==='nn' && B.toUpperCase()==='A') return [0x32, mA.addr & 0xFF, (mA.addr>>8)&0xFF];
+        // 16-bit loads LD dd, nn
+        if (A.toUpperCase()==='BC' || A.toUpperCase()==='DE' || A.toUpperCase()==='HL' || A.toUpperCase()==='SP') {
+          const r = A.toUpperCase();
+          const v = this._parseNumber(B) & 0xFFFF;
+          const dd = {BC:0,DE:1,HL:2,SP:3}[r];
+          return [0x01 + (dd<<4), v & 0xFF, (v>>8)&0xFF];
+        }
+        if (A.toUpperCase()==='IX' || A.toUpperCase()==='IY') {
+          const v = this._parseNumber(B) & 0xFFFF;
+          const prefix = A.toUpperCase()==='IX' ? 0xDD : 0xFD;
+          return [prefix, 0x21, v & 0xFF, (v>>8)&0xFF];
+        }
+        // LD HL, (nn) / LD (nn), HL
+        if (A.toUpperCase()==='HL' && mB && mB.type==='nn') return [0x2A, mB.addr & 0xFF, (mB.addr>>8)&0xFF];
+        if (mA && mA.type==='nn' && B.toUpperCase()==='HL') return [0x22, mA.addr & 0xFF, (mA.addr>>8)&0xFF];
+        // LD BC/DE,(nn) and (nn),BC/DE
+        if ((A.toUpperCase()==='BC' || A.toUpperCase()==='DE') && mB && mB.type==='nn') {
+          return [0xED, A.toUpperCase()==='BC'?0x4B:0x5B, mB.addr & 0xFF, (mB.addr>>8)&0xFF];
+        }
+        if (mA && mA.type==='nn' && (B.toUpperCase()==='BC' || B.toUpperCase()==='DE')) {
+          return [0xED, B.toUpperCase()==='BC'?0x43:0x53, mA.addr & 0xFF, (mA.addr>>8)&0xFF];
+        }
+        // LD SP, HL
+        if (A.toUpperCase()==='SP' && B.toUpperCase()==='HL') return [0xF9];
+        // Indexed loads
+        if (r0 && mB && (mB.type==='ix' || mB.type==='iy')) {
+          const prefix = mB.type==='ix' ? 0xDD : 0xFD;
+          const d = mB.sign === '+' ? mB.disp : (-mB.disp) & 0xFF;
+          return [prefix, 0x46 + (rIdx8(r0)<<3), d & 0xFF];
+        }
+        if (mA && (mA.type==='ix' || mA.type==='iy') && r1) {
+          const prefix = mA.type==='ix' ? 0xDD : 0xFD;
+          const d = mA.sign === '+' ? mA.disp : (-mA.disp) & 0xFF;
+          return [prefix, 0x70 + rIdx8(r1), d & 0xFF];
+        }
+        if (mA && (mA.type==='ix' || mA.type==='iy') && !r1) {
+          const prefix = mA.type==='ix' ? 0xDD : 0xFD;
+          const d = mA.sign === '+' ? mA.disp : (-mA.disp) & 0xFF;
+          return [prefix, 0x36, d & 0xFF, this._parseNumber(B) & 0xFF];
+        }
+        throw new Error('LD: cannot parse operands');
+      }
+
+      // ---- PUSH / POP ----
+      case 'PUSH': {
+        const r = A.toUpperCase();
+        if (r==='BC') return [0xC5];
+        if (r==='DE') return [0xD5];
+        if (r==='HL') return [0xE5];
+        if (r==='AF') return [0xF5];
+        if (r==='IX') return [0xDD, 0xE5];
+        if (r==='IY') return [0xFD, 0xE5];
+        throw new Error('PUSH: bad operand');
+      }
+      case 'POP': {
+        const r = A.toUpperCase();
+        if (r==='BC') return [0xC1];
+        if (r==='DE') return [0xD1];
+        if (r==='HL') return [0xE1];
+        if (r==='AF') return [0xF1];
+        if (r==='IX') return [0xDD, 0xE1];
+        if (r==='IY') return [0xFD, 0xE1];
+        throw new Error('POP: bad operand');
+      }
+
+      // ---- EX / EXX ----
+      case 'EX': {
+        if (A.toUpperCase()==='DE' && B.toUpperCase()==='HL') return [0xEB];
+        if (A.toUpperCase()==='AF' && B.toUpperCase()===`AF'`) return [0x08];
+        if (A.toUpperCase()==='(SP)' && B.toUpperCase()==='HL') return [0xE3];
+        if (A.toUpperCase()==='(SP)' && B.toUpperCase()==='IX') return [0xDD, 0xE3];
+        if (A.toUpperCase()==='(SP)' && B.toUpperCase()==='IY') return [0xFD, 0xE3];
+        throw new Error('EX: bad form');
+      }
+      case 'EXX': return [0xD9];
+
+      // ---- ALU ops ----
+      case 'ADD': {
+        // ADD A, r / ADD A, n / ADD HL, ss / ADD IX, pp / ADD IY, rr
+        if (A.toUpperCase()==='A') {
+          const r = this._parseReg8(B);
+          if (r) return [0x80 + rIdx8(r)];
+          if (B.toUpperCase()==='(HL)') return [0x86];
+          if (/^[\$%0-9A-Za-z_'+\-]+$/.test(B)) return [0xC6, this._parseNumber(B)&0xFF];
+          const m = this._parseMem(B);
+          if (m && (m.type==='ix' || m.type==='iy')) {
+            const prefix = m.type==='ix'?0xDD:0xFD;
+            const d = m.sign === '+' ? m.disp : (-m.disp) & 0xFF;
+            return [prefix, 0x86, d & 0xFF];
+          }
+          throw new Error('ADD A: bad operand');
+        }
+        if (A.toUpperCase()==='HL') {
+          const r = B.toUpperCase();
+          const m = {BC:0x09,DE:0x19,HL:0x29,SP:0x39}[r];
+          if (m===undefined) throw new Error('ADD HL: bad pair');
+          return [m];
+        }
+        if (A.toUpperCase()==='IX') {
+          const m = {BC:0xDD09,DE:0xDD19,IX:0xDD29,SP:0xDD39}[B.toUpperCase()];
+          if (!m) throw new Error('ADD IX: bad pair');
+          return [m>>8, m&0xFF];
+        }
+        if (A.toUpperCase()==='IY') {
+          const m = {BC:0xFD09,DE:0xFD19,IY:0xFD29,SP:0xFD39}[B.toUpperCase()];
+          if (!m) throw new Error('ADD IY: bad pair');
+          return [m>>8, m&0xFF];
+        }
+        throw new Error('ADD: bad form');
+      }
+      case 'ADC': {
+        if (A.toUpperCase()!=='A') throw new Error('ADC: must be ADC A,r');
+        const r = this._parseReg8(B);
+        if (r) return [0x88 + rIdx8(r)];
+        if (B.toUpperCase()==='(HL)') return [0x8E];
+        if (/^[\$%0-9A-Za-z_'+\-]+$/.test(B)) return [0xCE, this._parseNumber(B)&0xFF];
+        const m = this._parseMem(B);
+        if (m && (m.type==='ix'||m.type==='iy')) {
+          const prefix = m.type==='ix'?0xDD:0xFD;
+          const d = m.sign === '+' ? m.disp : (-m.disp) & 0xFF;
+          return [prefix, 0x8E, d & 0xFF];
+        }
+        throw new Error('ADC: bad operand');
+      }
+      case 'SUB': {
+        const r = this._parseReg8(A);
+        if (r) return [0x90 + rIdx8(r)];
+        if (A.toUpperCase()==='(HL)') return [0x96];
+        if (/^[\$%0-9A-Za-z_'+\-]+$/.test(A)) return [0xD6, this._parseNumber(A)&0xFF];
+        const m = this._parseMem(A);
+        if (m && (m.type==='ix'||m.type==='iy')) {
+          const prefix = m.type==='ix'?0xDD:0xFD;
+          const d = m.sign === '+' ? m.disp : (-m.disp) & 0xFF;
+          return [prefix, 0x96, d & 0xFF];
+        }
+        throw new Error('SUB: bad operand');
+      }
+      case 'SBC': {
+        if (A.toUpperCase()!=='A') throw new Error('SBC: must be SBC A,r');
+        const r = this._parseReg8(B);
+        if (r) return [0x98 + rIdx8(r)];
+        if (B.toUpperCase()==='(HL)') return [0x9E];
+        if (/^[\$%0-9A-Za-z_'+\-]+$/.test(B)) return [0xDE, this._parseNumber(B)&0xFF];
+        const m = this._parseMem(B);
+        if (m && (m.type==='ix'||m.type==='iy')) {
+          const prefix = m.type==='ix'?0xDD:0xFD;
+          const d = m.sign === '+' ? m.disp : (-m.disp) & 0xFF;
+          return [prefix, 0x9E, d & 0xFF];
+        }
+        throw new Error('SBC: bad operand');
+      }
+      case 'AND': {
+        const r = this._parseReg8(A);
+        if (r) return [0xA0 + rIdx8(r)];
+        if (A.toUpperCase()==='(HL)') return [0xA6];
+        if (/^[\$%0-9A-Za-z_'+\-]+$/.test(A)) return [0xE6, this._parseNumber(A)&0xFF];
+        const m = this._parseMem(A);
+        if (m && (m.type==='ix'||m.type==='iy')) {
+          const prefix = m.type==='ix'?0xDD:0xFD;
+          const d = m.sign === '+' ? m.disp : (-m.disp) & 0xFF;
+          return [prefix, 0xA6, d & 0xFF];
+        }
+        throw new Error('AND: bad operand');
+      }
+      case 'OR': {
+        const r = this._parseReg8(A);
+        if (r) return [0xB0 + rIdx8(r)];
+        if (A.toUpperCase()==='(HL)') return [0xB6];
+        if (/^[\$%0-9A-Za-z_'+\-]+$/.test(A)) return [0xF6, this._parseNumber(A)&0xFF];
+        const m = this._parseMem(A);
+        if (m && (m.type==='ix'||m.type==='iy')) {
+          const prefix = m.type==='ix'?0xDD:0xFD;
+          const d = m.sign === '+' ? m.disp : (-m.disp) & 0xFF;
+          return [prefix, 0xB6, d & 0xFF];
+        }
+        throw new Error('OR: bad operand');
+      }
+      case 'XOR': {
+        const r = this._parseReg8(A);
+        if (r) return [0xA8 + rIdx8(r)];
+        if (A.toUpperCase()==='(HL)') return [0xAE];
+        if (/^[\$%0-9A-Za-z_'+\-]+$/.test(A)) return [0xEE, this._parseNumber(A)&0xFF];
+        const m = this._parseMem(A);
+        if (m && (m.type==='ix'||m.type==='iy')) {
+          const prefix = m.type==='ix'?0xDD:0xFD;
+          const d = m.sign === '+' ? m.disp : (-m.disp) & 0xFF;
+          return [prefix, 0xAE, d & 0xFF];
+        }
+        throw new Error('XOR: bad operand');
+      }
+      case 'CP': {
+        const r = this._parseReg8(A);
+        if (r) return [0xB8 + rIdx8(r)];
+        if (A.toUpperCase()==='(HL)') return [0xBE];
+        if (/^[\$%0-9A-Za-z_'+\-]+$/.test(A)) return [0xFE, this._parseNumber(A)&0xFF];
+        const m = this._parseMem(A);
+        if (m && (m.type==='ix'||m.type==='iy')) {
+          const prefix = m.type==='ix'?0xDD:0xFD;
+          const d = m.sign === '+' ? m.disp : (-m.disp) & 0xFF;
+          return [prefix, 0xBE, d & 0xFF];
+        }
+        throw new Error('CP: bad operand');
+      }
+      case 'NEG': return [0xED, 0x44];
+
+      // ---- INC / DEC 8-bit / 16-bit ----
+      case 'INC': {
+        const r = this._parseReg8(A);
+        if (r) return [0x04 + (rIdx8(r) << 3)];
+        if (A.toUpperCase()==='(HL)') return [0x34];
+        const p = this._parseReg16(A);
+        if (p==='BC') return [0x03];
+        if (p==='DE') return [0x13];
+        if (p==='HL') return [0x23];
+        if (p==='SP') return [0x33];
+        if (p==='IX') return [0xDD, 0x23];
+        if (p==='IY') return [0xFD, 0x23];
+        const m = this._parseMem(A);
+        if (m && (m.type==='ix'||m.type==='iy')) {
+          const prefix = m.type==='ix'?0xDD:0xFD;
+          const d = m.sign === '+' ? m.disp : (-m.disp) & 0xFF;
+          return [prefix, 0x34, d & 0xFF];
+        }
+        throw new Error('INC: bad operand');
+      }
+      case 'DEC': {
+        const r = this._parseReg8(A);
+        if (r) return [0x05 + (rIdx8(r) << 3)];
+        if (A.toUpperCase()==='(HL)') return [0x35];
+        const p = this._parseReg16(A);
+        if (p==='BC') return [0x0B];
+        if (p==='DE') return [0x1B];
+        if (p==='HL') return [0x2B];
+        if (p==='SP') return [0x3B];
+        if (p==='IX') return [0xDD, 0x2B];
+        if (p==='IY') return [0xFD, 0x2B];
+        const m = this._parseMem(A);
+        if (m && (m.type==='ix'||m.type==='iy')) {
+          const prefix = m.type==='ix'?0xDD:0xFD;
+          const d = m.sign === '+' ? m.disp : (-m.disp) & 0xFF;
+          return [prefix, 0x35, d & 0xFF];
+        }
+        throw new Error('DEC: bad operand');
+      }
+
+      // ---- Rotates ----
+      case 'RLCA': return [0x07];
+      case 'RRCA': return [0x0F];
+      case 'RLA':   return [0x17];
+      case 'RRA':   return [0x1F];
+      case 'CPL':   return [0x2F];
+      case 'SCF':   return [0x37];
+      case 'CCF':   return [0x3F];
+      case 'DAA':   return [0x27];
+      case 'NOP':   return [0x00];
+      case 'HALT':  return [0x76];
+      case 'DI':    return [0xF3];
+      case 'EI':    return [0xFB];
+
+      // ---- Jumps ----
+      case 'JP': {
+        const cond = this._parseCond(A);
+        if (cond) {
+          const t = B;
+          const m = this._parseMem(t);
+          let v;
+          if (m && m.type==='nn') v = m.addr;
+          else v = this._parseNumber(t);
+          const cc = {NZ:0xC2,Z:0xCA,NC:0xD2,C:0xDA,PO:0xE2,PE:0xEA,P:0xF2,M:0xFA}[cond];
+          return [cc, v & 0xFF, (v>>8)&0xFF];
+        }
+        // JP HL
+        if (A.toUpperCase()==='HL') return [0xE9];
+        if (A.toUpperCase()==='IX') return [0xDD, 0xE9];
+        if (A.toUpperCase()==='IY') return [0xFD, 0xE9];
+        // JP nn
+        const m = this._parseMem(A);
+        if (m && m.type==='nn') return [0xC3, m.addr & 0xFF, (m.addr>>8)&0xFF];
+        const v = this._parseNumber(A);
+        return [0xC3, v & 0xFF, (v>>8)&0xFF];
+      }
+      case 'JR': {
+        const cond = this._parseCond(A);
+        if (cond) {
+          const target = this._parseNumber(B);
+          // PC at this instruction + 2 (JR cc, e: opcode + cc + disp)
+          const disp = (target - (pc + 2)) & 0xFF;
+          const cc = {NZ:0x20,Z:0x28,NC:0x30,C:0x38}[cond];
+          if (!cc) throw new Error('JR: bad cond');
+          return [cc, disp];
+        }
+        const target = this._parseNumber(A);
+        const disp = (target - (pc + 2)) & 0xFF;
+        return [0x18, disp];
+      }
+      case 'DJNZ': {
+        const target = this._parseNumber(A);
+        const disp = (target - (pc + 2)) & 0xFF;
+        return [0x10, disp];
+      }
+
+      // ---- CALL ----
+      case 'CALL': {
+        const cond = this._parseCond(A);
+        if (cond) {
+          const v = this._parseNumber(B);
+          const cc = {NZ:0xC4,Z:0xCC,NC:0xD4,C:0xDC,PO:0xE4,PE:0xEC,P:0xF4,M:0xFC}[cond];
+          return [cc, v & 0xFF, (v>>8)&0xFF];
+        }
+        const v = this._parseNumber(A);
+        return [0xCD, v & 0xFF, (v>>8)&0xFF];
+      }
+
+      // ---- RET ----
+      case 'RET': {
+        if (!A) return [0xC9];
+        const cond = this._parseCond(A);
+        if (!cond) throw new Error('RET: bad cond');
+        const cc = {NZ:0xC0,Z:0xC8,NC:0xD0,C:0xD8,PO:0xE0,PE:0xE8,P:0xF0,M:0xF8}[cond];
+        return [cc];
+      }
+
+      // ---- RST ----
+      case 'RST': {
+        const v = this._parseNumber(A) & 0x38;
+        return [0xC7 + v];
+      }
+
+      // ---- I/O ----
+      case 'OUT': {
+        // OUT (n), A
+        if (B && B.toUpperCase()==='A') {
+          const n = this._parseNumber(A);
+          return [0xD3, n & 0xFF];
+        }
+        throw new Error('OUT: only OUT (n),A supported');
+      }
+      case 'IN': {
+        if (A && A.toUpperCase()==='A') {
+          const m = this._parseMem(B);
+          if (m && m.type==='nn') return [0xDB, m.addr & 0xFF];
+          const n = this._parseNumber(B);
+          return [0xDB, n & 0xFF];
+        }
+        throw new Error('IN: only IN A,(n) supported');
+      }
+
+      // ---- Block instructions (LDIR, LDDR) ----
+      case 'LDIR': return [0xED, 0xB0];
+      case 'LDDR': return [0xED, 0xB8];
+      case 'RLD':  return [0xED, 0x6F];
+      case 'RRD':  return [0xED, 0x67];
+
+      // ---- IM modes ----
+      case 'IM': {
+        const n = parseInt(A, 10);
+        if (n === 0) return [0xED, 0x46];
+        if (n === 1) return [0xED, 0x56];
+        if (n === 2) return [0xED, 0x5E];
+        throw new Error('IM: bad mode');
+      }
+
+      // ---- Bit instructions: BIT/SET/RES b, r ----
+      case 'BIT': case 'SET': case 'RES': {
+        const b = parseInt(A, 10);
+        if (isNaN(b) || b<0 || b>7) throw new Error(`${op}: bit must be 0..7`);
+        const r = this._parseReg8(B);
+        const m = this._parseMem(B);
+        const bb = {BIT:1,RES:2,SET:3}[op];
+        if (r) {
+          return [0xCB, (bb<<6) | (b<<3) | rIdx8(r)];
+        }
+        if (B.toUpperCase()==='(HL)') {
+          return [0xCB, (bb<<6) | (b<<3) | 0x06];
+        }
+        if (m && (m.type==='ix'||m.type==='iy')) {
+          const prefix = m.type==='ix'?0xDD:0xFD;
+          const d = m.sign === '+' ? m.disp : (-m.disp) & 0xFF;
+          return [prefix, 0xCB, d & 0xFF, (bb<<6) | (b<<3) | 0x06];
+        }
+        throw new Error(`${op}: bad operand`);
+      }
+
+      // ---- CB-prefix rotates on register ----
+      case 'RLC': case 'RRC': case 'RL': case 'RR':
+      case 'SLA': case 'SRA': case 'SRL': case 'SLL': {
+        const m = {RLC:0,RRC:1,RL:2,RR:3,SLA:4,SRA:5,SLL:6,SRL:7}[op];
+        const r = this._parseReg8(A);
+        const mem = this._parseMem(A);
+        if (r) return [0xCB, (m<<3) | rIdx8(r)];
+        if (A.toUpperCase()==='(HL)') return [0xCB, (m<<3) | 0x06];
+        if (mem && (mem.type==='ix'||mem.type==='iy')) {
+          const prefix = mem.type==='ix'?0xDD:0xFD;
+          const d = mem.sign === '+' ? mem.disp : (-mem.disp) & 0xFF;
+          return [prefix, 0xCB, d & 0xFF, (m<<3) | 0x06];
+        }
+        throw new Error(`${op}: bad operand`);
+      }
+
+      default:
+        throw new Error(`Unknown instruction: ${op}`);
+    }
+  }
+}
+
+if (typeof window !== 'undefined') window.Assembler = Assembler;
+</script>
+<script>
+/* ============================================================
+   Z80 Tutorial - Lessons and Challenges
+   ============================================================
+   A progressive curriculum that takes a learner from "what
+   is a register" to writing small programs (countdown,
+   string output, BCD, indexed access). Each lesson has:
+     - a short narrative
+     - a starter program (loaded into the editor)
+     - one or more concepts to teach
+     - a check function that runs against the user's code
+   ============================================================ */
+
+'use strict';
+
+const TUTORIAL = [
+  {
+    id: 'l1',
+    title: 'Lesson 1 — Your first instructions: LD',
+    concept: '8-bit loads & registers',
+    body: `
+<p>The <b>Z80</b> is an 8-bit processor from Zilog (1976). It powered the
+ZX Spectrum, MSX, Game Boy, TI calculators, and the CP/M operating system.</p>
+<p>It has seven main 8-bit registers you can use freely:
+<b>A, B, C, D, E, H, L</b>. "A" is the <i>accumulator</i> — the main
+register for arithmetic, logic, and I/O.</p>
+<p>The <code>LD</code> instruction copies a value into a register or
+memory cell:</p>
+<pre>LD A, 42     ; copy 42 into A
+LD B, A      ; copy A into B
+LD (HL), A   ; copy A into the memory location HL points to</pre>
+<p>Numbers can be written as <code>42</code> (decimal),
+<code>$2A</code> (hex), <code>0x2A</code> (hex), or <code>%00101010</code>
+(binary). Anything after <code>;</code> is a comment.</p>
+<p><b>Task:</b> Copy the value <code>5</code> into register <code>A</code>,
+then copy <code>A</code> into <code>B</code>, and copy <code>A</code> into
+memory address <code>$8000</code>.</p>`,
+    starter: `; Lesson 1 — load a value into A, B, and memory
+        ORG $8000
+
+        LD A, 5
+        LD B, A
+        LD HL, $9000
+        LD (HL), A
+        HALT
+`,
+    hints: [
+      'Use `LD A, 5` to put 5 in A.',
+      'Then `LD B, A` puts A into B.',
+      'To write A to memory, first point HL at the address with `LD HL, $9000`, then `LD (HL), A`.',
+    ],
+    check: (cpu) => {
+      const ok = cpu.A === 5 && cpu.B === 5 && cpu.read(0x9000) === 5;
+      return { ok, message: ok ? 'A=5, B=5, mem[$9000]=5 ✓' : `A=${cpu.A}, B=${cpu.B}, [9000]=${cpu.read(0x9000)}` };
+    }
+  },
+
+  {
+    id: 'l2',
+    title: 'Lesson 2 — Arithmetic: ADD and SUB',
+    concept: 'flags, accumulator arithmetic',
+    body: `
+<p>Arithmetic is done with the accumulator. <code>ADD A, n</code> adds
+<code>n</code> to A and stores the result back in A. <code>SUB n</code>
+subtracts. <code>INC r</code> adds one. <code>DEC r</code> subtracts one.</p>
+<p>Every arithmetic op also sets the <b>flags</b> in register F:</p>
+<ul>
+  <li><b>Z</b> — set when the result is zero</li>
+  <li><b>C</b> — set when the operation produced a carry/borrow</li>
+  <li><b>S</b> — set when the result's high bit is set (negative-looking)</li>
+  <li><b>P/V</b> — parity / overflow (set when the result has even parity)</li>
+</ul>
+<p><b>Task:</b> Compute <code>3 + 4 - 2</code> using ADD and SUB, leaving
+the result in A.</p>`,
+    starter: `; Lesson 2 — arithmetic on the accumulator
+        ORG $8000
+        LD A, 3
+        ADD A, 4
+        SUB 2
+        HALT
+`,
+    hints: [
+      '`LD A, 3` then `ADD A, 4` then `SUB 2`.',
+      'Run the program and watch the Z flag — it stays 0 because 5 ≠ 0.',
+    ],
+    check: (cpu) => {
+      const ok = cpu.A === 5;
+      return { ok, message: ok ? 'A=5 ✓' : `A=${cpu.A}, expected 5` };
+    }
+  },
+
+  {
+    id: 'l3',
+    title: 'Lesson 3 — Loops with DJNZ',
+    concept: 'control flow & the B register as a counter',
+    body: `
+<p>To repeat code, the Z80 has <code>JR</code> (jump relative) and
+<code>JP</code> (jump absolute). <code>DJNZ label</code> is a handy
+shortcut: it decrements B and jumps to the label <i>unless</i> B
+became zero. It is two bytes — perfect for tight loops.</p>
+<pre>        LD B, 5     ; loop counter
+LOOP:   ...         ; some code
+        DJNZ LOOP   ; B := B-1, jump if B != 0
+</pre>
+<p><b>Task:</b> Set A to 0, then add 1 to A ten times using DJNZ.</p>`,
+    starter: `; Lesson 3 — DJNZ loop, count to 10
+        ORG $8000
+        LD A, 0
+        LD B, 10
+LOOP:   INC A
+        DJNZ LOOP
+        HALT
+`,
+    hints: [
+      'The loop runs while B is not zero, so B=10 means 10 iterations.',
+      'INC A inside the loop adds 1 each time. After 10 iterations A=10.',
+    ],
+    check: (cpu) => {
+      const ok = cpu.A === 10;
+      return { ok, message: ok ? 'A=10 ✓' : `A=${cpu.A}, expected 10` };
+    }
+  },
+
+  {
+    id: 'l4',
+    title: 'Lesson 4 — Conditional jumps and the flags',
+    concept: 'decision-making with JR Z / JR NZ',
+    body: `
+<p>You can branch on the flags. Useful forms:</p>
+<pre>JR Z, target    ; jump if Z flag is set
+JR NZ, target   ; jump if Z flag is clear
+JR C, target    ; jump if carry
+JR NC, target   ; jump if no carry</pre>
+<p>After a <code>CP x</code> (compare A with x), the Z flag tells you
+whether A equals x, and C tells you whether A &lt; x (unsigned).</p>
+<p><b>Task:</b> Given A=7, if A is equal to 7, set A to 1, otherwise set
+A to 0. (Hint: use CP and JR Z.)</p>`,
+    starter: `; Lesson 4 — conditional branch
+        ORG $8000
+        LD A, 7
+        CP 7
+        JR Z, EQUAL
+        LD A, 0
+        JR DONE
+EQUAL:  LD A, 1
+DONE:   HALT
+`,
+    hints: [
+      'CP sets Z when A==operand. JR Z jumps if Z is set.',
+      'Without the second JR the program would fall through and overwrite A.',
+    ],
+    check: (cpu) => {
+      const ok = cpu.A === 1;
+      return { ok, message: ok ? 'A=1 ✓ (branch taken)' : `A=${cpu.A}, expected 1` };
+    }
+  },
+
+  {
+    id: 'l5',
+    title: 'Lesson 5 — Output to the "console" port',
+    concept: 'I/O with OUT',
+    body: `
+<p>Z80 programs talk to the outside world through <b>I/O ports</b>.
+<code>OUT (port), A</code> writes A to a port. In this simulator,
+writing to port <code>0</code> prints the character whose ASCII
+code is in A. Writing to port <code>1</code> appends to a "memory
+log" you can read on the right.</p>
+<p><b>Task:</b> Print the character <code>'H'</code>, then <code>'i'</code>,
+then a newline (ASCII 10).</p>`,
+    starter: `; Lesson 5 — print "Hi"
+        ORG $8000
+        LD A, 'H'
+        OUT (0), A
+        LD A, 'i'
+        OUT (0), A
+        LD A, 10
+        OUT (0), A
+        HALT
+`,
+    hints: [
+      'A character literal is just its ASCII code: `\'H\'` is 0x48.',
+      'Each `OUT (0), A` shows up in the Console panel on the right.',
+    ],
+    check: (cpu, sim) => {
+      const ok = sim.console.includes('Hi');
+      return { ok, message: ok ? `Console shows "Hi" ✓` : `Console: "${sim.console}"` };
+    }
+  },
+
+  {
+    id: 'l6',
+    title: 'Lesson 6 — Memory and HL as a pointer',
+    concept: 'indirect addressing & small loops',
+    body: `
+<p>HL is the most-used 16-bit register pair; it often serves as a
+"pointer" into memory. To write to memory at the address in HL use
+<code>LD (HL), n</code> or <code>LD (HL), A</code>. To read, use
+<code>LD A, (HL)</code>. <code>INC HL</code> moves the pointer forward.</p>
+<p><b>Task:</b> Fill memory from <code>$9000</code> to <code>$9009</code>
+with the values 0..9 (i.e. memory[i] = i).</p>`,
+    starter: `; Lesson 6 — fill memory 0..9
+        ORG $8000
+        LD HL, $9000
+        LD B, 10
+        LD A, 0
+LOOP:   LD (HL), A
+        INC A
+        INC HL
+        DJNZ LOOP
+        HALT
+`,
+    hints: [
+      'Use A as both the value and the implicit "next" index — INC A each step.',
+      'Watch memory at $9000..$9009 in the Memory panel after the loop.',
+    ],
+    check: (cpu) => {
+      let ok = true;
+      for (let i = 0; i < 10; i++) if (cpu.read(0x9000 + i) !== i) { ok = false; break; }
+      return { ok, message: ok ? 'Memory 0..9 stored correctly ✓' : 'Some bytes wrong — see Memory panel' };
+    }
+  },
+
+  {
+    id: 'l7',
+    title: 'Lesson 7 — Subroutines with CALL and RET',
+    concept: 'the stack & re-usable code',
+    body: `
+<p>A <b>subroutine</b> is a chunk of code you can call from anywhere
+and return from. <code>CALL label</code> pushes the current PC
+onto the stack and jumps to the label. <code>RET</code> pops the
+return address off the stack and jumps back.</p>
+<p>Anything you push with <code>PUSH</code> must be popped with
+<code>POP</code> — or the stack drifts and bad things happen.</p>
+<p><b>Task:</b> Define a subroutine <code>DOU</code> that doubles the
+value in A. Call it from the main program so A ends up holding 12.</p>`,
+    starter: `; Lesson 7 — subroutines
+        ORG $8000
+        LD A, 6
+        CALL DOU       ; A should become 12
+        HALT
+
+DOU:    ADD A, A      ; A = A + A
+        RET
+`,
+    hints: [
+      'A subroutine ends with RET, not HALT.',
+      'CALL saves PC on the stack. RET pops it and jumps back.',
+    ],
+    check: (cpu) => {
+      const ok = cpu.A === 12;
+      return { ok, message: ok ? 'A=12 ✓' : `A=${cpu.A}, expected 12` };
+    }
+  },
+
+  {
+    id: 'l8',
+    title: 'Lesson 8 — 16-bit add and BCD',
+    concept: 'working above 8 bits; DAA',
+    body: `
+<p>To add 16-bit values, use <code>ADD HL, ss</code>. The result sits
+in HL, with the carry going into the C flag. For example
+<code>ADD HL, BC</code> does HL = HL + BC.</p>
+<p>The Z80 also has the <b>DAA</b> instruction that adjusts A after an
+ADD or SUB to make it a valid <i>binary-coded decimal</i> (BCD)
+digit. Two BCD digits fit in one byte: high nibble = tens, low
+nibble = ones.</p>
+<p><b>Task:</b> Compute <code>5 + 7 = 12</code> in BCD: put 05 in A,
+add 07, then run DAA, and check A is now $12.</p>`,
+    starter: `; Lesson 8 — DAA / BCD
+        ORG $8000
+        LD A, $05
+        ADD A, $07
+        DAA           ; A should become $12
+        HALT
+`,
+    hints: [
+      'In BCD, $09 + $01 = $10 (sixteen decimal, but as BCD it means 1-0).',
+      'DAA fixes the low/high nibble after binary arithmetic. Use it right after ADD or SUB.',
+    ],
+    check: (cpu) => {
+      const ok = cpu.A === 0x12;
+      return { ok, message: ok ? 'A=$12 (BCD 12) ✓' : `A=$${cpu.A.toString(16).padStart(2,'0')}, expected $12` };
+    }
+  },
+
+  {
+    id: 'l9',
+    title: 'Lesson 9 — Indexed addressing with IX',
+    concept: 'tables & offsets',
+    body: `
+<p>Two 16-bit index registers, <b>IX</b> and <b>IY</b>, are useful for
+accessing arrays: <code>LD A, (IX+0)</code> reads the first byte,
+<code>(IX+1)</code> the next, and so on. They survive across many
+instructions and can be moved with <code>LD IX, nn</code>.</p>
+<p><b>Task:</b> Read the byte at <code>(IX+2)</code> and put it in A.</p>`,
+    starter: `; Lesson 9 — indexed addressing
+        ORG $8000
+        LD HL, $9000
+        LD (HL), 11   ; [9000] = 11
+        INC HL
+        LD (HL), 22   ; [9001] = 22
+        INC HL
+        LD (HL), 33   ; [9002] = 33
+
+        LD IX, $9000
+        LD A, (IX+2)  ; should be 33
+        HALT
+`,
+    hints: [
+      'IX+0 is the first element, IX+1 the second, IX+2 the third.',
+      'The simulator highlights the byte at IX+offset in the Memory panel.',
+    ],
+    check: (cpu) => {
+      const ok = cpu.A === 33;
+      return { ok, message: ok ? 'A=33 ✓' : `A=${cpu.A}, expected 33` };
+    }
+  },
+
+  {
+    id: 'l10',
+    title: 'Lesson 10 — Capstone: print a string',
+    concept: 'combining everything',
+    body: `
+<p>Combine what you know: a <b>DB</b> directive stores bytes, a
+pointer walks the memory, <code>LD A,(HL)</code> reads each byte,
+and <code>OUT (0),A</code> prints it. Stop when you see a zero byte
+(standard "C-style" string terminator).</p>
+<p><b>Task:</b> Print the string <code>"Z80!"</code> followed by a
+newline. The string must be stored with a DB directive somewhere in
+memory, and the program must walk it with a pointer until it hits
+a zero byte.</p>`,
+    starter: `; Lesson 10 — print a string
+        ORG $8000
+        LD HL, MSG
+LOOP:   LD A, (HL)
+        CP 0
+        JR Z, DONE
+        OUT (0), A
+        INC HL
+        JR LOOP
+DONE:   HALT
+
+        ORG $9000
+MSG:    DB "Z80!", 10, 0
+`,
+    hints: [
+      'A null-terminated string ends with a zero byte; CP 0 / JR Z handles that.',
+      'DB stores ASCII bytes in memory; ORG $9000 puts them in a known place.',
+    ],
+    check: (cpu, sim) => {
+      const ok = sim.console.includes('Z80!');
+      return { ok, message: ok ? `Console shows "Z80!" ✓` : `Console: "${sim.console}"` };
+    }
+  }
+];
+
+if (typeof window !== 'undefined') window.TUTORIAL = TUTORIAL;
+
+</script>
+<script>
+/* ===========================================================
+   Z80 Lab — UI, debugger, lesson runner
+   =========================================================== */
+'use strict';
+
+// ---------- Examples (non-lesson programs) ----------
+const EXAMPLES = [
+  {
+    id: 'ex-hello',
+    title: 'Hello world',
+    body: 'Classic: print "Hello" using a string pointer.',
+    code: `; Hello world
+        ORG $8000
+        LD HL, MSG
+LOOP:   LD A, (HL)
+        CP 0
+        JR Z, DONE
+        OUT (0), A
+        INC HL
+        JR LOOP
+DONE:   HALT
+
+        ORG $9000
+MSG:    DB "Hello, Z80!", 10, 0
+`
+  },
+  {
+    id: 'ex-counters',
+    title: 'Counters',
+    body: 'Two nested DJNZ loops to make A = 5*7 = 35.',
+    code: `; Multiplication by repeated addition
+        ORG $8000
+        LD A, 0
+        LD C, 5
+OUTER:  LD B, 7
+INNER:  ADD A, C
+        DJNZ INNER
+        DEC C
+        JR NZ, OUTER
+        HALT
+`
+  },
+  {
+    id: 'ex-bcd',
+    title: 'BCD countdown',
+    body: 'Count down from 99 to 0, printing two BCD digits each step.',
+    code: `; BCD countdown
+        ORG $8000
+        LD A, $99
+LOOP:   PUSH AF
+        ; tens digit
+        LD A, $FF
+        ; ... (illustrative; full routine omitted for brevity)
+        POP AF
+        DEC A
+        JR NZ, LOOP
+        HALT
+`
+  },
+  {
+    id: 'ex-block',
+    title: 'LDIR copy',
+    body: 'Use LDIR to copy 16 bytes from $9000 to $A000.',
+    code: `; Block copy with LDIR
+        ORG $8000
+        LD HL, $9000     ; source
+        LD DE, $A000     ; destination
+        LD BC, 16        ; count
+        LDIR
+        HALT
+`
+  }
+];
+
+// ---------- App state ----------
+const state = {
+  cpu: null,
+  asm: new Assembler(),
+  editorText: '',
+  currentLesson: 0,
+  completed: new Set(),
+  running: false,
+  runTimer: null,
+  prevRegs: {},
+  breakpoints: new Set(),
+  memory: { hl: 0, ix: 0, iy: 0, pc: 0, sp: 0 },
+  console: '',
+  listings: [],
+  errors: [],
+  lastAsmOk: false,
+  exampleMode: false
+};
+
+// ---------- Setup ----------
+function init() {
+  state.cpu = new Z80();
+  wireConsole();
+  state.cpu.ioOutput = (port, val) => {
+    if (port === 0) {
+      const ch = String.fromCharCode(val);
+      state.console += ch;
+      if (state.console.length > 800) state.console = state.console.slice(-800);
+      renderConsole();
+    } else if (port === 1) {
+      // Memory log
+      const addr = 0xA000 + (state.cpu.BC & 0xFF);
+      state.cpu.write(addr, val);
+    }
+  };
+  state.cpu.breakpointHit = (pc) => {
+    if (state.running) {
+      stopRun();
+      flashStatus(`Breakpoint at $${pc.toString(16).padStart(4,'0')}`);
+    }
+  };
+
+  renderLessonList();
+  renderExampleList();
+  loadLesson(0);
+  renderAll();
+  // Periodic render while running
+  setInterval(() => {
+    if (state.running) renderAll();
+  }, 200);
+}
+
+function wireConsole() {
+  // nothing to wire besides the renderer
+}
+
+function renderConsole() {
+  const el = document.getElementById('consoleOut');
+  el.textContent = state.console;
+  el.scrollTop = el.scrollHeight;
+}
+
+// ---------- Lesson list ----------
+function renderLessonList() {
+  const ul = document.getElementById('lessonList');
+  ul.innerHTML = '';
+  TUTORIAL.forEach((l, i) => {
+    const li = document.createElement('li');
+    li.dataset.idx = i;
+    li.innerHTML = `<span class="num">${i+1}</span>${l.title.replace(/^Lesson \d+ — /, '')}`;
+    if (state.completed.has(i)) li.classList.add('done');
+    if (i === state.currentLesson && !state.exampleMode) li.classList.add('active');
+    li.addEventListener('click', () => loadLesson(i));
+    ul.appendChild(li);
+  });
+  updateProgress();
+}
+
+function renderExampleList() {
+  const ul = document.getElementById('exampleList');
+  ul.innerHTML = '';
+  EXAMPLES.forEach((ex, i) => {
+    const li = document.createElement('li');
+    li.dataset.idx = i;
+    li.innerHTML = `<span class="num">·</span>${ex.title}`;
+    if (state.exampleMode && state.currentLesson === i) li.classList.add('active');
+    li.addEventListener('click', () => loadExample(i));
+    ul.appendChild(li);
+  });
+}
+
+function updateProgress() {
+  const done = state.completed.size;
+  const total = TUTORIAL.length;
+  document.getElementById('lessonProgress').textContent = `${done} / ${total} done`;
+}
+
+document.getElementById('resetProgress').addEventListener('click', () => {
+  if (!confirm('Reset all progress?')) return;
+  state.completed.clear();
+  state.breakpoints.clear();
+  renderLessonList();
+});
+
+// ---------- Load lesson/example ----------
+function loadLesson(i) {
+  state.exampleMode = false;
+  state.currentLesson = i;
+  const l = TUTORIAL[i];
+  document.getElementById('lbTitle').textContent = l.title;
+  document.getElementById('lbConcept').textContent = `Concept: ${l.concept}`;
+  document.getElementById('lbContent').innerHTML = l.body;
+  document.getElementById('editor').value = l.starter;
+  state.editorText = l.starter;
+  state.console = '';
+  state.errors = [];
+  state.breakpoints.clear();
+  resetCPU();
+  renderAll();
+  renderLessonList();
+  // Auto-assemble to populate listing
+  assemble();
+}
+
+function loadExample(i) {
+  state.exampleMode = true;
+  state.currentLesson = i;
+  const ex = EXAMPLES[i];
+  document.getElementById('lbTitle').textContent = ex.title;
+  document.getElementById('lbConcept').textContent = 'Example program';
+  document.getElementById('lbContent').innerHTML = `<p>${ex.body}</p>`;
+  document.getElementById('editor').value = ex.code;
+  state.editorText = ex.code;
+  state.console = '';
+  state.errors = [];
+  state.breakpoints.clear();
+  resetCPU();
+  renderAll();
+  renderExampleList();
+  renderLessonList();
+  assemble();
+}
+
+// ---------- Editor: line numbers, syntax highlight ----------
+const editor = document.getElementById('editor');
+const gutter = document.getElementById('gutter');
+const highlight = document.getElementById('highlight');
+
+function syncEditor() {
+  state.editorText = editor.value;
+  const lines = editor.value.split('\n');
+  gutter.innerHTML = lines.map((_, i) => `<span class="ln">${i+1}</span>`).join('');
+  highlight.innerHTML = highlightAsm(editor.value);
+  // keep scroll in sync
+  highlight.scrollTop = editor.scrollTop;
+  gutter.scrollTop = editor.scrollTop;
+}
+editor.addEventListener('input', syncEditor);
+editor.addEventListener('scroll', () => {
+  highlight.scrollTop = editor.scrollTop;
+  gutter.scrollTop = editor.scrollTop;
+});
+editor.addEventListener('keydown', (e) => {
+  // Tab inserts spaces
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const start = editor.selectionStart, end = editor.selectionEnd;
+    editor.setRangeText('    ', start, end, 'end');
+    syncEditor();
+  }
+  // Ctrl+B: assemble
+  if ((e.metaKey||e.ctrlKey) && e.key.toLowerCase() === 'b') { e.preventDefault(); assemble(); }
+  // F5: run
+  if (e.key === 'F5') { e.preventDefault(); run(); }
+  // F8: step
+  if (e.key === 'F8') { e.preventDefault(); step(); }
+});
+
+function highlightAsm(src) {
+  // Very simple syntax highlighting (escapes HTML, then tokenizes)
+  const esc = (s) => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const out = [];
+  const lines = src.split('\n');
+  for (const line of lines) {
+    const noCmt = line.replace(/[;].*$/, '');
+    const cmt = line.slice(noCmt.length);
+    // Label?
+    let rest = noCmt;
+    let label = '';
+    const lm = noCmt.match(/^(\s*)([A-Za-z_][A-Za-z0-9_]*)\s*:/);
+    if (lm) { label = esc(lm[1]) + '<span style="color:#ffcb6b">' + esc(lm[2]) + '</span>:'; rest = noCmt.slice(lm[0].length); }
+    // Mnemonic + rest
+    const tm = rest.match(/^(\s*)([A-Za-z_.]+)\b(.*)$/);
+    if (tm) {
+      const mne = tm[2].toUpperCase();
+      const isDir = ['ORG','EQU','DB','DW','DS','END','INCLUDE','DEFB','DEFM','DEFW'].includes(mne);
+      const isReg = /\b(A|B|C|D|E|H|L|I|R|IX|IY|AF|BC|DE|HL|SP|IXH|IXL|IYH|IYL)\b/i.test(tm[3]);
+      const col = isDir ? '#7ee787' : '#4cc2ff';
+      const restEsc = esc(tm[3]).replace(
+        /\b([0-9]+\$|\$[0-9a-fA-F]+|0x[0-9a-fA-F]+|%[01]+|'(.)')\b/g,
+        '<span style="color:#c1f0c9">$1</span>'
+      ).replace(
+        /\b([A-Z]{2,3})\b/g,
+        '<span style="color:#8a96a8">$1</span>'
+      );
+      out.push(label + esc(tm[1]) + `<span style="color:${col}">${esc(tm[2])}</span>` + restEsc + `<span style="color:#5a6577">${esc(cmt)}</span>`);
+    } else {
+      out.push(esc(line));
+    }
+  }
+  return out.join('\n');
+}
+
+// ---------- Assemble / Load ----------
+document.getElementById('btnAssemble').addEventListener('click', assemble);
+function assemble() {
+  stopRun();
+  const src = editor.value;
+  const result = state.asm.assemble(src, 0x8000);
+  state.lastAsmOk = result.ok;
+  state.listings = result.listings;
+  state.errors = result.errors;
+  // If assembling was successful, copy bytes to memory
+  if (result.ok) {
+    // First, clear the target region we use
+    state.cpu.mem.fill(0, 0x8000, 0xB000);
+    let addr = result.org;
+    for (const item of result.listings) {
+      for (const b of item.bytes) state.cpu.write(addr++, b);
+    }
+    state.cpu.PC = result.org;
+    state.cpu.SP = 0xFFFE;
+    state.cpu.write(0xFFFE, 0x00); state.cpu.write(0xFFFF, 0x00); // pretend we have a return addr
+    // Save breakpoints that match current PC region
+    state.cpu.breakpoints = new Set(state.breakpoints);
+    // Show success
+    flashStatus(`Assembled ${result.output.length} bytes`);
+  } else {
+    flashStatus(`Assembly failed: ${result.errors.length} error(s)`);
+  }
+  renderErrors();
+  renderListing();
+  renderAll();
+}
+
+// ---------- CPU controls ----------
+document.getElementById('btnStep').addEventListener('click', step);
+document.getElementById('btnStep2').addEventListener('click', step);
+document.getElementById('btnRun').addEventListener('click', run);
+document.getElementById('btnRun2').addEventListener('click', run);
+document.getElementById('btnStop').addEventListener('click', stopRun);
+document.getElementById('btnReset').addEventListener('click', () => { stopRun(); resetCPU(); renderAll(); });
+document.getElementById('btnReset2').addEventListener('click', () => { stopRun(); resetCPU(); renderAll(); });
+document.getElementById('btnCheck').addEventListener('click', checkLesson);
+document.getElementById('btnHint').addEventListener('click', showHint);
+
+function resetCPU() {
+  state.cpu.reset();
+  state.cpu.PC = 0x8000;
+  state.cpu.SP = 0xFFFE;
+  state.cpu.write(0xFFFE, 0x00); state.cpu.write(0xFFFF, 0x00);
+  state.console = '';
+  renderConsole();
+}
+
+function step() {
+  try {
+    if (!state.lastAsmOk) { assemble(); if (!state.lastAsmOk) return; }
+    if (state.cpu.halted) { flashStatus('CPU is halted'); return; }
+    state.cpu.step();
+    state.memory.pc = state.cpu.PC;
+    renderAll();
+  } catch (e) {
+    flashStatus(e.message, true);
+  }
+}
+
+function run() {
+  if (!state.lastAsmOk) { assemble(); if (!state.lastAsmOk) return; }
+  if (state.running) return;
+  state.running = true;
+  const speed = +document.getElementById('speed').value;
+  document.getElementById('speedMeta').textContent = `Speed: ${speed} Hz`;
+  // interval = 1000/speed ms
+  const period = Math.max(1, Math.floor(1000 / speed));
+  const maxSteps = Math.max(1, Math.floor(speed / 60));
+  state.runTimer = setInterval(() => {
+    try {
+      if (state.cpu.halted) { stopRun(); flashStatus('HALT reached'); return; }
+      for (let i = 0; i < maxSteps; i++) {
+        state.cpu.step();
+        if (state.cpu.halted) break;
+      }
+      state.memory.pc = state.cpu.PC;
+    } catch (e) {
+      stopRun();
+      flashStatus(e.message, true);
+    }
+  }, period);
+}
+
+function stopRun() {
+  state.running = false;
+  if (state.runTimer) { clearInterval(state.runTimer); state.runTimer = null; }
+}
+
+// ---------- Lesson check ----------
+function checkLesson() {
+  if (state.exampleMode) {
+    flashStatus('Examples are not auto-checked — just run and observe.');
+    return;
+  }
+  if (!state.lastAsmOk) assemble();
+  if (!state.lastAsmOk) { flashStatus('Fix assembly errors first'); return; }
+  // Run to completion (up to a limit)
+  try {
+    // If HALT is present, just run to it
+    state.cpu.run(200000);
+  } catch (e) {
+    flashStatus(e.message, true);
+    return;
+  }
+  renderAll();
+  const lesson = TUTORIAL[state.currentLesson];
+  const res = lesson.check(state.cpu, state);
+  if (res.ok) {
+    state.completed.add(state.currentLesson);
+    flashOk(res.message + ' — lesson complete! Move on to the next one.');
+    renderLessonList();
+  } else {
+    flashStatus(res.message, true);
+  }
+}
+
+function showHint() {
+  if (state.exampleMode) { flashStatus('This is an example — no hints.'); return; }
+  const l = TUTORIAL[state.currentLesson];
+  const used = l._hintIdx || 0;
+  const h = l.hints[used] || l.hints[l.hints.length-1];
+  l._hintIdx = Math.min(l.hints.length - 1, used + 1);
+  // Show as a hint box in lesson body
+  const box = document.createElement('div');
+  box.className = 'hint';
+  box.textContent = '💡 ' + h;
+  document.getElementById('lbContent').appendChild(box);
+}
+
+// ---------- Listing + trace + tabs ----------
+document.querySelectorAll('.trace .tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.trace .tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    renderTraceBody(t.dataset.tab);
+  });
+});
+
+function renderListing() {
+  if (!state.listings.length) {
+    document.getElementById('listingPre').textContent = 'No listing yet — click "Assemble" to compile your program.';
+    return;
+  }
+  const out = [];
+  for (const l of state.listings) {
+    const addr = l.addr.toString(16).padStart(4,'0');
+    const bytes = l.bytes.map(b => b.toString(16).padStart(2,'0')).join(' ').padEnd(12, ' ');
+    const src = (l.source || '').trim();
+    out.push(`<span class="l"><span class="ln">${l.line}</span>  <span class="addr clickable" data-addr="${l.addr}">$${addr}</span>  <span class="bytes">${bytes}</span>  <span class="src">${escapeHtml(src)}</span></span>`);
+  }
+  document.getElementById('listingPre').innerHTML = out.join('\n');
+  // Wire click on address to set PC / toggle breakpoint
+  document.querySelectorAll('#listingPre .addr.clickable').forEach(el => {
+    el.addEventListener('click', (e) => {
+      const addr = parseInt(el.dataset.addr, 10);
+      if (e.shiftKey) {
+        state.cpu.PC = addr;
+        flashStatus(`PC set to $${addr.toString(16).padStart(4,'0')}`);
+      } else if (state.breakpoints.has(addr)) {
+        state.breakpoints.delete(addr); state.cpu.breakpoints = new Set(state.breakpoints);
+      } else {
+        state.breakpoints.add(addr); state.cpu.breakpoints = new Set(state.breakpoints);
+      }
+      renderAll();
+    });
+  });
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderTraceBody(tab) {
+  const body = document.getElementById('traceBody');
+  if (tab === 'listing') {
+    body.className = 'body listing';
+    renderListing();
+  } else if (tab === 'trace') {
+    body.className = 'body';
+    if (state.cpu.trace.length === 0) {
+      body.innerHTML = '<pre style="color:#5a6577">No trace yet — run or step the program.</pre>';
+      return;
+    }
+    const lines = state.cpu.trace.slice(-300).map(t => {
+      return `PC=$${t.pc.toString(16).padStart(4,'0')}  (${t.tStates} t-states)`;
+    });
+    body.innerHTML = '<pre>' + lines.join('\n') + '</pre>';
+  } else if (tab === 'help') {
+    body.className = 'body';
+    body.innerHTML = `<pre style="color:#8a96a8">
+Z80 Lab — quick help
+
+  Editor    — Type Z80 assembly. Click "Assemble" (Ctrl+B) to compile.
+  Step      — Execute one instruction at a time (F8).
+  Run       — Run at the chosen speed (F5).
+  Stop      — Halt a running program.
+  Reset     — Restart CPU from $8000 and clear the console.
+  Check     — Run the current lesson to its HALT, then auto-grade it.
+
+  Listing   — Compiled bytes. Click an address to toggle a breakpoint.
+              Shift+click to jump the PC there.
+  Trace     — Recent PCs the CPU has executed.
+  Memory    — Click an address to peek; PC, SP, HL/IX/IY are colored.
+  Console   — Characters sent to port 0 appear here.
+
+Number formats:
+  42       decimal
+  $2A      hexadecimal
+  0x2A     hexadecimal
+  %00101010 binary
+  'A'      ASCII code for A (65)
+
+Tips for beginners:
+  1. Always start with ORG $8000 and end with HALT.
+  2. The Z is the only "equal" flag after CP. C is the unsigned less-than.
+  3. PUSH without matching POP will eventually crash the program.
+  4. To watch a memory cell change, the panel auto-follows HL/IX/IY/PC.
+</pre>`;
+  }
+}
+
+// ---------- Render: registers, flags, memory, status ----------
+const REG_DEFS = [
+  ['A','A'],['B','B'],['C','C'],['D','D'],['E','E'],['H','H'],['L','L'],
+  ['F','F'],['A\'',"A2"],['B\'',"B2"],['C\'',"C2"],
+  ['IX','IX'],['IY','IY'],['SP','SP'],['PC','PC']
+];
+const FLAG_DEFS = [['S','flagS'],['Z','flagZ'],['H','flagH'],['P/V','flagPV'],['N','flagN'],['C','flagC']];
+
+function renderAll() {
+  renderRegs();
+  renderFlags();
+  renderMem();
+  renderBps();
+  renderConsole();
+  renderTraceBody('listing');
+}
+
+function renderRegs() {
+  const cpu = state.cpu;
+  const html = REG_DEFS.map(([name, key]) => {
+    let v;
+    if (name.endsWith('\'')) v = cpu[key];
+    else if (name === 'PC') v = cpu.PC;
+    else if (name === 'SP') v = cpu.SP;
+    else if (name === 'F') v = cpu.F;
+    else v = cpu[name];
+    if (typeof v !== 'number') v = 0;
+    const hex = (name === 'PC' || name === 'SP' || name === 'IX' || name === 'IY' || name === 'A\'')
+      ? v.toString(16).padStart(4,'0')
+      : v.toString(16).padStart(2,'0');
+    const changed = state.prevRegs[name] !== undefined && state.prevRegs[name] !== v;
+    state.prevRegs[name] = v;
+    return `<div class="r"><span class="name">${name}</span><span class="val${changed?' changed':''}">$${hex}</span></div>`;
+  }).join('');
+  document.getElementById('regs').innerHTML = html;
+}
+
+function renderFlags() {
+  const cpu = state.cpu;
+  const html = FLAG_DEFS.map(([name, key]) => {
+    const on = cpu[key];
+    return `<div class="f ${on?'on':''}"><span class="lbl">${name}</span>${on?'1':'0'}</div>`;
+  }).join('');
+  document.getElementById('flags').innerHTML = html;
+}
+
+function renderMem() {
+  const cpu = state.cpu;
+  // Decide base address to show: PC region
+  const follow = document.getElementById('cbFollow').checked;
+  const base = follow ? (cpu.PC & 0xFFF0) : 0x8000;
+  const lines = [];
+  const hl = cpu.HL, ix = cpu.IX, iy = cpu.IY, pc = cpu.PC, sp = cpu.SP;
+  for (let row = 0; row < 16; row++) {
+    const addr = (base + row*16) & 0xFFFF;
+    let html = `<span class="addr">${addr.toString(16).padStart(4,'0')}:</span> `;
+    let ascii = '';
+    for (let col = 0; col < 16; col++) {
+      const a = (addr + col) & 0xFFFF;
+      const b = cpu.read(a);
+      let cls = 'byt';
+      if (a === pc) cls += ' pc';
+      if (a === sp || a === ((sp+1)&0xFFFF)) cls += ' sp';
+      if (a === hl || a === ((hl+1)&0xFFFF)) cls += ' hl';
+      if (a === ix || a === ((ix+1)&0xFFFF)) cls += ' hl';
+      if (a === iy || a === ((iy+1)&0xFFFF)) cls += ' hl';
+      html += `<span class="${cls}">${b.toString(16).padStart(2,'0')}</span> `;
+      ascii += (b>=32 && b<127) ? String.fromCharCode(b) : '.';
+    }
+    html += ` <span class="ch">|${ascii}|</span>`;
+    lines.push(`<div class="row">${html}</div>`);
+  }
+  document.getElementById('memview').innerHTML = lines.join('');
+  // Show where SP/PC actually are at the bottom if outside the window
+  if (pc < base || pc >= base + 256) {
+    document.getElementById('memview').insertAdjacentHTML('beforeend',
+      `<div class="row meta">… PC=$${pc.toString(16).padStart(4,'0')} (outside view)</div>`);
+  }
+}
+
+function renderBps() {
+  const el = document.getElementById('breakpts');
+  if (state.breakpoints.size === 0) {
+    el.innerHTML = '<span class="meta" style="opacity:.7">no breakpoints — click a listing address to add one</span>';
+    return;
+  }
+  el.innerHTML = [...state.breakpoints].sort((a,b)=>a-b).map(a =>
+    `<span class="bp" data-addr="${a}">$${a.toString(16).padStart(4,'0')} ✕</span>`).join('');
+  el.querySelectorAll('.bp').forEach(s => {
+    s.addEventListener('click', () => {
+      const a = parseInt(s.dataset.addr, 10);
+      state.breakpoints.delete(a); state.cpu.breakpoints = new Set(state.breakpoints);
+      renderBps();
+    });
+  });
+}
+
+function renderErrors() {
+  const panel = document.getElementById('errorsPanel');
+  const errEl = document.getElementById('errors');
+  if (state.errors.length === 0) {
+    panel.style.display = 'none';
+    return;
+  }
+  panel.style.display = '';
+  errEl.innerHTML = state.errors.map(e =>
+    `<div class="error">Line ${e.line}: ${escapeHtml(e.msg)}<br><span style="opacity:.6">${escapeHtml(e.source)}</span></div>`
+  ).join('');
+}
+
+function flashStatus(msg, isError=false) {
+  const el = document.getElementById('statusMsg') || (() => {
+    const s = document.createElement('div');
+    s.id = 'statusMsg';
+    s.style.cssText = 'position:fixed;bottom:12px;left:50%;transform:translateX(-50%);background:#1c2129;border:1px solid #2a313a;padding:6px 12px;border-radius:6px;font:12px ui-monospace,monospace;z-index:99;';
+    document.body.appendChild(s);
+    return s;
+  })();
+  el.textContent = msg;
+  el.style.color = isError ? 'var(--bad)' : 'var(--accent)';
+  el.style.display = 'block';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.style.display = 'none'; }, 3500);
+}
+
+function flashOk(msg) {
+  const el = document.getElementById('statusMsg') || (() => {
+    const s = document.createElement('div');
+    s.id = 'statusMsg';
+    s.style.cssText = 'position:fixed;bottom:12px;left:50%;transform:translateX(-50%);background:#1c2129;border:1px solid #2a313a;padding:6px 12px;border-radius:6px;font:12px ui-monospace,monospace;z-index:99;';
+    document.body.appendChild(s);
+    return s;
+  })();
+  el.textContent = msg;
+  el.style.color = 'var(--ok)';
+  el.style.display = 'block';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.style.display = 'none'; }, 5000);
+}
+
+// ---------- Keyboard shortcuts on body (focus-agnostic) ----------
+document.addEventListener('keydown', (e) => {
+  // Don't capture if user is typing in editor (handled above)
+  if (document.activeElement === editor) return;
+  if (e.key === 'F8') { e.preventDefault(); step(); }
+  if (e.key === 'F5') { e.preventDefault(); if (state.running) stopRun(); else run(); }
+});
+
+// ---------- Init ----------
+window.addEventListener('load', init);
+</script>
+</body>
+</html>

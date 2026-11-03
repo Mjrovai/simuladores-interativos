@@ -1,0 +1,2815 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Apple 1 Lab — Learn 6502 Assembly</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+  :root {
+    --bg: #0e1116; --panel: #161b22; --panel2: #1c2129; --border: #2a313a;
+    --text: #d8dde6; --muted: #8a96a8; --accent: #ffb86c; --accent2: #4cc2ff;
+    --ok: #7ee787; --bad: #ff7b72; --hi: #3a2a18; --code: #c9d1d6;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; height:100%; }
+  body {
+    font: 14px/1.4 -apple-system, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+    background: var(--bg); color: var(--text); overflow: hidden;
+  }
+  button {
+    background: var(--panel2); color: var(--text); border: 1px solid var(--border);
+    border-radius: 6px; padding: 6px 10px; cursor: pointer; font: inherit;
+  }
+  button:hover { background: #232a33; }
+  button.primary { background: #3a2a18; border-color: #5c3a1a; }
+  button.primary:hover { background: #4a3a25; }
+  button.ok { background: #1d3a25; border-color: #2e5b3a; color: #c1f0c9; }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  textarea, input, select {
+    background: #0b0e13; color: var(--text); border: 1px solid var(--border);
+    border-radius: 6px; padding: 6px 8px; font: 13px/1.4 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  .app {
+    display: grid;
+    grid-template-columns: 280px 1fr 360px;
+    grid-template-rows: 44px 1fr 180px;
+    grid-template-areas:
+      "topbar topbar topbar"
+      "lessons main   debug"
+      "lessons trace  debug";
+    height: 100vh;
+  }
+  .topbar {
+    grid-area: topbar; display: flex; align-items: center; gap: 12px;
+    background: var(--panel); border-bottom: 1px solid var(--border); padding: 0 12px;
+  }
+  .topbar h1 { font-size: 14px; margin: 0; font-weight: 600; color: var(--accent); letter-spacing: .3px; }
+  .topbar .sep { width:1px; height:24px; background: var(--border); }
+  .topbar .spacer { flex: 1; }
+  .topbar .meta { color: var(--muted); font-size: 12px; }
+  .lessons {
+    grid-area: lessons; background: var(--panel); border-right: 1px solid var(--border); overflow-y: auto;
+  }
+  .lessons h2 {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px;
+    color: var(--muted); margin: 12px 12px 6px; font-weight: 600;
+  }
+  .lesson-list { list-style: none; margin: 0; padding: 0; }
+  .lesson-list li {
+    padding: 8px 12px; cursor: pointer; border-left: 3px solid transparent; font-size: 13px;
+  }
+  .lesson-list li:hover { background: var(--panel2); }
+  .lesson-list li.active { background: var(--panel2); border-left-color: var(--accent); }
+  .lesson-list li.done { color: var(--ok); }
+  .lesson-list li .num {
+    display: inline-block; width: 22px; color: var(--muted);
+    font: 11px ui-monospace, monospace; text-align: right; margin-right: 6px;
+  }
+  .lessons .reset-progress { margin: 12px; display: block; width: calc(100% - 24px); font-size: 11px; }
+  .main { grid-area: main; display: grid; grid-template-rows: 1fr 200px; min-width: 0; }
+  .lesson-body {
+    padding: 12px 18px; overflow-y: auto; border-bottom: 1px solid var(--border); background: var(--panel2);
+  }
+  .lesson-body h3 { margin: 0 0 4px; font-size: 15px; color: var(--accent); }
+  .lesson-body .concept { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+  .lesson-body p { margin: 6px 0; }
+  .lesson-body pre {
+    background: #0b0e13; border: 1px solid var(--border);
+    border-radius: 6px; padding: 8px 10px; font: 12px ui-monospace, monospace;
+    color: var(--code); overflow-x: auto;
+  }
+  .lesson-body code {
+    background: #0b0e13; padding: 1px 5px; border-radius: 4px;
+    font: 12px ui-monospace, monospace; color: var(--accent2);
+  }
+  .lesson-body .hint {
+    background: #0b0e13; border-left: 3px solid var(--accent2);
+    padding: 6px 10px; border-radius: 4px; font-size: 12px; color: var(--muted); margin: 6px 0;
+  }
+  .editor-wrap { display: grid; grid-template-rows: 36px 1fr; min-height: 0; }
+  .editor-bar {
+    display: flex; align-items: center; gap: 8px; padding: 4px 8px;
+    border-top: 1px solid var(--border); background: var(--panel);
+  }
+  .editor-bar .filename { color: var(--muted); font-size: 12px; margin-right: 8px; }
+  .editor-area { position: relative; min-height: 0; background: #0b0e13; }
+  textarea.editor {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    background: transparent; color: transparent; caret-color: var(--accent);
+    border: 0; border-radius: 0; padding: 6px 8px 6px 56px; resize: none;
+    font: 13px/1.5 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    white-space: pre; overflow: auto; tab-size: 4;
+  }
+  textarea.editor::selection { background: rgba(255,184,108,.25); }
+  pre.highlight {
+    position: absolute; inset: 0; padding: 6px 8px 6px 56px; margin: 0;
+    border: 0; pointer-events: none; white-space: pre; overflow: auto;
+    font: 13px/1.5 ui-monospace, "SF Mono", Menlo, Consolas, monospace; color: var(--code);
+  }
+  .gutter {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 48px;
+    background: #0a0d12; color: var(--muted); font: 12px ui-monospace, monospace;
+    padding: 6px 4px; text-align: right; border-right: 1px solid var(--border);
+    overflow: hidden; user-select: none;
+  }
+  .gutter .ln { display: block; }
+  .debug {
+    grid-area: debug; background: var(--panel); border-left: 1px solid var(--border);
+    display: grid; grid-template-rows: auto 1fr auto; overflow: hidden;
+  }
+  .controls {
+    display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; border-bottom: 1px solid var(--border);
+  }
+  .panels { overflow-y: auto; padding: 8px; }
+  .panel {
+    background: var(--panel2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 10px; margin-bottom: 10px;
+  }
+  .panel h3 {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px;
+    color: var(--muted); margin: 0 0 6px; font-weight: 600;
+  }
+  .regs {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 4px 8px; font: 12px ui-monospace, monospace;
+  }
+  .regs .r { display: flex; justify-content: space-between; }
+  .regs .name { color: var(--muted); }
+  .regs .val { color: var(--code); }
+  .regs .val.changed { color: var(--accent); }
+  .flags {
+    display: grid; grid-template-columns: repeat(8, 1fr);
+    gap: 4px; font: 12px ui-monospace, monospace; text-align: center;
+  }
+  .flags .f {
+    background: #0b0e13; border: 1px solid var(--border);
+    border-radius: 4px; padding: 2px 0;
+  }
+  .flags .f.on { background: var(--hi); color: var(--accent); border-color: var(--accent); }
+  .flags .lbl { color: var(--muted); display: block; font-size: 10px; }
+  .memview {
+    font: 11px ui-monospace, monospace; max-height: 220px; overflow: auto;
+    background: #0b0e13; border: 1px solid var(--border); border-radius: 4px;
+    padding: 4px; line-height: 1.4;
+  }
+  .memview .row { white-space: pre; }
+  .memview .row .addr { color: var(--muted); }
+  .memview .row .byt { color: var(--code); }
+  .memview .row .ch { color: var(--accent); }
+  .memview .row .byt.hl { background: var(--hi); color: var(--accent); }
+  .memview .row .byt.pc { background: #1f3a55; color: var(--accent2); }
+  .memview .row .byt.sp { background: #1f3a26; color: var(--ok); }
+  .help { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .error {
+    color: var(--bad); font: 12px ui-monospace, monospace;
+    background: #2a0d10; border: 1px solid #4d1a20;
+    border-radius: 4px; padding: 4px 6px; margin: 4px 0; white-space: pre-wrap;
+  }
+  .breakpt {
+    display: flex; flex-wrap: wrap; gap: 4px; font: 11px ui-monospace, monospace;
+  }
+  .breakpt .bp { background: #2a1a0d; border: 1px solid #5c3a1a; padding: 1px 6px; border-radius: 4px; cursor: pointer; }
+  .breakpt .bp:hover { background: #3a2418; }
+  .trace {
+    grid-area: trace; background: var(--panel); border-top: 1px solid var(--border);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .trace .tabs {
+    display: flex; gap: 1px; padding: 0 8px; background: var(--panel2);
+    border-bottom: 1px solid var(--border);
+  }
+  .trace .tab {
+    padding: 6px 12px; cursor: pointer; font-size: 12px;
+    color: var(--muted); border-bottom: 2px solid transparent;
+  }
+  .trace .tab.active { color: var(--text); border-bottom-color: var(--accent); }
+  .trace .body {
+    flex: 1; overflow: auto; font: 12px ui-monospace, monospace;
+    padding: 4px 8px; background: #0a0d12;
+  }
+  .trace .body pre { margin: 0; white-space: pre; color: var(--code); }
+  .listing .l { white-space: pre; }
+  .listing .l .ln { color: var(--muted); }
+  .listing .l .addr { color: var(--accent); }
+  .listing .l .bytes { color: var(--accent2); }
+  .listing .l .src { color: var(--code); }
+  /* Apple 1 screen — the "monitor" looks like a real CRT */
+  .screen-wrap {
+    border-top: 1px solid var(--border); background: #0a0d12; padding: 8px;
+  }
+  .screen-wrap h4 {
+    font-size: 11px; text-transform: uppercase; color: var(--muted);
+    margin: 0 0 4px; font-weight: 600;
+  }
+  .screen {
+    font: 13px/1.4 "VT323", "Courier New", ui-monospace, monospace;
+    color: #b6f0a0; background: #0d1208;
+    border: 1px solid #1d2519; border-radius: 4px;
+    padding: 6px 8px; min-height: 60px; max-height: 90px;
+    overflow: auto; white-space: pre-wrap; word-break: break-all;
+  }
+  .screen .cursor { display: inline-block; width: 7px; height: 14px; background: #b6f0a0; vertical-align: text-bottom; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .kbd-bar {
+    display: flex; gap: 4px; align-items: center; flex-wrap: wrap;
+    padding: 6px 8px; border-top: 1px solid var(--border);
+    background: var(--panel);
+  }
+  .kbd-bar input {
+    flex: 1; min-width: 100px; font: 12px ui-monospace, monospace;
+  }
+  kbd {
+    background: #0b0e13; border: 1px solid var(--border); border-bottom-width: 2px;
+    border-radius: 3px; padding: 0 4px; font: 11px ui-monospace, monospace;
+  }
+  .woz-banner {
+    background: #1f1810; border: 1px solid #4a3a1a; color: #ffb86c;
+    padding: 6px 10px; border-radius: 4px; font: 11px ui-monospace, monospace;
+    margin: 4px 0; display: flex; align-items: center; justify-content: space-between;
+  }
+  .woz-banner button { font: 11px; padding: 2px 6px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <h1>Apple 1 Lab</h1>
+    <span class="sep"></span>
+    <span class="meta">6502 / Woz Monitor — Learn 6502 assembly</span>
+    <span class="spacer"></span>
+    <span class="meta" id="lessonProgress">0 / 0 done</span>
+  </div>
+
+  <div class="lessons">
+    <h2>Lessons</h2>
+    <ul class="lesson-list" id="lessonList"></ul>
+    <h2>Examples</h2>
+    <ul class="lesson-list" id="exampleList"></ul>
+    <button class="reset-progress" id="resetProgress">Reset progress</button>
+  </div>
+
+  <div class="main">
+    <div class="lesson-body" id="lessonBody">
+      <h3 id="lbTitle">Welcome to Apple 1 Lab</h3>
+      <div class="concept" id="lbConcept"></div>
+      <div id="lbContent"></div>
+    </div>
+    <div class="editor-wrap">
+      <div class="editor-bar">
+        <span class="filename">program.s</span>
+        <button id="btnAssemble" class="primary" title="Assemble (Ctrl+B)">Assemble</button>
+        <button id="btnStep" title="Step one instruction (F8)">Step</button>
+        <button id="btnRun" title="Run until BRK or breakpoint (F5)">Run</button>
+        <button id="btnStop" title="Stop running program">Stop</button>
+        <button id="btnReset" title="Reset CPU and clear screen">Reset</button>
+        <button id="btnCheck" class="ok" title="Check the current lesson">Check ✓</button>
+        <span class="spacer" style="flex:1"></span>
+        <span class="meta" id="speedMeta">Speed: 100 Hz</span>
+        <input type="range" id="speed" min="10" max="2000" value="100" step="10" style="width:100px" title="Run speed" />
+        <button id="btnHint" title="Show a hint">Hint</button>
+      </div>
+      <div class="editor-area">
+        <div class="gutter" id="gutter"></div>
+        <pre class="highlight" id="highlight"></pre>
+        <textarea class="editor" id="editor" spellcheck="false" wrap="off"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="debug">
+    <div class="controls">
+      <button id="btnStep2">Step</button>
+      <button id="btnRun2">Run</button>
+      <button id="btnReset2">Reset</button>
+      <span class="spacer" style="flex:1"></span>
+      <label class="meta"><input type="checkbox" id="cbFollow" checked> Follow PC</label>
+    </div>
+    <div class="panels" id="panels">
+      <div class="panel">
+        <h3>Registers</h3>
+        <div class="regs" id="regs"></div>
+        <div style="height:6px"></div>
+        <div class="flags" id="flags"></div>
+        <div class="help">6502 flags: N V - B D I Z C. Bits 4/5 (B / unused) are software-visible via PHP/PLP.</div>
+      </div>
+      <div class="panel">
+        <h3>Breakpoints</h3>
+        <div class="breakpt" id="breakpts"><span class="meta" style="opacity:.7">no breakpoints</span></div>
+        <div class="help">Click a listing address to add/remove a breakpoint.</div>
+      </div>
+      <div class="panel">
+        <h3>Memory</h3>
+        <div class="memview" id="memview"></div>
+        <div class="help">PC in blue. SP region ($0100+SP) in green.</div>
+      </div>
+      <div class="panel" id="errorsPanel" style="display:none">
+        <h3>Errors / Status</h3>
+        <div id="errors"></div>
+      </div>
+    </div>
+    <div class="screen-wrap">
+      <div class="woz-banner" id="wozBanner" style="display:none">
+        <span>Woz Monitor active — type an address like <b>0: 12 34</b> or <b>0R</b> to run.</span>
+        <button id="btnExitWoz">Exit to RAM</button>
+      </div>
+      <h4>Apple 1 Screen ($D010) <span class="meta" id="kbdMode" style="margin-left:6px"></span></h4>
+      <div class="screen" id="screen"></div>
+      <div class="kbd-bar">
+        <span class="meta">Type a key (or paste):</span>
+        <input type="text" id="kbdInput" placeholder="Press a key, then Enter..." autocomplete="off" />
+        <button id="kbdSend">Send ↵</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="trace">
+    <div class="tabs">
+      <div class="tab active" data-tab="listing">Listing</div>
+      <div class="tab" data-tab="trace">Trace</div>
+      <div class="tab" data-tab="help">Help</div>
+    </div>
+    <div class="body listing" id="traceBody">
+      <pre id="listingPre">No listing yet — click "Assemble" to compile your program.</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ==== inlined a1-cpu.js ==== -->
+<script>
+/* ============================================================
+   Apple 1 / 6502 CPU simulator
+   ============================================================
+   A clean, readable 6502 implementation. Covers the documented
+   instruction set (the 56 official opcodes plus the well-known
+   undocumented behaviors of LDA/LDX/LDY immediate and zeropage
+   reading the base page on the "second tick" — handled correctly
+   below).  Not cycle-accurate, but cycle counts are reported.
+   ============================================================ */
+
+'use strict';
+
+class Cpu6502 {
+  constructor() {
+    // Registers
+    this.A  = 0;     // accumulator
+    this.X  = 0;     // index X
+    this.Y  = 0;     // index Y
+    this.SP = 0xFD;  // stack pointer (6502 uses $0100 + SP)
+    this.PC = 0;     // program counter
+    // Flags in P register: NV-BDIZC
+    // bit 7: N (negative)
+    // bit 6: V (overflow)
+    // bit 5: unused (always 1 on stack)
+    // bit 4: B (break) — software set only
+    // bit 3: D (decimal)
+    // bit 2: I (interrupt disable)
+    // bit 1: Z (zero)
+    // bit 0: C (carry)
+    this.P = 0x24;   // default: U=1, I=1
+    // Memory: 64 KiB flat
+    this.mem = new Uint8Array(0x10000);
+    // Halted state
+    this.halted = false;
+    // Trace for debugger
+    this.trace = [];
+    this.traceMax = 2000;
+    // I/O hooks (Apple 1 maps $D010/D011)
+    this.ioOutput = null; // (addr, value) — for $D010 write
+    this.ioInput  = null; // (addr) => value — for $D011 read
+    // Optional: get a key (used for keyboard polling)
+    this.getKey = null;   // () => ascii code or -1 if none
+    // Steps counter
+    this.steps = 0;
+    // Breakpoints
+    this.breakpoints = new Set();
+    this.breakpointHit = null;
+    // IRQ / NMI
+    this.irqPending = false;
+    this.nmiPending = false;
+    this.resetRequested = false;
+  }
+
+  // ----- Flag helpers -----
+  get fN() { return (this.P & 0x80) !== 0; }
+  get fV() { return (this.P & 0x40) !== 0; }
+  get fD() { return (this.P & 0x08) !== 0; }
+  get fI() { return (this.P & 0x04) !== 0; }
+  get fZ() { return (this.P & 0x02) !== 0; }
+  get fC() { return (this.P & 0x01) !== 0; }
+  setN(v) { if (v & 0x80) this.P |= 0x80; else this.P &= ~0x80; }
+  setZ(v) { if ((v & 0xFF) === 0) this.P |= 0x02; else this.P &= ~0x02; }
+  setNZ(v) { this.setZ(v); this.setN(v); }
+  setC(v) { if (v) this.P |= 0x01; else this.P &= ~0x01; }
+  setV(v) { if (v) this.P |= 0x40; else this.P &= ~0x40; }
+
+  // Push / pull
+  push(v) { this.mem[0x100 + (this.SP & 0xFF)] = v & 0xFF; this.SP = (this.SP - 1) & 0xFF; }
+  pop()  { this.SP = (this.SP + 1) & 0xFF; return this.mem[0x100 + this.SP]; }
+  push16(v) { this.push((v >> 8) & 0xFF); this.push(v & 0xFF); }
+  pop16()  { const lo = this.pop(); const hi = this.pop(); return (hi << 8) | lo; }
+
+  // Memory
+  read(addr)  {
+    addr &= 0xFFFF;
+    if (this.ioInput && addr === 0xD011) {
+      const v = this.ioInput(addr) & 0xFF;
+      this.mem[addr] = v;
+      return v;
+    }
+    return this.mem[addr];
+  }
+  write(addr, v) {
+    addr &= 0xFFFF; this.mem[addr] = v & 0xFF;
+    if (this.ioOutput) this.ioOutput(addr, v & 0xFF);
+  }
+  read16(addr) {
+    addr &= 0xFFFF;
+    // The 6502 has a bug: when crossing a page boundary during a
+    // 16-bit read, the high byte comes from the *same* page instead
+    // of the next. We faithfully reproduce that here.
+    if ((addr & 0xFF) === 0xFF) {
+      return this.mem[addr] | (this.mem[addr & 0xFF00] << 8);
+    }
+    return this.mem[addr] | (this.mem[(addr + 1) & 0xFFFF] << 8);
+  }
+
+  // Decimal mode ADC helper
+  _adc(a, b, cIn) {
+    if (this.fD) {
+      // Decimal mode
+      let lo = (a & 0x0F) + (b & 0x0F) + cIn;
+      let hi = (a >> 4) + (b >> 4) + (lo > 9 ? 1 : 0);
+      let c = false;
+      if (lo > 9) { lo = (lo + 6) & 0x0F; }
+      if (hi > 9) { c = true; hi = (hi + 6) & 0x0F; }
+      const r = ((hi << 4) | lo) & 0xFF;
+      this.setC(c);
+      this.setNZ(r);
+      // Overflow in decimal mode: treat as binary
+      this.setV(((a ^ r) & (b ^ r) & 0x80) !== 0);
+      return r;
+    } else {
+      const r = a + b + cIn;
+      const carry = r > 0xFF;
+      this.setC(carry);
+      const rb = r & 0xFF;
+      this.setNZ(rb);
+      this.setV(((a ^ b) & 0x80) === 0 && ((a ^ rb) & 0x80) !== 0);
+      return rb;
+    }
+  }
+
+  _sbc(a, b, cIn) {
+    if (this.fD) {
+      // Decimal mode SBC
+      let lo = (a & 0x0F) - (b & 0x0F) - (1 - cIn);
+      let hi = (a >> 4) - (b >> 4) - (lo < 0 ? 1 : 0);
+      let c = true;
+      if (lo < 0) { c = false; lo = (lo + 10) & 0x0F; }
+      else if (lo > 9) { c = false; lo = (lo - 10) & 0x0F; } // shouldn't happen
+      if (hi < 0) { c = false; hi = (hi + 10) & 0x0F; }
+      const r = ((hi << 4) | lo) & 0xFF;
+      this.setC(c);
+      this.setNZ(r);
+      this.setV(((a ^ b) & 0x80) !== 0 && ((a ^ r) & 0x80) !== 0);
+      return r;
+    } else {
+      // SBC = ADC with inverted operand
+      return this._adc(a, b ^ 0xFF, cIn);
+    }
+  }
+
+  // Compare: A - M
+  _cmp(a, m) {
+    const r = a - m;
+    this.setC(a >= m);
+    this.setNZ(r & 0xFF);
+  }
+
+  // ----- Step / execute one instruction -----
+  step() {
+    if (this.halted) return 0;
+
+    // Pending interrupts
+    if (this.nmiPending) {
+      this.nmiPending = false;
+      this._interrupt(0xFFFA, 0xFFFB, false, false);
+    } else if (this.irqPending && !this.fI) {
+      this.irqPending = false;
+      this._interrupt(0xFFFE, 0xFFFF, true, true);
+    }
+    if (this.resetRequested) {
+      this.resetRequested = false;
+      // Read reset vector
+      const lo = this.read(0xFFFC), hi = this.read(0xFFFD);
+      this.PC = (hi << 8) | lo;
+      this.SP = 0xFD;
+      this.P = 0x24;
+    }
+
+    if (this.breakpoints.has(this.PC) && this.steps > 0) {
+      if (this.breakpointHit) this.breakpointHit(this.PC);
+    }
+
+    const startPC = this.PC;
+    const t = this.executeOne();
+    this.steps++;
+    this.trace.push({ pc: startPC, a: this.A, x: this.X, y: this.Y, p: this.P, sp: this.SP, tStates: t });
+    if (this.trace.length > this.traceMax) this.trace.shift();
+    return t;
+  }
+
+  _interrupt(vecLo, vecHi, setBreak, disableI) {
+    // Push PC and P; load PC from vector
+    this.push16(this.PC);
+    this.push(this.P | (setBreak ? 0x10 : 0));
+    if (disableI) this.P |= 0x04;
+    const lo = this.read(vecLo), hi = this.read(vecHi);
+    this.PC = (hi << 8) | lo;
+  }
+
+  run(maxSteps = 100000) {
+    let total = 0;
+    for (let i = 0; i < maxSteps; i++) {
+      if (this.halted) break;
+      total += this.step();
+    }
+    return total;
+  }
+
+  reset() {
+    this.A = this.X = this.Y = 0;
+    this.SP = 0xFD;
+    this.P = 0x24;
+    this.halted = false;
+    this.steps = 0;
+    this.irqPending = false;
+    this.nmiPending = false;
+    this.resetRequested = true;
+    this.trace.length = 0;
+  }
+
+  // ----- Main instruction dispatch (single big switch) -----
+  executeOne() {
+    const op = this.read(this.PC); this.PC = (this.PC + 1) & 0xFFFF;
+
+    // Helper: parse operand by addressing mode
+    const mode = opMode(op);
+    const opname = opName(op);
+
+    // Get operand address and value where applicable
+    let addr = 0, t = 0; // t for t-states
+    switch (mode) {
+      case 'IMP': // implied / accumulator
+        break;
+      case 'ACC': // accumulator (LDA, etc.) - same as IMP for execution
+        break;
+      case 'IMM': {
+        addr = this.PC; this.PC = (this.PC + 1) & 0xFFFF; break;
+      }
+      case 'ZP': {
+        addr = this.read(this.PC); this.PC = (this.PC + 1) & 0xFFFF; break;
+      }
+      case 'ZPX': {
+        addr = (this.read(this.PC) + this.X) & 0xFF; this.PC = (this.PC + 1) & 0xFFFF; break;
+      }
+      case 'ZPY': {
+        addr = (this.read(this.PC) + this.Y) & 0xFF; this.PC = (this.PC + 1) & 0xFFFF; break;
+      }
+      case 'ABS': {
+        addr = this.read16(this.PC); this.PC = (this.PC + 2) & 0xFFFF; break;
+      }
+      case 'ABX': {
+        const base = this.read16(this.PC); this.PC = (this.PC + 2) & 0xFFFF;
+        addr = (base + this.X) & 0xFFFF;
+        // Boundary crossing t-state penalty is added per-instruction below
+        t = ((base & 0xFF00) !== (addr & 0xFF00)) ? 1 : 0;
+        break;
+      }
+      case 'ABY': {
+        const base = this.read16(this.PC); this.PC = (this.PC + 2) & 0xFFFF;
+        addr = (base + this.Y) & 0xFFFF;
+        t = ((base & 0xFF00) !== (addr & 0xFF00)) ? 1 : 0;
+        break;
+      }
+      case 'IND': {
+        const ptr = this.read16(this.PC); this.PC = (this.PC + 2) & 0xFFFF;
+        // Page-boundary bug for indirect JMP: 6502 bug
+        if ((ptr & 0xFF) === 0xFF) {
+          addr = this.mem[ptr] | (this.mem[ptr & 0xFF00] << 8);
+        } else {
+          addr = this.mem[ptr] | (this.mem[(ptr + 1) & 0xFFFF] << 8);
+        }
+        break;
+      }
+      case 'IZX': {
+        const zp = this.read(this.PC); this.PC = (this.PC + 1) & 0xFFFF;
+        const lo = this.mem[(zp + this.X) & 0xFF];
+        const hi = this.mem[(zp + this.X + 1) & 0xFF];
+        addr = (hi << 8) | lo;
+        break;
+      }
+      case 'IZY': {
+        const zp = this.read(this.PC); this.PC = (this.PC + 1) & 0xFFFF;
+        const lo = this.mem[zp];
+        const hi = this.mem[(zp + 1) & 0xFF];
+        const base = (hi << 8) | lo;
+        addr = (base + this.Y) & 0xFFFF;
+        t = ((base & 0xFF00) !== (addr & 0xFF00)) ? 1 : 0;
+        break;
+      }
+      case 'REL': {
+        // Branch target; read displacement here, instructions will use it
+        const off = this.read(this.PC); this.PC = (this.PC + 1) & 0xFFFF;
+        // sign-extend
+        const disp = (off & 0x80) ? (off - 0x100) : off;
+        addr = (this.PC + disp) & 0xFFFF;
+        break;
+      }
+    }
+
+    // Branch instructions handled specially
+    switch (op) {
+      case 0x10: t = 2; if (!this.fN) { this.PC = addr; t = 3; } return t; // BPL
+      case 0x30: t = 2; if (this.fN)  { this.PC = addr; t = 3; } return t; // BMI
+      case 0x50: t = 2; if (!this.fV) { this.PC = addr; t = 3; } return t; // BVC
+      case 0x70: t = 2; if (this.fV)  { this.PC = addr; t = 3; } return t; // BVS
+      case 0x90: t = 2; if (!this.fC) { this.PC = addr; t = 3; } return t; // BCC
+      case 0xB0: t = 2; if (this.fC)  { this.PC = addr; t = 3; } return t; // BCS
+      case 0xD0: t = 2; if (!this.fZ) { this.PC = addr; t = 3; } return t; // BNE
+      case 0xF0: t = 2; if (this.fZ)  { this.PC = addr; t = 3; } return t; // BEQ
+    }
+
+    // Other ops - read operand if needed
+    let m = 0; // operand byte
+    if (mode !== 'IMP' && mode !== 'ACC' && mode !== 'REL') {
+      m = this.read(addr);
+    }
+
+    switch (op) {
+      // ----- Loads -----
+      case 0xA9: case 0xA5: case 0xB5: case 0xAD: case 0xBD: case 0xB9: case 0xA1: case 0xB1:
+        // LDA
+        this.A = m; this.setNZ(this.A); return opCycles(op) + t;
+      case 0xA2: case 0xA6: case 0xB6: case 0xAE: case 0xBE:
+        // LDX
+        this.X = m; this.setNZ(this.X); return opCycles(op) + t;
+      case 0xA0: case 0xA4: case 0xB4: case 0xAC: case 0xBC:
+        // LDY
+        this.Y = m; this.setNZ(this.Y); return opCycles(op) + t;
+
+      // ----- Stores -----
+      case 0x85: case 0x95: case 0x8D: case 0x9D: case 0x99: case 0x81: case 0x91:
+        // STA
+        this.write(addr, this.A); return opCycles(op) + t;
+      case 0x86: case 0x96: case 0x8E: case 0x9E:
+        // STX
+        this.write(addr, this.X); return opCycles(op) + t;
+      case 0x84: case 0x94: case 0x8C: case 0x9C:
+        // STY
+        this.write(addr, this.Y); return opCycles(op) + t;
+
+      // ----- Transfers -----
+      case 0xAA: this.X = this.A; this.setNZ(this.X); return 2; // TAX
+      case 0x8A: this.A = this.X; this.setNZ(this.A); return 2; // TXA
+      case 0xA8: this.Y = this.A; this.setNZ(this.Y); return 2; // TAY
+      case 0x98: this.A = this.Y; this.setNZ(this.A); return 2; // TYA
+      case 0xBA: this.X = this.SP; this.setNZ(this.X); return 2; // TSX
+      case 0x9A: this.SP = this.X; return 2; // TXS
+
+      // ----- Stack -----
+      case 0x48: this.push(this.A); return 3; // PHA
+      case 0x68: this.A = this.pop(); this.setNZ(this.A); return 4; // PLA
+      case 0x08: this.push(this.P | 0x10); return 3; // PHP (B=1, unused=1)
+      case 0x28: { let p = this.pop(); p = (p | 0x20) & ~0x10; this.P = p; return 4; } // PLP
+      case 0x40: { // RTI
+        let p = this.pop(); p = (p | 0x20) & ~0x10; this.P = p;
+        this.PC = this.pop16();
+        return 6;
+      }
+      case 0x60: { // RTS
+        const ret = (this.pop16() + 1) & 0xFFFF;
+        this.PC = ret;
+        return 6;
+      }
+      case 0x20: { // JSR
+        const target = addr;
+        this.push16(this.PC - 1); // Push PC+1 (target is the absolute operand)
+        this.PC = target;
+        return 6;
+      }
+      case 0x4C: { // JMP abs
+        this.PC = addr;
+        return 3;
+      }
+      case 0x6C: { // JMP ind
+        this.PC = addr;
+        return 5;
+      }
+
+      // ----- Arithmetic / logic -----
+      case 0x69: case 0x65: case 0x75: case 0x6D: case 0x7D: case 0x79: case 0x61: case 0x71:
+        // ADC
+        this.A = this._adc(this.A, m, this.fC ? 1 : 0);
+        return opCycles(op) + t;
+      case 0xE9: case 0xE5: case 0xF5: case 0xED: case 0xFD: case 0xF9: case 0xE1: case 0xF1: case 0xF3: case 0xEB:
+        // SBC (note: 0xF3 and 0xEB are aliases of F1/E9)
+        this.A = this._sbc(this.A, m, this.fC ? 1 : 0);
+        return opCycles(op) + t;
+      case 0x29: case 0x25: case 0x35: case 0x2D: case 0x3D: case 0x39: case 0x21: case 0x31:
+        // AND
+        this.A &= m; this.setNZ(this.A); return opCycles(op) + t;
+      case 0x09: case 0x05: case 0x15: case 0x0D: case 0x1D: case 0x19: case 0x01: case 0x11:
+        // ORA
+        this.A |= m; this.setNZ(this.A); return opCycles(op) + t;
+      case 0x49: case 0x45: case 0x55: case 0x4D: case 0x5D: case 0x59: case 0x41: case 0x51:
+        // EOR
+        this.A ^= m; this.setNZ(this.A); return opCycles(op) + t;
+      case 0x24: case 0x2C: { // BIT zp / abs
+        this.setZ(this.A & m);
+        this.setV((m & 0x40) !== 0);
+        this.setN((m & 0x80) !== 0);
+        return opCycles(op);
+      }
+
+      // ----- Compare -----
+      case 0xC9: case 0xC5: case 0xD5: case 0xCD: case 0xDD: case 0xD9: case 0xC1: case 0xD1:
+        // CMP
+        this._cmp(this.A, m); return opCycles(op) + t;
+      case 0xE0: case 0xE4: case 0xEC:
+        // CPX
+        this._cmp(this.X, m); return opCycles(op);
+      case 0xC0: case 0xC4: case 0xCC:
+        // CPY
+        this._cmp(this.Y, m); return opCycles(op);
+
+      // ----- Increments / decrements -----
+      case 0xE6: case 0xF6: case 0xEE: case 0xFE: { // INC
+        const v = (m + 1) & 0xFF; this.write(addr, v); this.setNZ(v); return opCycles(op); }
+      case 0xC6: case 0xD6: case 0xCE: case 0xDE: { // DEC
+        const v = (m - 1) & 0xFF; this.write(addr, v); this.setNZ(v); return opCycles(op); }
+      case 0xE8: this.X = (this.X + 1) & 0xFF; this.setNZ(this.X); return 2; // INX
+      case 0xC8: this.Y = (this.Y + 1) & 0xFF; this.setNZ(this.Y); return 2; // INY
+      case 0xCA: this.X = (this.X - 1) & 0xFF; this.setNZ(this.X); return 2; // DEX
+      case 0x88: this.Y = (this.Y - 1) & 0xFF; this.setNZ(this.Y); return 2; // DEY
+
+      // ----- Shifts / rotates -----
+      case 0x0A: { // ASL A
+        const c = (this.A & 0x80) !== 0;
+        this.A = (this.A << 1) & 0xFF;
+        this.setC(c); this.setNZ(this.A);
+        return 2;
+      }
+      case 0x06: case 0x16: case 0x0E: case 0x1E: { // ASL
+        const c = (m & 0x80) !== 0;
+        const v = (m << 1) & 0xFF;
+        this.write(addr, v);
+        this.setC(c); this.setNZ(v);
+        return opCycles(op);
+      }
+      case 0x4A: { // LSR A
+        const c = (this.A & 0x01) !== 0;
+        this.A = this.A >> 1;
+        this.setC(c); this.setNZ(this.A);
+        return 2;
+      }
+      case 0x46: case 0x56: case 0x4E: case 0x5E: { // LSR
+        const c = (m & 0x01) !== 0;
+        const v = m >> 1;
+        this.write(addr, v);
+        this.setC(c); this.setNZ(v);
+        return opCycles(op);
+      }
+      case 0x2A: { // ROL A
+        const c = (this.A & 0x80) !== 0;
+        this.A = ((this.A << 1) | (this.fC ? 1 : 0)) & 0xFF;
+        this.setC(c); this.setNZ(this.A);
+        return 2;
+      }
+      case 0x26: case 0x36: case 0x2E: case 0x3E: { // ROL
+        const c = (m & 0x80) !== 0;
+        const v = ((m << 1) | (this.fC ? 1 : 0)) & 0xFF;
+        this.write(addr, v);
+        this.setC(c); this.setNZ(v);
+        return opCycles(op);
+      }
+      case 0x6A: { // ROR A
+        const c = (this.A & 0x01) !== 0;
+        this.A = (this.A >> 1) | (this.fC ? 0x80 : 0);
+        this.setC(c); this.setNZ(this.A);
+        return 2;
+      }
+      case 0x66: case 0x76: case 0x6E: case 0x7E: { // ROR
+        const c = (m & 0x01) !== 0;
+        const v = (m >> 1) | (this.fC ? 0x80 : 0);
+        this.write(addr, v);
+        this.setC(c); this.setNZ(v);
+        return opCycles(op);
+      }
+
+      // ----- Flag instructions -----
+      case 0x18: this.setC(false); return 2; // CLC
+      case 0x38: this.setC(true);  return 2; // SEC
+      case 0x58: this.P &= ~0x04;  return 2; // CLI
+      case 0x78: this.P |= 0x04;   return 2; // SEI
+      case 0xB8: this.setV(false); return 2; // CLV
+      case 0xD8: this.P &= ~0x08;  return 2; // CLD
+      case 0xF8: this.P |= 0x08;   return 2; // SED
+
+      // ----- Misc -----
+      case 0x00: { // BRK
+        this.push16(this.PC + 1);
+        this.push(this.P | 0x10);
+        this.P |= 0x04;
+        const lo = this.read(0xFFFE), hi = this.read(0xFFFF);
+        this.PC = (hi << 8) | lo;
+        return 7;
+      }
+      case 0xEA: return 2; // NOP
+      case 0x1A: case 0x3A: case 0x5A: case 0x7A: case 0xDA: case 0xFA: return 2; // undocumented NOPs
+      case 0x80: case 0x82: case 0x89: case 0xC2: case 0xE2: return 2; // SKB
+      case 0x04: case 0x44: case 0x64: return 3; // DOP zp
+      case 0x14: case 0x34: case 0x54: case 0x74: case 0xD4: case 0xF4: return 4; // DOP zpx
+      case 0x0C: return 4; // TOP abs
+      case 0x1C: case 0x3C: case 0x5C: case 0x7C: case 0xDC: case 0xFC: return 4; // TOP abx
+    }
+
+    throw new Error(`Unimplemented opcode 0x${op.toString(16).padStart(2,'0')} (${opname}) at PC=$${((this.PC-1)&0xFFFF).toString(16).padStart(4,'0')}`);
+  }
+}
+
+// ----- Opcode metadata (addressing mode, base cycles) -----
+// 6502 opcodes with [mode, base-cycles]
+const OP_INFO = {
+  // BRK
+  0x00: ['IMP',7], // BRK
+  // ORA
+  0x01: ['IZX',6], 0x05: ['ZP',3], 0x09: ['IMM',2], 0x0D: ['ABS',4],
+  0x11: ['IZY',5], 0x15: ['ZPX',4], 0x19: ['ABY',4], 0x1D: ['ABX',4],
+  // ASL
+  0x06: ['ZP',5], 0x0A: ['ACC',2], 0x0E: ['ABS',6], 0x16: ['ZPX',6], 0x1E: ['ABX',7],
+  // PHP, CLC, PLP, SEC, PHA, CLI
+  0x08: ['IMP',3], 0x18: ['IMP',2], 0x28: ['IMP',4], 0x38: ['IMP',2],
+  0x48: ['IMP',3], 0x58: ['IMP',2], 0x68: ['IMP',4], 0x78: ['IMP',2],
+  0x88: ['IMP',2], 0x98: ['IMP',2], 0xA8: ['IMP',2], 0xB8: ['IMP',2], 0xC8: ['IMP',2], 0xD8: ['IMP',2], 0xE8: ['IMP',2], 0xF8: ['IMP',2],
+  // JSR, RTI, RTS
+  0x20: ['ABS',6], 0x40: ['IMP',6], 0x60: ['IMP',6],
+  // AND
+  0x21: ['IZX',6], 0x25: ['ZP',3], 0x29: ['IMM',2], 0x2D: ['ABS',4],
+  0x31: ['IZY',5], 0x35: ['ZPX',4], 0x39: ['ABY',4], 0x3D: ['ABX',4],
+  // BIT
+  0x24: ['ZP',3], 0x2C: ['ABS',4],
+  // ROL, ROR, LSR, ASL already covered
+  0x26: ['ZP',5], 0x2A: ['ACC',2], 0x2E: ['ABS',6], 0x36: ['ZPX',6], 0x3E: ['ABX',7],
+  0x46: ['ZP',5], 0x4A: ['ACC',2], 0x4E: ['ABS',6], 0x56: ['ZPX',6], 0x5E: ['ABX',7],
+  0x66: ['ZP',5], 0x6A: ['ACC',2], 0x6E: ['ABS',6], 0x76: ['ZPX',6], 0x7E: ['ABX',7],
+  0x4C: ['ABS',3], 0x6C: ['IND',5],
+  // EOR
+  0x41: ['IZX',6], 0x45: ['ZP',3], 0x49: ['IMM',2], 0x4D: ['ABS',4],
+  0x51: ['IZY',5], 0x55: ['ZPX',4], 0x59: ['ABY',4], 0x5D: ['ABX',4],
+  // ADC
+  0x61: ['IZX',6], 0x65: ['ZP',3], 0x69: ['IMM',2], 0x6D: ['ABS',4],
+  0x71: ['IZY',5], 0x75: ['ZPX',4], 0x79: ['ABY',4], 0x7D: ['ABX',4],
+  // STA
+  0x81: ['IZX',6], 0x85: ['ZP',3], 0x8D: ['ABS',4],
+  0x91: ['IZY',6], 0x95: ['ZPX',4], 0x99: ['ABY',5], 0x9D: ['ABX',5],
+  // STY, STA-cont
+  0x84: ['ZP',3], 0x8C: ['ABS',4], 0x94: ['ZPX',4],
+  0x86: ['ZP',3], 0x8E: ['ABS',4], 0x96: ['ZPY',4],
+  // LDA
+  0xA1: ['IZX',6], 0xA5: ['ZP',3], 0xA9: ['IMM',2], 0xAD: ['ABS',4],
+  0xB1: ['IZY',5], 0xB5: ['ZPX',4], 0xB9: ['ABY',4], 0xBD: ['ABX',4],
+  // LDX
+  0xA2: ['IMM',2], 0xA6: ['ZP',3], 0xAE: ['ABS',4], 0xB6: ['ZPY',4], 0xBE: ['ABY',4],
+  // LDY
+  0xA0: ['IMM',2], 0xA4: ['ZP',3], 0xAC: ['ABS',4], 0xB4: ['ZPX',4], 0xBC: ['ABX',4],
+  // CMP
+  0xC1: ['IZX',6], 0xC5: ['ZP',3], 0xC9: ['IMM',2], 0xCD: ['ABS',4],
+  0xD1: ['IZY',5], 0xD5: ['ZPX',4], 0xD9: ['ABY',4], 0xDD: ['ABX',4],
+  // CPX, CPY
+  0xC0: ['IMM',2], 0xC4: ['ZP',3], 0xCC: ['ABS',4],
+  0xE0: ['IMM',2], 0xE4: ['ZP',3], 0xEC: ['ABS',4],
+  // SBC
+  0xE1: ['IZX',6], 0xE5: ['ZP',3], 0xE9: ['IMM',2], 0xED: ['ABS',4], 0xEB: ['IMM',2],
+  0xF1: ['IZY',5], 0xF5: ['ZPX',4], 0xF9: ['ABY',4], 0xFD: ['ABX',4], 0xF3: ['IZY',5],
+  // INC, DEC
+  0xE6: ['ZP',5], 0xEE: ['ABS',6], 0xF6: ['ZPX',6], 0xFE: ['ABX',7],
+  0xC6: ['ZP',5], 0xCE: ['ABS',6], 0xD6: ['ZPX',6], 0xDE: ['ABX',7],
+  // STX etc covered
+  // Branch instructions
+  0x10: ['REL',2], 0x30: ['REL',2], 0x50: ['REL',2], 0x70: ['REL',2],
+  0x90: ['REL',2], 0xB0: ['REL',2], 0xD0: ['REL',2], 0xF0: ['REL',2],
+  // NOP
+  0xEA: ['IMP',2], 0x1A: ['IMP',2], 0x3A: ['IMP',2], 0x5A: ['IMP',2], 0x7A: ['IMP',2], 0xDA: ['IMP',2], 0xFA: ['IMP',2],
+  0x80: ['IMM',2], 0x82: ['IMM',2], 0x89: ['IMM',2], 0xC2: ['IMM',2], 0xE2: ['IMM',2],
+  0x04: ['ZP',3], 0x44: ['ZP',3], 0x64: ['ZP',3],
+  0x14: ['ZPX',4], 0x34: ['ZPX',4], 0x54: ['ZPX',4], 0x74: ['ZPX',4], 0xD4: ['ZPX',4], 0xF4: ['ZPX',4],
+  0x0C: ['ABS',4],
+  0x1C: ['ABX',4], 0x3C: ['ABX',4], 0x5C: ['ABX',4], 0x7C: ['ABX',4], 0xDC: ['ABX',4], 0xFC: ['ABX',4]
+};
+
+function opMode(op) {
+  const e = OP_INFO[op];
+  return e ? e[0] : 'IMP';
+}
+function opCycles(op) {
+  const e = OP_INFO[op];
+  return e ? e[1] : 2;
+}
+const OP_NAMES = {
+  0x00:'BRK',0x01:'ORA',0x05:'ORA',0x09:'ORA',0x0D:'ORA',0x11:'ORA',0x15:'ORA',0x19:'ORA',0x1D:'ORA',
+  0x06:'ASL',0x0A:'ASL',0x0E:'ASL',0x16:'ASL',0x1E:'ASL',
+  0x08:'PHP',0x18:'CLC',0x28:'PLP',0x38:'SEC',0x48:'PHA',0x58:'CLI',0x68:'PLA',0x78:'SEI',
+  0x88:'DEY',0x98:'TYA',0xA8:'TAY',0xB8:'CLV',0xC8:'INY',0xD8:'CLD',0xE8:'INX',0xF8:'SED',
+  0x20:'JSR',0x40:'RTI',0x60:'RTS',
+  0x21:'AND',0x25:'AND',0x29:'AND',0x2D:'AND',0x31:'AND',0x35:'AND',0x39:'AND',0x3D:'AND',
+  0x24:'BIT',0x2C:'BIT',
+  0x26:'ROL',0x2A:'ROL',0x2E:'ROL',0x36:'ROL',0x3E:'ROL',
+  0x46:'LSR',0x4A:'LSR',0x4E:'LSR',0x56:'LSR',0x5E:'LSR',
+  0x66:'ROR',0x6A:'ROR',0x6E:'ROR',0x76:'ROR',0x7E:'ROR',
+  0x4C:'JMP',0x6C:'JMP',
+  0x41:'EOR',0x45:'EOR',0x49:'EOR',0x4D:'EOR',0x51:'EOR',0x55:'EOR',0x59:'EOR',0x5D:'EOR',
+  0x61:'ADC',0x65:'ADC',0x69:'ADC',0x6D:'ADC',0x71:'ADC',0x75:'ADC',0x79:'ADC',0x7D:'ADC',
+  0x81:'STA',0x85:'STA',0x8D:'STA',0x91:'STA',0x95:'STA',0x99:'STA',0x9D:'STA',
+  0x84:'STY',0x8C:'STY',0x94:'STY',0x86:'STX',0x8E:'STX',0x96:'STX',
+  0xA1:'LDA',0xA5:'LDA',0xA9:'LDA',0xAD:'LDA',0xB1:'LDA',0xB5:'LDA',0xB9:'LDA',0xBD:'LDA',
+  0xA2:'LDX',0xA6:'LDX',0xAE:'LDX',0xB6:'LDX',0xBE:'LDX',
+  0xA0:'LDY',0xA4:'LDY',0xAC:'LDY',0xB4:'LDY',0xBC:'LDY',
+  0xC1:'CMP',0xC5:'CMP',0xC9:'CMP',0xCD:'CMP',0xD1:'CMP',0xD5:'CMP',0xD9:'CMP',0xDD:'CMP',
+  0xC0:'CPY',0xC4:'CPY',0xCC:'CPY',0xE0:'CPX',0xE4:'CPX',0xEC:'CPX',
+  0xE1:'SBC',0xE5:'SBC',0xE9:'SBC',0xED:'SBC',0xF1:'SBC',0xF5:'SBC',0xF9:'SBC',0xFD:'SBC',0xEB:'SBC',0xF3:'SBC',
+  0xE6:'INC',0xEE:'INC',0xF6:'INC',0xFE:'INC',
+  0xC6:'DEC',0xCE:'DEC',0xD6:'DEC',0xDE:'DEC',
+  0x10:'BPL',0x30:'BMI',0x50:'BVC',0x70:'BVS',
+  0x90:'BCC',0xB0:'BCS',0xD0:'BNE',0xF0:'BEQ',
+  0xAA:'TAX',0x8A:'TXA',0xA8:'TAY',0x98:'TYA',0xBA:'TSX',0x9A:'TXS',
+  0xEA:'NOP'
+};
+function opName(op) { return OP_NAMES[op] || '???'; }
+
+if (typeof window !== 'undefined') {
+  window.Cpu6502 = Cpu6502;
+  window._opMode = opMode;
+  window._opCycles = opCycles;
+  window._opName = opName;
+}
+</script>
+<!-- ==== inlined a1-asm.js ==== -->
+<script>
+/* ============================================================
+   6502 Assembler (Apple 1 / Woz-friendly)
+   ============================================================
+   Two-pass assembler for the MOS 6502. Supports the documented
+   6502 instruction set plus standard assembler directives:
+     ORG, EQU, DB/.BYTE, DW/.WORD, DS, END
+   Numbers: 42 decimal, $2A hex, 0x2A hex, %00101010 binary,
+   'A' character literal. Labels end with ':'.
+   ============================================================ */
+
+'use strict';
+
+class Asm6502 {
+  constructor() { this.reset(); }
+  reset(org = 0) {
+    this.labels = {};
+    this.equs = {};
+    this.org = org;
+    this.output = [];
+    this.errors = [];
+    this.listings = [];
+  }
+
+  assemble(source, org = 0) {
+    this.reset(org);
+    const lines = this._preprocess(source);
+    let pc = org;
+    for (const item of lines) {
+      try {
+        if (item.label) {
+          this.labels[item.label] = pc & 0xFFFF;
+          this.equs[item.label] = pc & 0xFFFF;
+        }
+        if (item.instruction) {
+          const size = this._estimate(item);
+          pc = (pc + size) & 0xFFFF;
+        } else if (item.directive) {
+          this._evalDir1(item);
+        }
+      } catch (e) { this._err(item, e.message); }
+    }
+    if (this.errors.length) {
+      return { ok: false, errors: this.errors, listings: [], output: [] };
+    }
+    // Pass 2: emit bytes
+    pc = org;
+    this.output = [];
+    this.listings = [];
+    for (const item of lines) {
+      const startAddr = pc;
+      let bytes = [];
+      try {
+        if (item.instruction) {
+          bytes = this._encode(item, pc);
+        } else if (item.directive) {
+          bytes = this._evalDir2(item) || [];
+        }
+      } catch (e) { this._err(item, e.message); continue; }
+      for (const b of bytes) this.output.push(b & 0xFF);
+      this.listings.push({
+        addr: startAddr, line: item.lineNo, source: item.raw,
+        bytes: bytes.map(b => b & 0xFF)
+      });
+      pc = (pc + bytes.length) & 0xFFFF;
+    }
+    return { ok: this.errors.length === 0, errors: this.errors, listings: this.listings, output: this.output, org };
+  }
+
+  _preprocess(source) {
+    const items = [];
+    const lines = source.split(/\r?\n/);
+    lines.forEach((raw, idx) => {
+      const lineNo = idx + 1;
+      let line = raw.replace(/[;].*$/, '').replace(/\/\/.*$/, '').trim();
+      if (!line) return;
+      let label = null;
+      const lm = line.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*:\s*(.*)$/);
+      if (lm) { label = lm[1]; line = lm[2].trim(); }
+      if (!line) { items.push({ lineNo, raw, label }); return; }
+      const DIRS = new Set(['ORG','EQU','DB','DW','BYTE','WORD','DS','END','INCLUDE','DEFb','DEFw','DEFB','DEFM','DEFW']);
+      const tm = line.match(/^([A-Za-z_.]+)\b\s*(.*)$/);
+      const op = tm[1].toUpperCase();
+      const rest = tm[2].trim();
+      if (DIRS.has(op)) { items.push({ lineNo, raw, label, directive: op, args: rest }); return; }
+      // Split on top-level commas only (respect parens and quotes).
+      const parts = this._splitArgs(rest).map(s => s.trim()).filter(s => s.length > 0);
+      items.push({ lineNo, raw, label, instruction: op, args: parts });
+    });
+    return items;
+  }
+
+  // ----- Number / expression helpers -----
+  _parseNumber(tok) {
+    tok = tok.trim();
+    if (tok === '') throw new Error('expected number');
+    const cm = tok.match(/^'(.)'$/);
+    if (cm) return cm[1].charCodeAt(0) & 0xFF;
+    if (tok.startsWith('$')) return parseInt(tok.slice(1), 16) & 0xFFFF;
+    if (tok.startsWith('0x') || tok.startsWith('0X')) return parseInt(tok.slice(2), 16) & 0xFFFF;
+    if (tok.startsWith('%')) return parseInt(tok.slice(1), 2) & 0xFFFF;
+    if (tok.startsWith('"') && tok.endsWith('"') && tok.length >= 2) {
+      return tok.charCodeAt(1) & 0xFF; // first char only
+    }
+    if (/^-?\d+$/.test(tok)) return parseInt(tok, 10) & 0xFFFF;
+    return this._evalExpr(tok);
+  }
+  _evalExpr(expr) {
+    // First, handle the 6502-style "low/high byte of label" by
+    // rewriting `<LABEL` and `>LABEL` into equivalent expressions.
+    // This must happen before label substitution, so the value
+    // produced by the substitution can be wrapped.
+    let s = expr
+      .replace(/\$[0-9a-fA-F]+/g, (m) => '0x' + m.slice(1))
+      .replace(/%[01]+/g,        (m) => '0b' + m.slice(1))
+      .replace(/<([A-Za-z_][A-Za-z0-9_]*)/g, '(($1)&0xFF)')
+      .replace(/>([A-Za-z_][A-Za-z0-9_]*)/g, '(($1)>>8)');
+    // Now substitute labels (skip those inside 0x... literals)
+    const norm = s.replace(/[A-Za-z_][A-Za-z0-9_]*/g, (m, off) => {
+      const before = s[off - 1];
+      if (before === '0') return m; // part of 0x... number
+      if (m in this.equs) return this.equs[m].toString();
+      throw new Error(`Unknown label: ${m}`);
+    });
+    const v = Function('"use strict";return (' + norm + ')')();
+    return v & 0xFFFF;
+  }
+
+  // ----- Operand classification -----
+  // Returns { mode, value } where mode is one of:
+  //   A (accumulator), #imm, zp, zpx, zpy, abs, absx, absy, ind, izx, izy, rel
+  _classifyOperand(tok) {
+    if (!tok) return null;
+    tok = tok.trim();
+    if (tok === 'A') return { mode: 'A' };
+    if (tok.startsWith('#')) {
+      const v = this._parseNumber(tok.slice(1));
+      return { mode: '#imm', value: v & 0xFF };
+    }
+    // ($zp),Y — indirect indexed (must come BEFORE the abs,Y pattern
+    // which would otherwise eat the closing paren)
+    const my = tok.match(/^\(([^\)]+)\)\s*,\s*Y$/i);
+    if (my) {
+      const v = this._parseNumber(my[1]);
+      return { mode: 'izy', value: v & 0xFF };
+    }
+    // ($zp,X) — pre-indexed indirect
+    const mx = tok.match(/^\(([^\)]+)\s*,\s*X\)$/i);
+    if (mx) {
+      const v = this._parseNumber(mx[1]);
+      return { mode: 'izx', value: v & 0xFF };
+    }
+    // (zp), (zp,X) - matches the form where the parens are at the end
+    const m1 = tok.match(/^\(([^\)]+)\)$/);
+    if (m1) {
+      const inner = m1[1].trim();
+      // (zp,X) or (zp, X)
+      const m2 = inner.match(/^([^,]+)\s*,\s*X$/i);
+      if (m2) {
+        const v = this._parseNumber(m2[1]);
+        return { mode: 'izx', value: v & 0xFF };
+      }
+      // (zp),Y
+      const m3 = inner.match(/^([^,]+)\s*,\s*Y$/i);
+      if (m3) {
+        const v = this._parseNumber(m3[1]);
+        return { mode: 'izy', value: v & 0xFF };
+      }
+      // Indirect JMP: ($nnnn)
+      const v = this._parseNumber(inner);
+      return { mode: 'ind', value: v & 0xFFFF };
+    }
+    // abs,X / abs,Y  (or zp,X / zp,Y if value < $100)
+    const m4 = tok.match(/^([^,]+)\s*,\s*X$/i);
+    if (m4) {
+      const v = this._parseNumber(m4[1]);
+      if (v < 0x100) return { mode: 'zpx', value: v & 0xFF };
+      return { mode: 'absx', value: v & 0xFFFF };
+    }
+    const m5 = tok.match(/^([^,]+)\s*,\s*Y$/i);
+    if (m5) {
+      const v = this._parseNumber(m5[1]);
+      if (v < 0x100) return { mode: 'zpy', value: v & 0xFF };
+      return { mode: 'absy', value: v & 0xFFFF };
+    }
+    // plain number / label
+    const v = this._parseNumber(tok);
+    if (v < 0x100) return { mode: 'zp', value: v };
+    return { mode: 'abs', value: v };
+  }
+
+  // ----- Addressing mode size in bytes -----
+  _sizeOfOperand(c) {
+    if (!c) return 0;
+    switch (c.mode) {
+      case 'A': return 0;
+      case '#imm': return 1;
+      case 'zp': return 1;
+      case 'zpx': case 'zpy': return 1;
+      case 'abs': return 2;
+      case 'absx': case 'absy': return 2;
+      case 'ind': return 2;
+      case 'izx': case 'izy': return 1;
+    }
+    return 0;
+  }
+
+  // ----- Estimate instruction size without encoding -----
+  _estimate(item) {
+    const op = item.instruction;
+    const ops = item.args;
+    if (op === 'BRK' || op === 'RTI' || op === 'RTS' || op === 'NOP') return 1;
+    if (op === 'JMP') {
+      // JMP $nnnn or JMP ($nnnn)
+      if (ops[0] && ops[0].startsWith('(')) return 3;
+      return 3;
+    }
+    if (op === 'JSR') return 3;
+    if (op === 'PHP' || op === 'PLP' || op === 'PHA' || op === 'PLA' ||
+        op === 'RTI' || op === 'RTS' || op === 'TAX' || op === 'TXA' ||
+        op === 'TAY' || op === 'TYA' || op === 'TSX' || op === 'TXS' ||
+        op === 'INX' || op === 'INY' || op === 'DEX' || op === 'DEY' ||
+        op === 'CLC' || op === 'SEC' || op === 'CLI' || op === 'SEI' ||
+        op === 'CLV' || op === 'CLD' || op === 'SED') return 1;
+    // Branch ops: 2 bytes
+    if (['BPL','BMI','BVC','BVS','BCC','BCS','BNE','BEQ'].includes(op)) return 2;
+    // Quick text-based size guess for pass 1, avoiding label resolution.
+    const t = (ops[0] || '').trim();
+    if (!t) return 1;
+    if (t === 'A') return 1; // ASL A etc.
+    if (t.startsWith('#')) return 2; // immediate = 2 bytes
+    if (t.startsWith('(')) {
+      // (zp) = 2; (zp,X) = 2; (zp),Y = 2; ($nnnn) = 3 (indirect JMP)
+      if (t.includes(',')) return 2;
+      // ($nnnn) - 3 bytes for JMP
+      if (op === 'JMP') return 3;
+      return 2;
+    }
+    if (t.includes(',')) {
+      // abs,X or abs,Y = 3 bytes; but if the base is a small
+      // immediate number (< $100), the assembler will emit the
+      // zp form (2 bytes). Try to detect that.
+      const baseMatch = t.match(/^([^,]+)/);
+      if (baseMatch) {
+        const base = baseMatch[1].trim();
+        if (/^\$?[0-9a-fA-F]+$|^%[01]+$|^0x[0-9a-fA-F]+$|^\d+$/.test(base)) {
+          let v = 0;
+          if (base.startsWith('$')) v = parseInt(base.slice(1), 16);
+          else if (base.startsWith('0x')) v = parseInt(base.slice(2), 16);
+          else if (base.startsWith('%')) v = parseInt(base.slice(1), 2);
+          else v = parseInt(base, 10);
+          if (v < 0x100) return 2; // zp,x or zp,y
+        }
+      }
+      return 3; // abs,X or abs,Y
+    }
+    // Plain number/label - 2 bytes for zp, 3 for abs. Try to detect
+    // small numeric literals; default to 3 for labels (worst case).
+    if (/^\$?[0-9a-fA-F]+$|^%[01]+$|^0x[0-9a-fA-F]+$|^\d+$/.test(t)) {
+      let v = 0;
+      if (t.startsWith('$')) v = parseInt(t.slice(1), 16);
+      else if (t.startsWith('0x')) v = parseInt(t.slice(2), 16);
+      else if (t.startsWith('%')) v = parseInt(t.slice(1), 2);
+      else v = parseInt(t, 10);
+      if (v < 0x100) return 2;
+    }
+    return 3;
+  }
+
+  _evalDir1(item) {
+    if (item.directive === 'EQU') {
+      if (!item.label) throw new Error('EQU requires label');
+      const v = this._parseNumber(item.args);
+      this.labels[item.label] = v & 0xFFFF;
+      this.equs[item.label] = v & 0xFFFF;
+    } else if (item.directive === 'ORG') {
+      const v = this._parseNumber(item.args);
+      this.org = v & 0xFFFF;
+    }
+  }
+  _evalDir2(item) {
+    if (item.directive === 'DB' || item.directive === '.BYTE' || item.directive === 'DEFB') {
+      // DB args can be a comma-separated list of bytes and strings.
+      // Split on commas (at top level), but keep quoted strings intact.
+      const toks = this._splitDbArgs(item.args);
+      const bytes = [];
+      for (const t of toks) {
+        if (t.startsWith('"') && t.endsWith('"') && t.length >= 2) {
+          for (let i = 1; i < t.length - 1; i++) bytes.push(t.charCodeAt(i) & 0xFF);
+        } else {
+          bytes.push(this._parseNumber(t) & 0xFF);
+        }
+      }
+      return bytes;
+    } else if (item.directive === 'DW' || item.directive === '.WORD' || item.directive === 'DEFW') {
+      const toks = this._splitArgs(item.args);
+      const bytes = [];
+      for (const t of toks) {
+        const v = this._parseNumber(t);
+        bytes.push(v & 0xFF);
+        bytes.push((v >> 8) & 0xFF);
+      }
+      return bytes;
+    } else if (item.directive === 'DS') {
+      const n = this._parseNumber(item.args) & 0xFFFF;
+      return new Array(n).fill(0);
+    }
+    return [];
+  }
+  _splitArgs(s) {
+    // 6502 instructions take at most one operand; any commas are
+    // part of the addressing mode (`$40,X`, `($40),Y`). Split on
+    // whitespace only.
+    return s.split(/\s+/).filter(x => x.length > 0);
+  }
+  // Split a directive argument list (DB / DW) on commas, respecting
+  // quoted strings.
+  _splitDbArgs(s) {
+    const out = []; let cur = ''; let inStr = false;
+    for (let i = 0; i < s.length; i++) {
+      const ch = s[i];
+      if (ch === '"') { inStr = !inStr; cur += ch; continue; }
+      if (ch === ',' && !inStr) { out.push(cur.trim()); cur = ''; continue; }
+      cur += ch;
+    }
+    if (cur.trim().length) out.push(cur.trim());
+    return out;
+  }
+  _err(item, msg) { this.errors.push({ line: item.lineNo, source: item.raw, msg }); }
+
+  // ----- Encode an instruction to bytes -----
+  _encode(item, pc) {
+    const op = item.instruction;
+    const ops = item.args;
+    // Helpers
+    const c0 = ops[0] ? this._classifyOperand(ops[0]) : null;
+    const emit = (...b) => b;
+
+    switch (op) {
+      // Loads
+      case 'LDA': {
+        switch (c0.mode) {
+          case '#imm': return [0xA9, c0.value];
+          case 'zp':   return [0xA5, c0.value];
+          case 'zpx':  return [0xB5, c0.value];
+          case 'abs':  return [0xAD, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+          case 'absx': return [0xBD, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+          case 'absy': return [0xB9, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+          case 'izx':  return [0xA1, c0.value];
+          case 'izy':  return [0xB1, c0.value];
+        } throw new Error('LDA: bad operand');
+      }
+      case 'LDX': {
+        switch (c0.mode) {
+          case '#imm': return [0xA2, c0.value];
+          case 'zp':   return [0xA6, c0.value];
+          case 'zpy':  return [0xB6, c0.value];
+          case 'abs':  return [0xAE, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+          case 'absy': return [0xBE, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+        } throw new Error('LDX: bad operand');
+      }
+      case 'LDY': {
+        switch (c0.mode) {
+          case '#imm': return [0xA0, c0.value];
+          case 'zp':   return [0xA4, c0.value];
+          case 'zpx':  return [0xB4, c0.value];
+          case 'abs':  return [0xAC, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+          case 'absx': return [0xBC, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+        } throw new Error('LDY: bad operand');
+      }
+
+      // Stores
+      case 'STA': {
+        switch (c0.mode) {
+          case 'zp':   return [0x85, c0.value];
+          case 'zpx':  return [0x95, c0.value];
+          case 'abs':  return [0x8D, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+          case 'absx': return [0x9D, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+          case 'absy': return [0x99, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+          case 'izx':  return [0x81, c0.value];
+          case 'izy':  return [0x91, c0.value];
+        } throw new Error('STA: bad operand');
+      }
+      case 'STX': {
+        switch (c0.mode) {
+          case 'zp':   return [0x86, c0.value];
+          case 'zpy':  return [0x96, c0.value];
+          case 'abs':  return [0x8E, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+        } throw new Error('STX: bad operand');
+      }
+      case 'STY': {
+        switch (c0.mode) {
+          case 'zp':   return [0x84, c0.value];
+          case 'zpx':  return [0x94, c0.value];
+          case 'abs':  return [0x8C, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+        } throw new Error('STY: bad operand');
+      }
+
+      // Transfers
+      case 'TAX': return [0xAA];
+      case 'TXA': return [0x8A];
+      case 'TAY': return [0xA8];
+      case 'TYA': return [0x98];
+      case 'TSX': return [0xBA];
+      case 'TXS': return [0x9A];
+
+      // Stack
+      case 'PHA': return [0x48];
+      case 'PLA': return [0x68];
+      case 'PHP': return [0x08];
+      case 'PLP': return [0x28];
+      case 'RTI': return [0x40];
+      case 'RTS': return [0x60];
+
+      // Jumps
+      case 'JMP': {
+        if (c0.mode === 'ind') return [0x6C, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+        return [0x4C, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+      }
+      case 'JSR': {
+        return [0x20, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+      }
+      case 'BRK': return [0x00];
+
+      // Arithmetic
+      case 'ADC': {
+        switch (c0.mode) {
+          case '#imm': return [0x69, c0.value];
+          case 'zp':   return [0x65, c0.value];
+          case 'zpx':  return [0x75, c0.value];
+          case 'abs':  return [0x6D, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+          case 'absx': return [0x7D, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+          case 'absy': return [0x79, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+          case 'izx':  return [0x61, c0.value];
+          case 'izy':  return [0x71, c0.value];
+        } throw new Error('ADC: bad operand');
+      }
+      case 'SBC': {
+        switch (c0.mode) {
+          case '#imm': return [0xE9, c0.value];
+          case 'zp':   return [0xE5, c0.value];
+          case 'zpx':  return [0xF5, c0.value];
+          case 'abs':  return [0xED, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+          case 'absx': return [0xFD, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+          case 'absy': return [0xF9, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+          case 'izx':  return [0xE1, c0.value];
+          case 'izy':  return [0xF1, c0.value];
+        } throw new Error('SBC: bad operand');
+      }
+
+      // Logic
+      case 'AND': {
+        switch (c0.mode) {
+          case '#imm': return [0x29, c0.value];
+          case 'zp':   return [0x25, c0.value];
+          case 'zpx':  return [0x35, c0.value];
+          case 'abs':  return [0x2D, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+          case 'absx': return [0x3D, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+          case 'absy': return [0x39, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+          case 'izx':  return [0x21, c0.value];
+          case 'izy':  return [0x31, c0.value];
+        } throw new Error('AND: bad operand');
+      }
+      case 'ORA': {
+        switch (c0.mode) {
+          case '#imm': return [0x09, c0.value];
+          case 'zp':   return [0x05, c0.value];
+          case 'zpx':  return [0x15, c0.value];
+          case 'abs':  return [0x0D, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+          case 'absx': return [0x1D, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+          case 'absy': return [0x19, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+          case 'izx':  return [0x01, c0.value];
+          case 'izy':  return [0x11, c0.value];
+        } throw new Error('ORA: bad operand');
+      }
+      case 'EOR': {
+        switch (c0.mode) {
+          case '#imm': return [0x49, c0.value];
+          case 'zp':   return [0x45, c0.value];
+          case 'zpx':  return [0x55, c0.value];
+          case 'abs':  return [0x4D, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+          case 'absx': return [0x5D, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+          case 'absy': return [0x59, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+          case 'izx':  return [0x41, c0.value];
+          case 'izy':  return [0x51, c0.value];
+        } throw new Error('EOR: bad operand');
+      }
+      case 'BIT': {
+        switch (c0.mode) {
+          case 'zp':  return [0x24, c0.value];
+          case 'abs': return [0x2C, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+        } throw new Error('BIT: bad operand');
+      }
+
+      // Compare
+      case 'CMP': {
+        switch (c0.mode) {
+          case '#imm': return [0xC9, c0.value];
+          case 'zp':   return [0xC5, c0.value];
+          case 'zpx':  return [0xD5, c0.value];
+          case 'abs':  return [0xCD, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+          case 'absx': return [0xDD, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+          case 'absy': return [0xD9, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+          case 'izx':  return [0xC1, c0.value];
+          case 'izy':  return [0xD1, c0.value];
+        } throw new Error('CMP: bad operand');
+      }
+      case 'CPX': {
+        switch (c0.mode) {
+          case '#imm': return [0xE0, c0.value];
+          case 'zp':   return [0xE4, c0.value];
+          case 'abs':  return [0xEC, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+        } throw new Error('CPX: bad operand');
+      }
+      case 'CPY': {
+        switch (c0.mode) {
+          case '#imm': return [0xC0, c0.value];
+          case 'zp':   return [0xC4, c0.value];
+          case 'abs':  return [0xCC, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+        } throw new Error('CPY: bad operand');
+      }
+
+      // INC / DEC
+      case 'INC': {
+        switch (c0.mode) {
+          case 'zp':   return [0xE6, c0.value];
+          case 'zpx':  return [0xF6, c0.value];
+          case 'abs':  return [0xEE, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+          case 'absx': return [0xFE, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+        } throw new Error('INC: bad operand');
+      }
+      case 'DEC': {
+        switch (c0.mode) {
+          case 'zp':   return [0xC6, c0.value];
+          case 'zpx':  return [0xD6, c0.value];
+          case 'abs':  return [0xCE, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+          case 'absx': return [0xDE, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+        } throw new Error('DEC: bad operand');
+      }
+      case 'INX': return [0xE8];
+      case 'INY': return [0xC8];
+      case 'DEX': return [0xCA];
+      case 'DEY': return [0x88];
+
+      // Shifts / rotates
+      case 'ASL': {
+        if (c0.mode === 'A') return [0x0A];
+        switch (c0.mode) {
+          case 'zp':   return [0x06, c0.value];
+          case 'zpx':  return [0x16, c0.value];
+          case 'abs':  return [0x0E, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+          case 'absx': return [0x1E, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+        } throw new Error('ASL: bad operand');
+      }
+      case 'LSR': {
+        if (c0.mode === 'A') return [0x4A];
+        switch (c0.mode) {
+          case 'zp':   return [0x46, c0.value];
+          case 'zpx':  return [0x56, c0.value];
+          case 'abs':  return [0x4E, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+          case 'absx': return [0x5E, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+        } throw new Error('LSR: bad operand');
+      }
+      case 'ROL': {
+        if (c0.mode === 'A') return [0x2A];
+        switch (c0.mode) {
+          case 'zp':   return [0x26, c0.value];
+          case 'zpx':  return [0x36, c0.value];
+          case 'abs':  return [0x2E, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+          case 'absx': return [0x3E, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+        } throw new Error('ROL: bad operand');
+      }
+      case 'ROR': {
+        if (c0.mode === 'A') return [0x6A];
+        switch (c0.mode) {
+          case 'zp':   return [0x66, c0.value];
+          case 'zpx':  return [0x76, c0.value];
+          case 'abs':  return [0x6E, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+          case 'absx': return [0x7E, c0.value & 0xFF, (c0.value >> 8) & 0xFF];
+        } throw new Error('ROR: bad operand');
+      }
+
+      // Branches
+      case 'BPL': case 'BMI': case 'BVC': case 'BVS':
+      case 'BCC': case 'BCS': case 'BNE': case 'BEQ': {
+        const target = this._parseNumber(ops[0]);
+        const disp = (target - (pc + 2)) & 0xFF;
+        const opc = { BPL:0x10, BMI:0x30, BVC:0x50, BVS:0x70,
+                      BCC:0x90, BCS:0xB0, BNE:0xD0, BEQ:0xF0 }[op];
+        return [opc, disp];
+      }
+
+      // Flag ops
+      case 'CLC': return [0x18];
+      case 'SEC': return [0x38];
+      case 'CLI': return [0x58];
+      case 'SEI': return [0x78];
+      case 'CLV': return [0xB8];
+      case 'CLD': return [0xD8];
+      case 'SED': return [0xF8];
+
+      // Misc
+      case 'NOP': return [0xEA];
+    }
+    throw new Error(`Unknown instruction: ${op}`);
+  }
+}
+
+if (typeof window !== 'undefined') window.Asm6502 = Asm6502;
+</script>
+<!-- ==== inlined a1-woz.js ==== -->
+<script>
+/* ============================================================
+   Apple 1: Woz Monitor + I/O
+   ============================================================
+   The Woz Monitor is a 256-byte ROM that Steve Wozniak wrote for
+   the Apple 1. It provides a tiny "front panel" interface:
+     - After reset, prints "\" prompt and waits for input.
+     - "0: 12 34 ..." deposits bytes starting at $00.. (or
+       wherever the user types in the address).
+     - "0R" runs from the address 0 (or last deposit address).
+     - "0. 12 34 ..." examines memory and prints bytes.
+   The original ROM lives at $FF00-$FFFF on the Apple 1.
+
+   The original Apple 1 used a "dumb terminal" interface: writing
+   to $D010 displays a character; reading $D011 reads a key.
+   We emulate that here, plus a small JavaScript implementation of
+   the Woz Monitor for use when the user wants to talk to the
+   "real" machine instead of running their own program.
+   ============================================================ */
+
+'use strict';
+
+// ----- Woz Monitor ROM (256 bytes, loaded at $FF00) -----
+// This is a faithful machine-code translation of the original.
+// Source: https://www.sbprojects.net/projects/apple1/wozmon.php
+// We hand-assembled the original to a byte array.
+const WOZ_ROM = new Uint8Array([
+  // $FF00 DUMP
+  0xD8, 0x58, 0xA0, 0x7F, 0x8C, 0x12, 0xD0, 0xA9, 0xA7, 0x8D, 0x12, 0xD0, 0xA9, 0xA0, 0xCD, 0x12,
+  0xD0, 0xD0, 0x17, 0xA9, 0xAA, 0x8D, 0x12, 0xD0, 0x20, 0x70, 0xFF, 0xA9, 0x00, 0xAA, 0x0A, 0x85,
+  0x2B, 0xC9, 0xA0, 0xB0, 0x05, 0xA2, 0x0E, 0xC9, 0x8A, 0xF0, 0xF3, 0xC9, 0x95, 0xD0, 0xF0, 0xF0,
+  0xEB, 0x29, 0x0F, 0x90, 0x04, 0xAA, 0xBD, 0xB6, 0xFF, 0xC9, 0x0A, 0x90, 0x06, 0x69, 0x88, 0xC9,
+  0xFA, 0x90, 0x05, 0x69, 0x80, 0x2A, 0xCA, 0xD0, 0xF4, 0xC9, 0x0F, 0xD0, 0xE0, 0xA0, 0xFF, 0xA9,
+  0x00, 0xAA, 0x0A, 0x85, 0x2A, 0xC9, 0x61, 0x90, 0x05, 0x69, 0x09, 0x29, 0x0F, 0x0A, 0xAA, 0xBD,
+  0xC6, 0xFF, 0xC9, 0x10, 0x90, 0xD4, 0x69, 0x02, 0xC9, 0x20, 0x90, 0xCE, 0xF0, 0xDE, 0x69, 0x00,
+  0xC5, 0x2B, 0xF0, 0xD8, 0x90, 0xDC, 0xA0, 0xFF, 0x94, 0x00, 0xC8, 0xB9, 0x00, 0x02, 0x10, 0xF7,
+  0xA9, 0x00, 0x85, 0x2A, 0x85, 0x2B, 0x88, 0x10, 0xE4, 0xE4, 0x2B, 0xD0, 0x8F, 0x06, 0x2A, 0x90,
+  0x8A, 0x8D, 0x11, 0xD0, 0xBD, 0xB6, 0xFF, 0x0A, 0xAA, 0xBD, 0xC6, 0xFF, 0xA0, 0xFF, 0x20, 0xFB,
+  0xFF, 0xA9, 0xA0, 0x20, 0xFB, 0xFF, 0xB9, 0x00, 0x02, 0x20, 0xFB, 0xFF, 0xC8, 0xC0, 0x08, 0xD0,
+  0xF4, 0xA9, 0xA0, 0x20, 0xFB, 0xFF, 0xA9, 0x8D, 0x20, 0xFB, 0xFF, 0xA0, 0xFF, 0xC0, 0x08, 0xF0,
+  0x97, 0xB9, 0x00, 0x02, 0x20, 0xFB, 0xFF, 0xC8, 0xC0, 0x08, 0xD0, 0xF4, 0xA9, 0xA0, 0x20, 0xFB,
+  0xFF, 0xA9, 0x8D, 0x20, 0xFB, 0xFF, 0x4C, 0x00, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x4C, 0x12, 0xD0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+]);
+
+// The Woz Monitor expects a small KBD/RESET vector at $FFFC/D and
+// a BRK vector pointing to $FF00.
+const WOZ_RESET_LO = 0x00, WOZ_RESET_HI = 0xFF; // PC starts at $FF00
+const WOZ_IRQ_LO = 0x00, WOZ_IRQ_HI = 0xFF;
+const WOZ_NMI_LO = 0xFA; // NMI doesn't make sense for Apple 1 but provide
+const WOZ_NMI_HI = 0xFA;
+
+// ----- Apple 1 I/O hooks -----
+// $D010: write displays a character (with high bit cleared)
+// $D011: read returns key (high bit set when no key pressed)
+const IO_DSP = 0xD010; // display output
+const IO_KBD = 0xD011; // keyboard input
+
+function installApple1IO(cpu, onDisplay, getKey) {
+  cpu.ioOutput = (addr, val) => {
+    if (addr === IO_DSP) onDisplay(val & 0x7F);
+  };
+  cpu.ioInput = (addr) => {
+    if (addr === IO_KBD) {
+      const k = getKey();
+      return k < 0 ? 0x80 : (k | 0x80); // original Apple 1: high bit set
+    }
+    return 0;
+  };
+}
+
+function loadWozMonitor(cpu) {
+  for (let i = 0; i < WOZ_ROM.length; i++) {
+    cpu.mem[0xFF00 + i] = WOZ_ROM[i];
+  }
+  // Vectors
+  cpu.mem[0xFFFC] = WOZ_RESET_LO;
+  cpu.mem[0xFFFD] = WOZ_RESET_HI;
+  cpu.mem[0xFFFE] = WOZ_IRQ_LO;
+  cpu.mem[0xFFFF] = WOZ_IRQ_HI;
+  cpu.mem[0xFFFA] = WOZ_NMI_LO;
+  cpu.mem[0xFFFB] = WOZ_NMI_HI;
+}
+
+if (typeof window !== 'undefined') {
+  window.WOZ_ROM = WOZ_ROM;
+  window.installApple1IO = installApple1IO;
+  window.loadWozMonitor = loadWozMonitor;
+  window.IO_DSP = IO_DSP;
+  window.IO_KBD = IO_KBD;
+}
+</script>
+<!-- ==== inlined a1-lessons.js ==== -->
+<script>
+/* ============================================================
+   Apple 1 / 6502 — Lessons
+   ============================================================
+   Same structure as the Z80 tutorial: ten progressive lessons
+   that take a learner from "what is a register" to writing
+   small programs on the Apple 1. Each lesson has:
+     - a title and concept line
+     - HTML body explaining the idea
+     - a starter program loaded into the editor
+     - a check() function the UI calls to grade the user's code
+   ============================================================ */
+
+'use strict';
+
+const LESSONS = [
+  {
+    id: 'l1',
+    title: 'Lesson 1 — Your first instructions: LDA and STA',
+    concept: 'the accumulator, A, and memory',
+    body: `
+<p>The <b>MOS 6502</b> (1975) powered the Apple II, the NES, the Atari 2600,
+the Commodore 64, and the BBC Micro. Wozniak's <b>Apple 1</b> (1976) was
+one of its first commercial successes.</p>
+<p>The 6502 has three 8-bit registers: <b>A</b> (the accumulator, used for
+most arithmetic and memory loads), <b>X</b>, and <b>Y</b> (index registers).
+Everything else goes through memory.</p>
+<p>Two fundamental instructions:</p>
+<pre>LDA #$05     ; load the value 5 into A
+STA $40      ; store A into memory at $0040</pre>
+<p>The <code>#</code> means "immediate" — the value is the operand. Without
+the <code>#</code> the assembler would treat <code>05</code> as the address
+<code>$0005</code>.</p>
+<p><b>Task:</b> Load <code>5</code> into A, then store A into memory
+location <code>$40</code>, then load <code>9</code> into A and store
+it at <code>$41</code>.</p>`,
+    starter: `; Lesson 1 — first loads and stores
+        ORG $300
+
+        LDA #$05
+        STA $40
+        LDA #$09
+        STA $41
+
+DONE:   JMP DONE       ; halt by infinite loop
+`,
+    hints: [
+      '`LDA #$05` puts 5 in A. `LDA #$09` puts 9 in A.',
+      '`STA $40` and `STA $41` write A to those addresses.',
+      'A `JMP DONE` infinite loop is the Apple 1 way of saying "halt".',
+    ],
+    check: (cpu) => {
+      const ok = cpu.mem[0x40] === 5 && cpu.mem[0x41] === 9 && cpu.A === 9;
+      return { ok, message: ok ? '$40=5, $41=9, A=9 ✓' : `state: $40=${cpu.mem[0x40]}, $41=${cpu.mem[0x41]}, A=${cpu.A}` };
+    }
+  },
+
+  {
+    id: 'l2',
+    title: 'Lesson 2 — Arithmetic: ADC and SBC',
+    concept: 'the carry flag and A as a math register',
+    body: `
+<p>The 6502 has only one general-purpose arithmetic register: A. To add
+to A, you use <code>ADC</code> (add with carry). To subtract, you use
+<code>SBC</code> (subtract with carry). Both <i>include</i> the carry
+flag — that's why there's a special <code>SEC</code> instruction to set
+the carry first.</p>
+<p>The 6502 flags: <b>N</b> (negative), <b>V</b> (overflow), <b>Z</b>
+(zero), <b>C</b> (carry). After an ADC, Z is set when the result is 0,
+C is set on unsigned overflow, V on signed overflow, N when bit 7 is set.</p>
+<p><b>Task:</b> Compute <code>3 + 4 - 2 = 5</code> using A. Start by
+making sure the carry is clear before the SBC (CLC).</p>`,
+    starter: `; Lesson 2 — ADC, SBC, and the carry flag
+        ORG $300
+
+        CLC
+        LDA #$03
+        ADC #$04
+        SEC
+        SBC #$02
+
+DONE:   JMP DONE
+`,
+    hints: [
+      '`CLC` clears the carry so SBC works correctly. (SBC does A = A - M - !C.)',
+      '`ADC #$04` adds 4 to A. `SBC #$02` subtracts 2.',
+    ],
+    check: (cpu) => {
+      const ok = cpu.A === 5;
+      return { ok, message: ok ? 'A=5 ✓' : `A=${cpu.A}, expected 5` };
+    }
+  },
+
+  {
+    id: 'l3',
+    title: 'Lesson 3 — Loops with X and Y',
+    concept: 'indexed registers as counters',
+    body: `
+<p>The 6502 doesn't have a single "decrement and branch" instruction.
+To make a loop, you load a counter into <b>X</b> or <b>Y</b>, do work
+inside the loop, decrement with <code>DEX</code>/<code>DEY</code>,
+and branch back with <code>BNE</code> (branch if not equal — i.e. not
+zero) until the counter reaches zero.</p>
+<pre>        LDX #$05     ; counter = 5
+LOOP:   ...          ; some code
+        DEX          ; X = X - 1
+        BNE LOOP     ; branch while X != 0
+</pre>
+<p><b>Task:</b> Use a loop to add 1 to A ten times. End with A = 10.</p>`,
+    starter: `; Lesson 3 — loop with X as a counter
+        ORG $300
+
+        LDA #$00
+        LDX #$0A     ; 10 iterations
+LOOP:   CLC
+        ADC #$01
+        DEX
+        BNE LOOP
+
+DONE:   JMP DONE
+`,
+    hints: [
+      '`LDX #$0A` sets X=10. Each DEX makes X one smaller.',
+      '`BNE LOOP` branches back as long as X is not zero.',
+    ],
+    check: (cpu) => {
+      const ok = cpu.A === 10;
+      return { ok, message: ok ? 'A=10 ✓' : `A=${cpu.A}, expected 10` };
+    }
+  },
+
+  {
+    id: 'l4',
+    title: 'Lesson 4 — Conditional branches: BEQ and BNE',
+    concept: 'decision-making with the Z flag',
+    body: `
+<p>Branches on the 6502 inspect the flags:</p>
+<pre>BEQ target   ; branch if Z=1 (result was zero / equal)
+BNE target   ; branch if Z=0
+BCC target   ; branch if C=0 (no carry / unsigned less)
+BCS target   ; branch if C=1
+BMI target   ; branch if N=1 (minus / negative)
+BPL target   ; branch if N=0
+</pre>
+<p>After <code>CMP x</code>, Z is set if A == x, and C is set if
+A &gt;= x (unsigned).</p>
+<p><b>Task:</b> If A is 7, set A to 1. Otherwise set A to 0. Use
+<code>CMP #$07</code> and <code>BEQ</code>.</p>`,
+    starter: `; Lesson 4 — conditional branch
+        ORG $300
+
+        LDA #$07
+        CMP #$07
+        BEQ EQUAL
+        LDA #$00
+        JMP DONE
+EQUAL:  LDA #$01
+DONE:   JMP DONE
+`,
+    hints: [
+      'CMP sets Z when A==operand. BEQ jumps if Z=1.',
+      'Without the `JMP DONE` after the false branch, the program would fall through into EQUAL.',
+    ],
+    check: (cpu) => {
+      const ok = cpu.A === 1;
+      return { ok, message: ok ? 'A=1 ✓ (branch taken)' : `A=${cpu.A}, expected 1` };
+    }
+  },
+
+  {
+    id: 'l5',
+    title: 'Lesson 5 — Output to the Apple 1 screen',
+    concept: 'memory-mapped I/O at $D010',
+    body: `
+<p>The Apple 1 was a "dumb terminal" computer: any character you write
+to address <code>$D010</code> appears on the screen. The character
+must be in standard ASCII (no high bit).</p>
+<p>To output a character, put it in A and <code>STA $D010</code>.</p>
+<p><b>Task:</b> Print <code>"Hi"</code> followed by a newline (ASCII 13
+— the Apple 1 used CR only, not LF+CR).</p>`,
+    starter: `; Lesson 5 — print "Hi" to the Apple 1 screen
+        ORG $300
+
+        LDA #'H'         ; ASCII 0x48
+        STA $D010
+        LDA #'i'         ; ASCII 0x69
+        STA $D010
+        LDA #$0D         ; carriage return
+        STA $D010
+
+DONE:   JMP DONE
+`,
+    hints: [
+      '`LDA #\'H\'` is the same as `LDA #$48`.',
+      'Each `STA $D010` shows up in the Apple 1 screen on the right.',
+    ],
+    check: (cpu, sim) => {
+      const ok = sim.screen.includes('Hi');
+      return { ok, message: ok ? `Screen shows "Hi" ✓` : `Screen: "${sim.screen}"` };
+    }
+  },
+
+  {
+    id: 'l6',
+    title: 'Lesson 6 — Indexed addressing: ,X and ,Y',
+    concept: 'walking through memory with X or Y',
+    body: `
+<p>To access an array, load the base address into <b>X</b> or <b>Y</b>
+(useful only for the second in indexed addressing, but more often you
+use a <b>zero page pointer</b> plus indexed addressing, like
+<code>LDA $40,X</code>). The simpler form: <code>STX</code>/<code>LDX</code>
+on the zero page gives you a small indexable buffer.</p>
+<p>For walking memory you'll most often use <code>LDA $nn,X</code> or
+<code>LDA $nn,Y</code>, where <code>nn</code> is the base address in the
+zero page.</p>
+<p><b>Task:</b> Fill addresses <code>$40..$49</code> with the values
+0..9. Use X as the index, and <code>LDA #$00</code> + <code>CLC</code>/<code>ADC #$01</code>
+to compute the byte to store.</p>`,
+    starter: `; Lesson 6 — fill memory $40..$49 with 0..9
+        ORG $300
+
+        LDA #$00
+        LDX #$00       ; index
+LOOP:   STA $40,X
+        CLC
+        ADC #$01
+        INX
+        CPX #$0A
+        BNE LOOP
+
+DONE:   JMP DONE
+`,
+    hints: [
+      '`STA $40,X` writes A to address $40+X.',
+      'After each store, INX and CPX #$0A: BNE back to LOOP until X=10.',
+    ],
+    check: (cpu) => {
+      let ok = true;
+      for (let i = 0; i < 10; i++) if (cpu.mem[0x40 + i] !== i) { ok = false; break; }
+      return { ok, message: ok ? '$40..$49 = 0..9 ✓' : 'Some bytes wrong — see Memory panel' };
+    }
+  },
+
+  {
+    id: 'l7',
+    title: 'Lesson 7 — Subroutines with JSR and RTS',
+    concept: 'reusable code and the stack',
+    body: `
+<p>A subroutine is called with <code>JSR label</code> and ends with
+<code>RTS</code>. <code>JSR</code> pushes the return address minus 1
+onto the stack, and <code>RTS</code> pulls it and adds 1.</p>
+<p>The 6502 stack is hard-wired to page 1 (addresses <code>$0100</code>
+to <code>$01FF</code>), with the stack pointer (<b>SP</b>) starting at
+<code>$FD</code> and growing downward.</p>
+<p><b>Task:</b> Define a subroutine <code>DOUB</code> that doubles the
+value in A (i.e. A = A * 2). Call it so A ends up being 12.</p>`,
+    starter: `; Lesson 7 — subroutines
+        ORG $300
+
+        LDA #$06
+        JSR DOUB       ; A should become 12
+        JMP DONE
+
+DOUB:   ASL A          ; A = A << 1 = A * 2
+        RTS
+
+DONE:   JMP DONE
+`,
+    hints: [
+      '`ASL A` shifts A left by one bit — that doubles it (and sets C with the bit that fell off).',
+      'RTS pulls the return address off the stack and jumps back to right after JSR.',
+    ],
+    check: (cpu) => {
+      const ok = cpu.A === 12;
+      return { ok, message: ok ? 'A=12 ✓' : `A=${cpu.A}, expected 12` };
+    }
+  },
+
+  {
+    id: 'l8',
+    title: 'Lesson 8 — Decimal mode (BCD)',
+    concept: 'SED + ADC for BCD arithmetic',
+    body: `
+<p>The 6502 has a hardware <b>decimal mode</b>: when <code>SED</code>
+sets the D flag, subsequent <code>ADC</code> and <code>SBC</code>
+instructions do <b>binary-coded decimal</b> arithmetic. Each byte is
+treated as two 4-bit decimal digits (the high nibble is "tens", the
+low nibble is "ones").</p>
+<p>This is great for things like clocks, scores, and money.</p>
+<p><b>Task:</b> Compute <code>5 + 7 = 12</code> in BCD: set decimal
+mode, load 5, add 7, then <code>CLD</code> (so future code is binary)
+and check A is <code>$12</code>.</p>`,
+    starter: `; Lesson 8 — BCD via decimal mode
+        ORG $300
+
+        SED
+        CLC
+        LDA #$05
+        ADC #$07
+        CLD
+
+DONE:   JMP DONE
+`,
+    hints: [
+      'In BCD, $09 + $01 = $10, not $0A. ADC handles this when D=1.',
+      'Always CLD afterwards so your next binary code is safe.',
+    ],
+    check: (cpu) => {
+      const ok = cpu.A === 0x12;
+      return { ok, message: ok ? 'A=$12 (BCD 12) ✓' : `A=$${cpu.A.toString(16).padStart(2,'0')}, expected $12` };
+    }
+  },
+
+  {
+    id: 'l9',
+    title: 'Lesson 9 — Indirect indexed: ($nn),Y',
+    concept: 'pointer tables and reading bytes by index',
+    body: `
+<p>The 6502 has two powerful indirect modes:</p>
+<pre>LDA ($40),Y    ; read byte at address stored at $40, plus Y
+LDA ($40,X)    ; read byte at address stored at $40+X
+</pre>
+<p>The first, <code>($nn),Y</code>, is the "classic" 6502 way to read
+a byte from a pointer table. You store a 16-bit pointer at
+<code>$nn/$nn+1</code> in the zero page, then <code>LDA ($nn),Y</code>
+reads the byte at <code>(pointer + Y)</code>. This is how
+AppleSoft BASIC does string indexing.</p>
+<p><b>Task:</b> Set the pointer at <code>$40/$41</code> to <code>$50</code>
+(so <code>$40 = $50</code>, <code>$41 = $00</code>). Put the value
+<code>33</code> at <code>$53</code> (i.e. <code>$50 + 3</code>). Then
+read it with <code>LDA ($40),Y</code> where Y = 3.</p>`,
+    starter: `; Lesson 9 — indirect indexed addressing
+        ORG $300
+
+        ; pointer at $40/$41 points to $50
+        LDA #$50
+        STA $40
+        LDA #$00
+        STA $41
+
+        ; put 33 at $50+3 = $53
+        LDA #$21        ; 33 = 0x21
+        STA $53
+
+        ; now read it
+        LDY #$03
+        LDA ($40),Y     ; A should be 33
+
+DONE:   JMP DONE
+`,
+    hints: [
+      '`LDA ($40),Y` means: read 16-bit pointer from $40, add Y, then read that address.',
+      'Y=3, pointer=$50, so this reads $53.',
+    ],
+    check: (cpu) => {
+      const ok = cpu.A === 33;
+      return { ok, message: ok ? 'A=33 ✓' : `A=${cpu.A}, expected 33` };
+    }
+  },
+
+  {
+    id: 'l10',
+    title: 'Lesson 10 — Capstone: print a string',
+    concept: 'combining everything',
+    body: `
+<p>Combine what you know: a <code>DB</code> directive stores bytes
+somewhere in memory (the Apple 1 user-RAM is <code>$0300..$0FFF</code>),
+a pointer walks the memory, <code>LDA ($nn),Y</code> reads each byte,
+and <code>STA $D010</code> prints it. Stop when you see a zero byte.</p>
+<p><b>Task:</b> Print the string <code>"APPLE!"</code> followed by a
+CR. Store the string in memory after your code, walk it with a
+zero-page pointer, and end on a zero byte.</p>`,
+    starter: `; Lesson 10 — print "APPLE!"
+        ORG $300
+
+        ; zero-page pointer at $40/$41
+        LDA #<STR
+        STA $40
+        LDA #>STR
+        STA $41
+
+        ; Y is the index
+        LDY #$00
+LOOP:   LDA ($40),Y
+        CMP #$00
+        BEQ DONE
+        STA $D010
+        INY
+        JMP LOOP
+
+DONE:   JMP DONE
+
+        ; "<" and ">" give the low and high byte of STR's address
+STR:    DB "APPLE!", $0D, $00
+`,
+    hints: [
+      '`<STR` and `>STR` are the standard 6502 assembler way to say "low byte of STR\'s address" and "high byte".',
+      'Stop when you see a zero byte — your DB line has one at the end.',
+    ],
+    check: (cpu, sim) => {
+      const ok = sim.screen.includes('APPLE!');
+      return { ok, message: ok ? `Screen shows "APPLE!" ✓` : `Screen: "${sim.screen}"` };
+    }
+  }
+];
+
+if (typeof window !== 'undefined') window.LESSONS = LESSONS;
+</script>
+<script>
+'use strict';
+
+const EXAMPLES = [
+  {
+    id: 'ex-hello',
+    title: 'Hello Apple 1',
+    body: 'Print "Hello, Apple 1!" to the screen using a string pointer.',
+    code: `; Print "Hello, Apple 1!"
+        ORG $300
+
+        LDA #<STR
+        STA $40
+        LDA #>STR
+        STA $41
+
+        LDY #$00
+LOOP:   LDA ($40),Y
+        CMP #$00
+        BEQ DONE
+        STA $D010
+        INY
+        JMP LOOP
+
+DONE:   JMP DONE
+
+STR:    DB "Hello, Apple 1!", $0D, $00
+`
+  },
+  {
+    id: 'ex-8bitmul',
+    title: '8-bit multiply',
+    body: 'Multiply two small numbers by repeated addition. A = 7 * 6 = 42.',
+    code: `; 8-bit multiply via repeated addition
+        ORG $300
+
+        LDA #$00
+        LDX #$07       ; multiplicand
+        LDY #$06       ; multiplier
+MUL:    CLC
+        ADC #$06
+        DEY
+        BNE MUL
+
+DONE:   JMP DONE
+`
+  },
+  {
+    id: 'ex-woz',
+    title: 'Woz Monitor',
+    body: 'Reset into the Woz Monitor and type commands like "0: A9 00" then "0R".',
+    code: `; This is a placeholder — the Woz Monitor lives in ROM at $FF00.
+; Click "Woz Monitor" below to enter the monitor at reset.
+        JMP $FF00
+`
+  }
+];
+
+// ----- State -----
+const state = {
+  cpu: null, asm: new Asm6502(),
+  currentLesson: 0, completed: new Set(), exampleMode: false,
+  running: false, runTimer: null,
+  breakpoints: new Set(), listings: [], errors: [],
+  lastAsmOk: false, prevRegs: {},
+  screen: '',
+  inWoz: false,
+  keyBuffer: []
+};
+
+// ----- Init -----
+function init() {
+  state.cpu = new Cpu6502();
+  loadWozMonitor(state.cpu);
+  installApple1IO(state.cpu,
+    (c) => { state.screen += String.fromCharCode(c); renderScreen(); },
+    () => {
+      if (state.keyBuffer.length > 0) {
+        const k = state.keyBuffer.shift();
+        return k & 0x7F;
+      }
+      return -1;
+    }
+  );
+  state.cpu.breakpointHit = (pc) => {
+    if (state.running) {
+      stopRun();
+      flashStatus(`Breakpoint at $${pc.toString(16).padStart(4,'0')}`);
+    }
+  };
+
+  renderLessonList();
+  renderExampleList();
+  loadLesson(0);
+  renderAll();
+  setInterval(() => { if (state.running) renderAll(); }, 200);
+
+  // Keyboard input bar
+  document.getElementById('kbdSend').addEventListener('click', sendKbdText);
+  document.getElementById('kbdInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); sendKbdText(); }
+  });
+}
+
+function sendKbdText() {
+  const inp = document.getElementById('kbdInput');
+  // Send the text plus CR (0x0D) like a real terminal pressing Enter
+  const text = inp.value;
+  inp.value = '';
+  if (state.inWoz) {
+    // Feed the Woz Monitor directly — it echoes and responds immediately
+    wozMon.feedLine(text);
+    renderKbd();
+    return;
+  }
+  for (let i = 0; i < text.length; i++) state.keyBuffer.push(text.charCodeAt(i) & 0x7F);
+  state.keyBuffer.push(0x0D);
+  renderKbd();
+}
+
+function renderKbd() {
+  document.getElementById('kbdMode').textContent = state.keyBuffer.length ? `(${state.keyBuffer.length} key${state.keyBuffer.length>1?'s':''} queued)` : '';
+}
+
+function renderScreen() {
+  const el = document.getElementById('screen');
+  // Show last 600 chars; Woz-style carriage return handling
+  let s = state.screen;
+  if (s.length > 600) s = s.slice(s.length - 600);
+  el.innerHTML = '';
+  for (const ch of s) {
+    if (ch === '\r') { el.appendChild(document.createTextNode('\n')); continue; } // CR = Apple 1 newline
+    if (ch === '\n') { el.appendChild(document.createTextNode('\n')); continue; }
+    el.appendChild(document.createTextNode(ch));
+  }
+  el.appendChild(document.createElement('span')).className = 'cursor';
+  el.scrollTop = el.scrollHeight;
+}
+
+// ----- Lesson list / example list -----
+function renderLessonList() {
+  const ul = document.getElementById('lessonList');
+  ul.innerHTML = '';
+  LESSONS.forEach((l, i) => {
+    const li = document.createElement('li');
+    li.dataset.idx = i;
+    li.innerHTML = `<span class="num">${i+1}</span>${l.title.replace(/^Lesson \d+ — /, '')}`;
+    if (state.completed.has(i)) li.classList.add('done');
+    if (i === state.currentLesson && !state.exampleMode) li.classList.add('active');
+    li.addEventListener('click', () => loadLesson(i));
+    ul.appendChild(li);
+  });
+  updateProgress();
+}
+function renderExampleList() {
+  const ul = document.getElementById('exampleList');
+  ul.innerHTML = '';
+  EXAMPLES.forEach((ex, i) => {
+    const li = document.createElement('li');
+    li.dataset.idx = i;
+    li.innerHTML = `<span class="num">·</span>${ex.title}`;
+    if (state.exampleMode && state.currentLesson === i) li.classList.add('active');
+    li.addEventListener('click', () => loadExample(i));
+    ul.appendChild(li);
+  });
+  // Append a special "Woz Monitor" entry
+  const li2 = document.createElement('li');
+  li2.innerHTML = `<span class="num">·</span>Woz Monitor (ROM)`;
+  li2.addEventListener('click', enterWoz);
+  ul.appendChild(li2);
+}
+function updateProgress() {
+  const done = state.completed.size;
+  const total = LESSONS.length;
+  document.getElementById('lessonProgress').textContent = `${done} / ${total} done`;
+}
+document.getElementById('resetProgress').addEventListener('click', () => {
+  if (!confirm('Reset all progress?')) return;
+  state.completed.clear(); state.breakpoints.clear();
+  renderLessonList();
+});
+
+function loadLesson(i) {
+  state.exampleMode = false; state.inWoz = false;
+  state.currentLesson = i;
+  const l = LESSONS[i];
+  document.getElementById('lbTitle').textContent = l.title;
+  document.getElementById('lbConcept').textContent = `Concept: ${l.concept}`;
+  document.getElementById('lbContent').innerHTML = l.body;
+  document.getElementById('editor').value = l.starter;
+  document.getElementById('wozBanner').style.display = 'none';
+  state.screen = '';
+  state.errors = []; state.breakpoints.clear();
+  state.keyBuffer = [];
+  resetCPU();
+  renderAll();
+  renderLessonList();
+  assemble();
+}
+function loadExample(i) {
+  state.exampleMode = true; state.inWoz = false;
+  state.currentLesson = i;
+  const ex = EXAMPLES[i];
+  document.getElementById('lbTitle').textContent = ex.title;
+  document.getElementById('lbConcept').textContent = 'Example program';
+  document.getElementById('lbContent').innerHTML = `<p>${ex.body}</p>`;
+  document.getElementById('editor').value = ex.code;
+  document.getElementById('wozBanner').style.display = 'none';
+  state.screen = ''; state.errors = []; state.breakpoints.clear();
+  state.keyBuffer = [];
+  resetCPU();
+  renderAll();
+  renderExampleList();
+  renderLessonList();
+  assemble();
+}
+
+// ----- Woz Monitor (JavaScript implementation) -----
+// A faithful re-implementation of the Apple 1's Woz Monitor
+// behavior, in JavaScript. The original 256-byte ROM is still
+// loaded at $FF00 for inspection, but we run this JS version
+// because the real ROM uses several undocumented 6502 opcodes.
+const wozMon = {
+  curAddr: 0,
+  prompt() {
+    state.screen += '\\\r';
+  },
+  hex2(b) { return (b & 0xFF).toString(16).toUpperCase().padStart(2, '0'); },
+  hex4(a) { return (a & 0xFFFF).toString(16).toUpperCase().padStart(4, '0'); },
+  // Reset monitor state (called when entering the monitor)
+  reset() { this.curAddr = 0; },
+  // Feed one full command line (the keyboard box sends text on Enter).
+  // Commands, case-insensitive:
+  //   ADDR: B0 B1 B2 ...   deposit bytes starting at ADDR
+  //   ADDR1.ADDR2          examine memory (default end: ADDR1+7)
+  //   ADDR1.               examine 8 bytes at ADDR1
+  //   ADDR R               run program at ADDR (exits the monitor)
+  //   (empty)              just print a fresh prompt
+  feedLine(text) {
+    state.screen += text + '\r';           // echo what the user typed
+    const cmd = text.trim();
+    if (cmd !== '') {
+      try {
+        if (/^[0-9A-Fa-f]{1,4}\s*R$/i.test(cmd)) {
+          this.doRun(parseInt(cmd.match(/^([0-9A-Fa-f]{1,4})/i)[1], 16));
+          return;                           // doRun takes over the screen
+        }
+        if (/^[0-9A-Fa-f]{0,4}\s*:/i.test(cmd)) {
+          const m = cmd.match(/^([0-9A-Fa-f]{0,4})\s*:\s*(.*)$/);
+          let addr = m[1] ? parseInt(m[1], 16) : this.curAddr;
+          const bytes = this.parseBytes(m[2]);
+          if (!bytes.length) {
+            state.screen += '?\r';
+          } else {
+            for (const b of bytes) {
+              state.cpu.write(addr & 0xFFFF, b & 0xFF);
+              addr = (addr + 1) & 0xFFFF;
+            }
+            this.curAddr = addr;
+            state.screen += '\r';
+          }
+        } else if (/^[0-9A-Fa-f]{1,4}\s*\./i.test(cmd)) {
+          const m = cmd.match(/^([0-9A-Fa-f]{1,4})\s*\.\s*([0-9A-Fa-f]*)$/);
+          const a1 = parseInt(m[1], 16);
+          const a2 = m[2] ? parseInt(m[2], 16) : (a1 + 7) & 0xFFFF;
+          this.examine(a1, a2);
+        } else {
+          state.screen += '?\r';
+        }
+      } catch (e) { state.screen += '?\r'; }
+    }
+    this.prompt();
+    renderScreen();
+  },
+  // Accept "A9 00 8D" or "A9008D" — hex byte pairs, spaces optional
+  parseBytes(s) {
+    const hex = s.replace(/\s+/g, '');
+    if (!hex.length || /[^0-9A-Fa-f]/.test(hex) || hex.length % 2 !== 0) return [];
+    const out = [];
+    for (let i = 0; i < hex.length; i += 2) out.push(parseInt(hex.slice(i, i + 2), 16));
+    return out;
+  },
+  examine(a1, a2) {
+    a1 &= 0xFFFF; a2 &= 0xFFFF;
+    let a = a1, count = 0;
+    const total = ((a2 - a1) & 0xFFFF) + 1;
+    while (count < total && count < 256) {
+      if (count % 8 === 0) state.screen += this.hex4(a) + ': ';
+      state.screen += this.hex2(state.cpu.read(a)) + ' ';
+      if (count % 8 === 7 || count === total - 1) state.screen += '\r';
+      a = (a + 1) & 0xFFFF;
+      count++;
+    }
+    this.curAddr = (a2 + 1) & 0xFFFF;
+  },
+  doRun(addr) {
+    const cpu = state.cpu;
+    cpu.PC = addr & 0xFFFF;
+    cpu.SP = 0xFD; cpu.P = 0x24;
+    cpu.A = cpu.X = cpu.Y = 0;
+    state.inWoz = false;
+    document.getElementById('wozBanner').style.display = 'none';
+    renderAll();
+    flashStatus('Running at $' + this.hex4(addr));
+    run();
+  }
+};
+
+function enterWoz() {
+  state.exampleMode = true; state.inWoz = true;
+  document.getElementById('lbTitle').textContent = 'Woz Monitor';
+  document.getElementById('lbConcept').textContent = 'Tiny interactive shell — same commands as the Apple 1 ROM';
+  document.getElementById('lbContent').innerHTML = `
+    <p>The original Apple 1 had a 256-byte ROM Wozniak wrote himself, called the <b>Woz Monitor</b>. It gives the user three commands:</p>
+    <ul>
+      <li><b>0: 12 34 56</b> — deposit bytes 12 34 56 starting at address 0</li>
+      <li><b>0. 12 34 56</b> — examine memory starting at 0 (read those bytes)</li>
+      <li><b>0R</b> — run program at address 0 (sets PC and exits the monitor)</li>
+    </ul>
+    <p>Type a command in the keyboard box on the right and press <kbd>Enter</kbd>. The monitor prints <code>\\</code> when it is ready for input.</p>
+    <p><i>(This simulator uses a JavaScript re-implementation of the monitor; the original 256-byte ROM is still loaded at $FF00 if you want to inspect it.)</i></p>
+  `;
+  document.getElementById('editor').value = `; Woz Monitor (re-implemented in JavaScript). Type commands in the keyboard on the right.`;
+  document.getElementById('wozBanner').style.display = '';
+  state.screen = ''; state.errors = []; state.breakpoints.clear();
+  state.keyBuffer = [];
+  // Reset monitor state
+  wozMon.reset();
+  wozMon.prompt();
+  renderAll();
+  renderScreen();
+}
+document.getElementById('btnExitWoz').addEventListener('click', () => {
+  state.inWoz = false;
+  stopRun();
+  state.cpu.PC = 0x300;
+  state.cpu.SP = 0xFD;
+  document.getElementById('wozBanner').style.display = 'none';
+  renderAll();
+});
+
+// ----- Editor / syntax highlight -----
+const editor = document.getElementById('editor');
+const gutter = document.getElementById('gutter');
+const highlight = document.getElementById('highlight');
+
+function syncEditor() {
+  gutter.innerHTML = editor.value.split('\n').map((_, i) => `<span class="ln">${i+1}</span>`).join('');
+  highlight.innerHTML = highlightAsm(editor.value);
+  highlight.scrollTop = editor.scrollTop;
+  gutter.scrollTop = editor.scrollTop;
+}
+editor.addEventListener('input', syncEditor);
+editor.addEventListener('scroll', () => {
+  highlight.scrollTop = editor.scrollTop;
+  gutter.scrollTop = editor.scrollTop;
+});
+editor.addEventListener('keydown', (e) => {
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const s = editor.selectionStart, en = editor.selectionEnd;
+    editor.setRangeText('    ', s, en, 'end');
+    syncEditor();
+  }
+  if ((e.metaKey||e.ctrlKey) && e.key.toLowerCase() === 'b') { e.preventDefault(); assemble(); }
+  if (e.key === 'F5') { e.preventDefault(); run(); }
+  if (e.key === 'F8') { e.preventDefault(); step(); }
+});
+
+function highlightAsm(src) {
+  const esc = (s) => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const out = [];
+  for (const line of src.split('\n')) {
+    const noCmt = line.replace(/[;].*$/, '').replace(/\/\/.*$/, '');
+    const cmt = line.slice(noCmt.length);
+    let label = '';
+    const lm = noCmt.match(/^(\s*)([A-Za-z_][A-Za-z0-9_]*)\s*:/);
+    if (lm) { label = esc(lm[1]) + '<span style="color:#ffcb6b">' + esc(lm[2]) + '</span>:'; }
+    const rest = lm ? noCmt.slice(lm[0].length) : noCmt;
+    const tm = rest.match(/^(\s*)([A-Za-z_.]+)\b(.*)$/);
+    if (tm) {
+      const mne = tm[2].toUpperCase();
+      const isDir = ['ORG','EQU','DB','DW','DS','END','INCLUDE','DEFB','DEFM','DEFW','BYTE','WORD'].includes(mne);
+      const col = isDir ? '#7ee787' : '#ffb86c';
+      const restEsc = esc(tm[3]).replace(
+        /\b([0-9]+\$|\$[0-9a-fA-F]+|0x[0-9a-fA-F]+|%[01]+|'(.)'|<[A-Z_]+|>[A-Z_]+)\b/g,
+        '<span style="color:#c1f0c9">$1</span>'
+      );
+      out.push(label + esc(tm[1]) + `<span style="color:${col}">${esc(tm[2])}</span>` + restEsc + `<span style="color:#5a6577">${esc(cmt)}</span>`);
+    } else {
+      out.push(esc(line));
+    }
+  }
+  return out.join('\n');
+}
+
+// ----- Assemble / load -----
+document.getElementById('btnAssemble').addEventListener('click', assemble);
+function assemble() {
+  stopRun();
+  const src = editor.value;
+  const result = state.asm.assemble(src, 0x0300);
+  state.lastAsmOk = result.ok;
+  state.listings = result.listings;
+  state.errors = result.errors;
+  if (result.ok) {
+    let addr = result.org;
+    for (const item of result.listings) for (const b of item.bytes) state.cpu.write(addr++, b);
+    state.cpu.PC = result.org;
+    state.cpu.SP = 0xFD;
+    // Reset vectors: keep Woz Monitor at $FFFC
+    state.cpu.mem[0xFFFC] = 0x00;
+    state.cpu.mem[0xFFFD] = 0xFF;
+    state.cpu.breakpoints = new Set(state.breakpoints);
+    flashStatus(`Assembled ${result.output.length} bytes`);
+  } else {
+    flashStatus(`Assembly failed: ${result.errors.length} error(s)`, true);
+  }
+  renderErrors();
+  renderListing();
+  renderAll();
+}
+
+// ----- CPU controls -----
+document.getElementById('btnStep').addEventListener('click', step);
+document.getElementById('btnStep2').addEventListener('click', step);
+document.getElementById('btnRun').addEventListener('click', run);
+document.getElementById('btnRun2').addEventListener('click', run);
+document.getElementById('btnStop').addEventListener('click', stopRun);
+document.getElementById('btnReset').addEventListener('click', () => { stopRun(); resetCPU(); renderAll(); });
+document.getElementById('btnReset2').addEventListener('click', () => { stopRun(); resetCPU(); renderAll(); });
+document.getElementById('btnCheck').addEventListener('click', checkLesson);
+document.getElementById('btnHint').addEventListener('click', showHint);
+
+function resetCPU() {
+  state.cpu.PC = 0x300; state.cpu.SP = 0xFD; state.cpu.P = 0x24;
+  state.cpu.A = state.cpu.X = state.cpu.Y = 0;
+  state.screen = ''; renderScreen();
+  // Woz vectors
+  loadWozMonitor(state.cpu);
+}
+
+function step() {
+  try {
+    if (!state.lastAsmOk) { assemble(); if (!state.lastAsmOk) return; }
+    state.cpu.step();
+    renderAll();
+  } catch (e) { flashStatus(e.message, true); }
+}
+
+function run() {
+  if (state.inWoz) { flashStatus('In the Woz Monitor — use "ADDR R" or Exit first'); return; }
+  if (!state.lastAsmOk) { assemble(); if (!state.lastAsmOk) return; }
+  if (state.running) return;
+  state.running = true;
+  state.cpu.trace.length = 0;   // stale trace entries would trigger the halt detector instantly
+  const speed = +document.getElementById('speed').value;
+  document.getElementById('speedMeta').textContent = `Speed: ${speed} Hz`;
+  const period = Math.max(1, Math.floor(1000 / speed));
+  const maxSteps = Math.max(1, Math.floor(speed / 60));
+  state.runTimer = setInterval(() => {
+    try {
+      for (let i = 0; i < maxSteps; i++) {
+        // Detect "JMP DONE" infinite loop as user-halt pattern:
+        // if the last 5 executed PCs are identical, the program is
+        // spinning in place — treat it as a halt.
+        if (state.cpu.trace.length >= 5) {
+          const t = state.cpu.trace;
+          const last = t[t.length-1].pc;
+          if (t.slice(-5).every(e => e.pc === last)) {
+            stopRun();
+            flashStatus(`Reached JMP DONE infinite loop`);
+            return;
+          }
+        }
+        state.cpu.step();
+      }
+      renderAll();
+    } catch (e) { stopRun(); flashStatus(e.message, true); }
+  }, period);
+}
+
+function stopRun() {
+  state.running = false;
+  if (state.runTimer) { clearInterval(state.runTimer); state.runTimer = null; }
+}
+
+// ----- Lesson check -----
+function checkLesson() {
+  if (state.exampleMode) { flashStatus('Examples are not auto-checked — just run and observe.'); return; }
+  if (!state.lastAsmOk) assemble();
+  if (!state.lastAsmOk) { flashStatus('Fix assembly errors first'); return; }
+  // Reset and run
+  state.cpu.PC = state.listings[0].addr;
+  state.cpu.SP = 0xFD; state.cpu.P = 0x24;
+  state.cpu.A = state.cpu.X = state.cpu.Y = 0;
+  try { state.cpu.run(500000); } catch (e) { flashStatus(e.message, true); return; }
+  renderAll();
+  const lesson = LESSONS[state.currentLesson];
+  const sim = { screen: state.screen };
+  const res = lesson.check(state.cpu, sim);
+  if (res.ok) {
+    state.completed.add(state.currentLesson);
+    flashOk(res.message + ' — lesson complete! Move on to the next one.');
+    renderLessonList();
+  } else {
+    flashStatus(res.message, true);
+  }
+}
+
+function showHint() {
+  if (state.exampleMode) { flashStatus('This is an example — no hints.'); return; }
+  const l = LESSONS[state.currentLesson];
+  const used = l._hintIdx || 0;
+  const h = l.hints[used] || l.hints[l.hints.length-1];
+  l._hintIdx = Math.min(l.hints.length - 1, used + 1);
+  const box = document.createElement('div');
+  box.className = 'hint';
+  box.textContent = '💡 ' + h;
+  document.getElementById('lbContent').appendChild(box);
+}
+
+// ----- Tabs -----
+document.querySelectorAll('.trace .tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.trace .tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    renderTraceBody(t.dataset.tab);
+  });
+});
+
+function renderListing() {
+  if (!state.listings.length) {
+    document.getElementById('listingPre').textContent = 'No listing yet — click "Assemble" to compile your program.';
+    return;
+  }
+  const out = [];
+  for (const l of state.listings) {
+    const addr = l.addr.toString(16).padStart(4,'0');
+    const bytes = l.bytes.map(b => b.toString(16).padStart(2,'0')).join(' ').padEnd(10, ' ');
+    const src = (l.source || '').trim();
+    out.push(`<span class="l"><span class="ln">${l.line}</span>  <span class="addr clickable" data-addr="${l.addr}">$${addr}</span>  <span class="bytes">${bytes}</span>  <span class="src">${escapeHtml(src)}</span></span>`);
+  }
+  document.getElementById('listingPre').innerHTML = out.join('\n');
+  document.querySelectorAll('#listingPre .addr.clickable').forEach(el => {
+    el.addEventListener('click', (e) => {
+      const addr = parseInt(el.dataset.addr, 10);
+      if (e.shiftKey) {
+        state.cpu.PC = addr;
+        flashStatus(`PC set to $${addr.toString(16).padStart(4,'0')}`);
+      } else if (state.breakpoints.has(addr)) {
+        state.breakpoints.delete(addr); state.cpu.breakpoints = new Set(state.breakpoints);
+      } else {
+        state.breakpoints.add(addr); state.cpu.breakpoints = new Set(state.breakpoints);
+      }
+      renderAll();
+    });
+  });
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderTraceBody(tab) {
+  const body = document.getElementById('traceBody');
+  if (tab === 'listing') {
+    body.className = 'body listing';
+    renderListing();
+  } else if (tab === 'trace') {
+    body.className = 'body';
+    if (state.cpu.trace.length === 0) {
+      body.innerHTML = '<pre style="color:#5a6577">No trace yet — run or step the program.</pre>';
+      return;
+    }
+    const lines = state.cpu.trace.slice(-300).map(t =>
+      `PC=$${t.pc.toString(16).padStart(4,'0')}  A=$${(t.a||0).toString(16).padStart(2,'0')} X=$${(t.x||0).toString(16).padStart(2,'0')} Y=$${(t.y||0).toString(16).padStart(2,'0')} P=$${(t.p||0).toString(16).padStart(2,'0')} (${t.tStates} t)`
+    );
+    body.innerHTML = '<pre>' + lines.join('\n') + '</pre>';
+  } else if (tab === 'help') {
+    body.className = 'body';
+    body.innerHTML = `<pre style="color:#8a96a8">
+Apple 1 Lab — quick help
+
+  Editor    — Type 6502 assembly. Click "Assemble" (Ctrl+B) to compile.
+  Step      — Execute one instruction at a time (F8).
+  Run       — Run at the chosen speed (F5). Stops on the 'JMP  infinite-loop
+              pattern that lessons use as a halt.
+  Stop      — Halt a running program.
+  Reset     — Restart CPU from $0300 and clear the screen.
+  Check     — Run the current lesson to its halt, then auto-grade it.
+  Woz Mon.  — In the Examples list, choose "Woz Monitor" to drop into the
+              original 256-byte ROM. Type commands like
+                0: A9 00 8D 10 D0
+                0R
+              in the keyboard box and press Enter.
+
+  Listing   — Compiled bytes. Click an address to toggle a breakpoint.
+  Trace     — Recent PCs the CPU has executed.
+  Memory    — PC and SP are colored. CR (\r=0x0D) is the Apple 1 newline.
+
+Number formats accepted by the assembler:
+  42        decimal
+  $2A       hexadecimal (Woz style)
+  0x2A      hexadecimal (C style)
+  %00101010 binary
+  'A'       ASCII code for A (65)
+  <LABEL    low byte of LABEL\'s address
+  >LABEL    high byte of LABEL\'s address
+
+Tips for beginners:
+  1. Programs typically start with ORG $300 and end with
+     DONE: JMP DONE to halt (the Woz Monitor lives in $FF00).
+  2. SBC does A = A - M - !C. Always CLC before SBC if you don\'t know.
+  3. The stack lives at $0100..$01FF. SP starts at $FD.
+  4. To write a character, LDA #'X'; STA $D010.
+</pre>`;
+  }
+}
+
+// ----- Render: registers, flags, memory, status -----
+const REG_DEFS = [['A','A'],['X','X'],['Y','Y'],['SP','SP'],['PC','PC'],['P','P']];
+const FLAG_DEFS = [['N','fN'],['V','fV'],['-','_u'],['B','_b'],['D','fD'],['I','fI'],['Z','fZ'],['C','fC']];
+
+function renderAll() {
+  renderRegs();
+  renderFlags();
+  renderMem();
+  renderBps();
+  renderScreen();
+  renderKbd();
+  renderTraceBody('listing');
+}
+
+function renderRegs() {
+  const cpu = state.cpu;
+  const html = REG_DEFS.map(([name, key]) => {
+    const v = cpu[key];
+    const hex = (name === 'PC' || name === 'SP') ? v.toString(16).padStart(4,'0') : v.toString(16).padStart(2,'0');
+    const changed = state.prevRegs[name] !== undefined && state.prevRegs[name] !== v;
+    state.prevRegs[name] = v;
+    return `<div class="r"><span class="name">${name}</span><span class="val${changed?' changed':''}">$${hex}</span></div>`;
+  }).join('');
+  document.getElementById('regs').innerHTML = html;
+}
+
+function renderFlags() {
+  const cpu = state.cpu;
+  const html = FLAG_DEFS.map(([name, key]) => {
+    let on;
+    if (key === '_u') on = true; // bit 5 is always 1
+    else if (key === '_b') on = (cpu.P & 0x10) !== 0;
+    else on = !!cpu[key];
+    return `<div class="f ${on?'on':''}"><span class="lbl">${name}</span>${on?'1':'0'}</div>`;
+  }).join('');
+  document.getElementById('flags').innerHTML = html;
+}
+
+function renderMem() {
+  const cpu = state.cpu;
+  const follow = document.getElementById('cbFollow').checked;
+  const base = follow ? (cpu.PC & 0xFFF0) : 0x0000;
+  const lines = [];
+  for (let row = 0; row < 16; row++) {
+    const addr = (base + row*16) & 0xFFFF;
+    let html = `<span class="addr">${addr.toString(16).padStart(4,'0')}:</span> `;
+    let ascii = '';
+    for (let col = 0; col < 16; col++) {
+      const a = (addr + col) & 0xFFFF;
+      const b = cpu.mem[a];
+      let cls = 'byt';
+      if (a === cpu.PC) cls += ' pc';
+      // SP region
+      const spHi = 0x0100 + cpu.SP;
+      if (a === spHi || a === ((spHi+1)&0xFFFF)) cls += ' sp';
+      html += `<span class="${cls}">${b.toString(16).padStart(2,'0')}</span> `;
+      ascii += (b>=32 && b<127) ? String.fromCharCode(b) : '.';
+    }
+    html += ` <span class="ch">|${ascii}|</span>`;
+    lines.push(`<div class="row">${html}</div>`);
+  }
+  document.getElementById('memview').innerHTML = lines.join('');
+}
+
+function renderBps() {
+  const el = document.getElementById('breakpts');
+  if (state.breakpoints.size === 0) {
+    el.innerHTML = '<span class="meta" style="opacity:.7">no breakpoints — click a listing address to add one</span>';
+    return;
+  }
+  el.innerHTML = [...state.breakpoints].sort((a,b)=>a-b).map(a =>
+    `<span class="bp" data-addr="${a}">$${a.toString(16).padStart(4,'0')} ✕</span>`).join('');
+  el.querySelectorAll('.bp').forEach(s => {
+    s.addEventListener('click', () => {
+      const a = parseInt(s.dataset.addr, 10);
+      state.breakpoints.delete(a); state.cpu.breakpoints = new Set(state.breakpoints);
+      renderBps();
+    });
+  });
+}
+
+function renderErrors() {
+  const panel = document.getElementById('errorsPanel');
+  const errEl = document.getElementById('errors');
+  if (state.errors.length === 0) { panel.style.display = 'none'; return; }
+  panel.style.display = '';
+  errEl.innerHTML = state.errors.map(e =>
+    `<div class="error">Line ${e.line}: ${escapeHtml(e.msg)}<br><span style="opacity:.6">${escapeHtml(e.source)}</span></div>`
+  ).join('');
+}
+
+function flashStatus(msg, isError=false) {
+  let el = document.getElementById('statusMsg');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'statusMsg';
+    el.style.cssText = 'position:fixed;bottom:12px;left:50%;transform:translateX(-50%);background:#1c2129;border:1px solid #2a313a;padding:6px 12px;border-radius:6px;font:12px ui-monospace,monospace;z-index:99;';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.color = isError ? 'var(--bad)' : 'var(--accent)';
+  el.style.display = 'block';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.style.display = 'none'; }, 3500);
+}
+function flashOk(msg) {
+  flashStatus(msg);
+  const el = document.getElementById('statusMsg');
+  el.style.color = 'var(--ok)';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.style.display = 'none'; }, 5000);
+}
+
+document.addEventListener('keydown', (e) => {
+  if (document.activeElement === editor) return;
+  if (e.key === 'F8') { e.preventDefault(); step(); }
+  if (e.key === 'F5') { e.preventDefault(); if (state.running) stopRun(); else run(); }
+});
+
+window.addEventListener('load', init);
+</script>
+</body>
+</html>

@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Polarização de Transistores — Aula de Eletrônica</title>
+<style>
+  :root{
+    --bg:#f5f7fb; --card:#ffffff; --ink:#1e293b; --muted:#64748b;
+    --primary:#1d4ed8; --primary-soft:#dbeafe; --accent:#f59e0b; --accent-soft:#fef3c7;
+    --ok:#10b981; --ok-soft:#d1fae5; --danger:#ef4444; --danger-soft:#fee2e2;
+    --warn:#f59e0b; --warn-soft:#fef3c7; --line:#e2e8f0; --code:#0f172a;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       background:var(--bg); color:var(--ink); line-height:1.65; font-size:16px;}
+  header.hero{background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 60%,#1d4ed8 100%);
+       color:#fff; padding:56px 24px 48px; text-align:center;}
+  header.hero h1{font-size:2.2rem; letter-spacing:-.02em; margin-bottom:10px;}
+  header.hero p{max-width:720px; margin:0 auto; color:#cbd5e1; font-size:1.05rem;}
+  .badge{display:inline-block; background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.3);
+       padding:4px 14px; border-radius:999px; font-size:.8rem; margin-bottom:16px; letter-spacing:.05em;}
+  main{max-width:980px; margin:0 auto; padding:32px 20px 64px;}
+  nav.toc{background:var(--card); border:1px solid var(--line); border-radius:14px;
+       padding:18px 22px; margin:-40px auto 32px; max-width:980px; box-shadow:0 8px 24px rgba(15,23,42,.08);
+       display:flex; flex-wrap:wrap; gap:8px 20px; position:relative;}
+  nav.toc a{color:var(--primary); text-decoration:none; font-size:.92rem; font-weight:600;}
+  nav.toc a:hover{text-decoration:underline;}
+  nav.toc strong{font-size:.92rem; color:var(--muted); width:100%;}
+  section{background:var(--card); border:1px solid var(--line); border-radius:16px;
+       padding:28px 28px 32px; margin-bottom:28px; box-shadow:0 2px 10px rgba(15,23,42,.04);}
+  h2{font-size:1.45rem; margin-bottom:14px; display:flex; align-items:center; gap:12px;}
+  h2 .num{background:var(--primary); color:#fff; width:34px; height:34px; border-radius:10px;
+       display:inline-flex; align-items:center; justify-content:center; font-size:1rem; flex:0 0 auto;}
+  h3{font-size:1.1rem; margin:22px 0 10px; color:#0f172a;}
+  p{margin-bottom:12px;}
+  ul, ol{margin:0 0 14px 22px;}
+  li{margin-bottom:6px;}
+  .card-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:16px; margin:16px 0;}
+  .mini{background:#f8fafc; border:1px solid var(--line); border-radius:12px; padding:16px;}
+  .mini h4{font-size:.98rem; margin-bottom:6px; display:flex; align-items:center; gap:8px;}
+  .dot{width:12px; height:12px; border-radius:50%; display:inline-block;}
+  .dot.off{background:#94a3b8;} .dot.on{background:var(--ok);} .dot.sat{background:var(--danger);}
+  .mini p{font-size:.9rem; margin:0; color:var(--muted);}
+  table{width:100%; border-collapse:collapse; margin:14px 0; font-size:.93rem;}
+  th,td{border:1px solid var(--line); padding:9px 12px; text-align:left; vertical-align:top;}
+  th{background:#f1f5f9;}
+  tr:nth-child(even) td{background:#fafcff;}
+  .formula{background:var(--code); color:#e2e8f0; border-radius:10px; padding:14px 18px;
+       font-family:"SF Mono",SFMono-Regular,Menlo,Consolas,monospace; font-size:.92rem;
+       margin:12px 0; overflow-x:auto; line-height:1.9;}
+  .formula .lbl{color:#7dd3fc;} .formula .res{color:#fbbf24;}
+  .note{border-left:4px solid var(--accent); background:var(--accent-soft); border-radius:0 10px 10px 0;
+       padding:12px 16px; margin:14px 0; font-size:.93rem;}
+  .note.tip{border-color:var(--ok); background:var(--ok-soft);}
+  .note.warn{border-color:var(--danger); background:var(--danger-soft);}
+  .note b.tag{display:block; margin-bottom:4px; letter-spacing:.04em; font-size:.8rem; text-transform:uppercase;}
+  figure{margin:18px 0; text-align:center;}
+  figure .figbox{background:#0f172a; border-radius:14px; display:inline-block; padding:18px; max-width:100%; overflow-x:auto;}
+  figure svg{max-width:100%; height:auto; display:block; margin:0 auto;}
+  figcaption{margin-top:10px; font-size:.88rem; color:var(--muted); font-style:italic;}
+  .diagram-label{fill:#93c5fd; font:600 13px -apple-system,Segoe UI,sans-serif;}
+  .diagram-wire{stroke:#e2e8f0; stroke-width:2; fill:none;}
+  .diagram-res{stroke:#fbbf24; stroke-width:2.5; fill:none;}
+  .diagram-trans{stroke:#34d399; stroke-width:3; fill:none;}
+  .diagram-bar{fill:#34d399;}
+  .diagram-text{fill:#f8fafc; font:700 12px -apple-system,Segoe UI,sans-serif;}
+  .diagram-soft{fill:#64748b; font:600 11px -apple-system,Segoe UI,sans-serif;}
+  .chip{display:inline-block; padding:2px 10px; border-radius:999px; font-size:.8rem; font-weight:700;}
+  .chip.ok{background:var(--ok-soft); color:#047857;}
+  .chip.bad{background:var(--danger-soft); color:#b91c1c;}
+  .chip.mid{background:var(--warn-soft); color:#b45309;}
+  .calc{background:#f8fafc; border:2px dashed var(--primary); border-radius:14px; padding:20px; margin:18px 0;}
+  .calc h3{margin-top:0; color:var(--primary);}
+  .calc .fields{display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:12px; margin-bottom:14px;}
+  .calc label{font-size:.82rem; font-weight:700; color:var(--muted); display:block; margin-bottom:4px;}
+  .calc input{width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:8px;
+       font-size:.95rem; font-family:inherit; background:#fff;}
+  .calc button{background:var(--primary); color:#fff; border:none; border-radius:10px; padding:10px 22px;
+       font-size:.95rem; font-weight:700; cursor:pointer;}
+  .calc button:hover{background:#1e40af;}
+  .calc .out{margin-top:14px; font-size:.95rem;}
+  .calc .out .row{display:flex; justify-content:space-between; border-bottom:1px dashed var(--line); padding:6px 2px;}
+  .calc .out .row span:last-child{font-weight:700; font-family:Menlo,Consolas,monospace;}
+  details.exercise{border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin-bottom:12px; background:#fafcff;}
+  details.exercise summary{font-weight:700; cursor:pointer; color:#0f172a;}
+  details.exercise .sol{margin-top:12px; font-size:.93rem; color:#334155;}
+  details.exercise .sol .formula{font-size:.85rem;}
+  footer{text-align:center; color:var(--muted); font-size:.85rem; padding:24px;}
+  .two-col{display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:start;}
+  @media (max-width:760px){ .two-col{grid-template-columns:1fr;} section{padding:20px 18px 24px;} }
+  @media print{
+    body{background:#fff;} nav.toc,.calc button{display:none;}
+    section{box-shadow:none; break-inside:avoid;}
+    figure .figbox{background:#fff;} .diagram-wire{stroke:#000;}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="badge">ELETRÔNICA • DISPOSITIVOS SEMICONDUTORES</span>
+  <h1>Polarização de Transistores</h1>
+  <p>Como configurar o ponto de operação (ponto Q) do transistor bipolar para que ele
+  amplifique sem distorção — diagramas, fórmulas passo a passo e calculadoras interativas.</p>
+</header>
+
+<main>
+
+<nav class="toc" aria-label="Sumário">
+  <strong>Sumário:</strong>
+  <a href="#basico">1. Recapitulando o BJT</a>
+  <a href="#regioes">2. Regiões de operação</a>
+  <a href="#carga">3. Reta de carga DC</a>
+  <a href="#polarizacao">4. Métodos de polarização</a>
+  <a href="#divisor">5. Divisor de tensão (o mais usado)</a>
+  <a href="#comparacao">6. Comparação dos métodos</a>
+  <a href="#fet">7. Olhando de lado: FET</a>
+  <a href="#exercicios">8. Exercícios</a>
+</nav>
+
+<!-- ================= 1. RECAP ================= -->
+<section id="basico">
+  <h2><span class="num">1</span> Recapitulando o Transistor Bipolar (BJT)</h2>
+  <p>O transistor é um dispositivo de <b>3 terminais</b> e <b>2 junções</b>. Para polarizá-lo corretamente,
+  precisamos saber qual é a função de cada terminal:</p>
+  <div class="two-col">
+    <div>
+      <ul>
+        <li><b>Emissor (E)</b> — "emite" portadores. No NPN, a seta aponta <i>para fora</i>. Carrega a maior corrente (I<sub>E</sub>).</li>
+        <li><b>Base (B)</b> — "controla" o transistor. A corrente I<sub>B</sub> é pequena e controla tudo.</li>
+        <li><b>Coletor (C)</b> — "colete" os portadores que passaram pelo transistor. Corrente I<sub>C</sub> ≈ I<sub>E</sub>.</li>
+      </ul>
+      <p>Relações de ouro para o BJT em pequena sinal:</p>
+      <div class="formula">
+        <span class="lbl">I<sub>C</sub> = β · I<sub>B</sub></span>&nbsp;&nbsp;(β = h<sub>FE</sub>, tipicamente 50 a 300)<br>
+        <span class="lbl">I<sub>E</sub> ≈ I<sub>C</sub> + I<sub>B</sub></span> ≈ I<sub>C</sub>
+      </div>
+      <div class="note tip"><b class="tag">Regra prática</b>
+      A junção base-emissor se comporta como um diodo: <b>V<sub>BE</sub> ≈ 0,7 V</b> (silício) quando a junção está polarizada diretamente.</div>
+    </div>
+    <figure>
+      <div class="figbox">
+      <svg viewBox="0 0 380 200" width="380" role="img" aria-label="Símbolos do transistor NPN e PNP">
+        <!-- NPN -->
+        <line x1="20" y1="100" x2="96" y2="100" class="diagram-wire"/>
+        <rect x="96" y="40" width="8" height="120" class="diagram-bar"/>
+        <line x1="104" y1="55" x2="150" y2="25" class="diagram-trans"/>
+        <line x1="150" y1="25" x2="150" y2="10" class="diagram-wire"/>
+        <line x1="104" y1="145" x2="150" y2="175" class="diagram-trans"/>
+        <polygon points="150,175 131.8,173.7 141.7,158.7" fill="#34d399"/>
+        <text x="8" y="105" class="diagram-label">B</text>
+        <text x="156" y="22" class="diagram-label">C</text>
+        <text x="156" y="192" class="diagram-label">E</text>
+        <text x="85" y="198" class="diagram-soft" text-anchor="middle">NPN (seta pra fora)</text>
+        <!-- PNP -->
+        <line x1="180" y1="100" x2="256" y2="100" class="diagram-wire"/>
+        <rect x="256" y="40" width="8" height="120" class="diagram-bar"/>
+        <line x1="264" y1="55" x2="310" y2="25" class="diagram-trans"/>
+        <line x1="310" y1="25" x2="310" y2="10" class="diagram-wire"/>
+        <line x1="264" y1="145" x2="310" y2="175" class="diagram-trans"/>
+        <polygon points="288,160 290.4,176.3 300.3,161.3" fill="#34d399"/>
+        <text x="168" y="105" class="diagram-label">B</text>
+        <text x="316" y="22" class="diagram-label">C</text>
+        <text x="316" y="192" class="diagram-label">E</text>
+        <text x="245" y="198" class="diagram-soft" text-anchor="middle">PNP (seta pra dentro)</text>
+      </svg>
+      </div>
+      <figcaption>Símbolos do BJT. A seta no emissor mostra o sentido convencional da corrente de emissor: no NPN ela aponta para fora, no PNP para dentro.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ================= 2. REGIÕES ================= -->
+<section id="regioes">
+  <h2><span class="num">2</span> Regiões de operação do BJT</h2>
+  <p>Dependendo de como a tensão V<sub>CE</sub> e a corrente I<sub>B</sub> se comportam,
+  o transistor opera em uma de três regiões. <b>O Amplificador Linear pede a região ativa.</b></p>
+  <div class="card-grid">
+    <div class="mini">
+      <h4><span class="dot off"></span> Corte</h4>
+      <p>V<sub>BE</sub> &lt; 0,7 V (NPN). Nenhuma corrente flui: I<sub>C</sub> ≈ 0 e V<sub>CE</sub> ≈ V<sub>CC</sub>.
+      Comporta-se como um <b>interruptor aberto</b> — chave desligada.</p>
+    </div>
+    <div class="mini">
+      <h4><span class="dot on"></span> Ativa (região linear)</h4>
+      <p>V<sub>BE</sub> ≈ 0,7 V e V<sub>CE</sub> &gt; V<sub>CE(sat)</sub>. I<sub>C</sub> = β·I<sub>B</sub>.
+      É aqui que o transistor <b>amplifica</b>: a base "governa" o coletor.</p>
+    </div>
+    <div class="mini">
+      <h4><span class="dot sat"></span> Saturação</h4>
+      <p>I<sub>B</sub> grande demais: V<sub>CE(sat)</sub> ≈ 0,2 V, o coletor fica quase curto com o emissor.
+      O transistor age como <b>interruptor fechado</b> (chave ligada).</p>
+    </div>
+  </div>
+  <table>
+    <tr><th>Região</th><th>Junção B-E</th><th>Junção B-C</th><th>I<sub>C</sub></th><th>V<sub>CE</sub></th><th>Aplicação típica</th></tr>
+    <tr><td><b>Corte</b></td><td>inversamente polarizada</td><td>inversamente polarizada</td><td>≈ 0</td><td>≈ V<sub>CC</sub></td><td>Chave desligada, lógica "0"/"1"</td></tr>
+    <tr><td><b>Ativa</b></td><td>diretamente polarizada</td><td>inversamente polarizada</td><td>β · I<sub>B</sub></td><td>entre 0,2 V e V<sub>CC</sub></td><td>Amplificadores</td></tr>
+    <tr><td><b>Saturação</b></td><td>diretamente polarizada</td><td>diretamente polarizada</td><td>limitada por R<sub>C</sub></td><td>≈ 0,2 V</td><td>Chave ligada, drivers</td></tr>
+  </table>
+  <div class="note"><b class="tag">Ideia central da aula</b>
+  <b>Polarizar</b> um transistor = escolher as resistências do circuito para que, <u>em repouso (sem sinal de entrada)</u>,
+  o ponto Q fique bem no <b>meio da reta de carga</b>, na região ativa. Assim o sinal pode "crescer" e
+  "diminuir" sem bater nos extremos (corte/saturação) — evitando distorção.</div>
+</section>
+
+<!-- ================= 3. RETA DE CARGA ================= -->
+<section id="carga">
+  <h2><span class="num">3</span> Reta de carga DC e o ponto Q</h2>
+  <p>O par (V<sub>CE</sub>, I<sub>C</sub>) não pode ser qualquer coisa: é limitado pela malha do coletor,
+  descrita pela lei de Kirchhoff:</p>
+  <div class="formula">V<sub>CC</sub> = I<sub>C</sub>·R<sub>C</sub> + V<sub>CE</sub>&nbsp;&nbsp;&nbsp;⇒&nbsp;&nbsp;&nbsp;I<sub>C</sub> = (V<sub>CC</sub> − V<sub>CE</sub>)/R<sub>C</sub></div>
+  <p>Plotando essa reta no gráfico I<sub>C</sub> × V<sub>CE</sub>, obtemos os dois extremos:</p>
+  <ul>
+    <li><b>Ponto de saturação:</b> V<sub>CE</sub> ≈ 0 → I<sub>C(sat)</sub> = V<sub>CC</sub>/R<sub>C</sub> (máxima corrente)</li>
+    <li><b>Ponto de corte:</b> I<sub>C</sub> = 0 → V<sub>CE</sub> = V<sub>CC</sub> (máxima tensão)</li>
+  </ul>
+  <figure>
+    <div class="figbox">
+    <svg viewBox="0 0 360 260" width="360" role="img" aria-label="Gráfico da reta de carga DC">
+      <line x1="60" y1="210" x2="330" y2="210" class="diagram-wire"/>
+      <line x1="60" y1="210" x2="60" y2="20" class="diagram-wire"/>
+      <line x1="330" y1="210" x2="322" y2="204" class="diagram-wire"/>
+      <line x1="330" y1="210" x2="322" y2="216" class="diagram-wire"/>
+      <line x1="60" y1="20" x2="54" y2="28" class="diagram-wire"/>
+      <line x1="60" y1="20" x2="66" y2="28" class="diagram-wire"/>
+      <text x="318" y="235" class="diagram-label">V<tspan dy="3" font-size="9">CE</tspan><tspan dy="-3"> (V)</tspan></text>
+      <text x="18" y="60" class="diagram-label">I<tspan dy="3" font-size="9">C</tspan><tspan dy="-3"> (mA)</tspan></text>
+      <!-- reta de carga -->
+      <line x1="60" y1="80" x2="310" y2="210" class="diagram-res"/>
+      <text x="150" y="118" class="diagram-res" fill="#fbbf24">reta de carga</text>
+      <!-- extremos -->
+      <circle cx="60" cy="80" r="5" fill="#ef4444"/>
+      <text x="14" y="84" class="diagram-soft">ICsat = VCC/RC</text>
+      <text x="14" y="98" class="diagram-soft">(saturação)</text>
+      <circle cx="310" cy="210" r="5" fill="#94a3b8"/>
+      <text x="258" y="230" class="diagram-soft">VCC (corte)</text>
+      <!-- ponto Q -->
+      <circle cx="185" cy="145" r="6" fill="#34d399"/>
+      <line x1="60" y1="145" x2="185" y2="145" stroke="#34d399" stroke-width="1.5" stroke-dasharray="5 4"/>
+      <line x1="185" y1="145" x2="185" y2="210" stroke="#34d399" stroke-width="1.5" stroke-dasharray="5 4"/>
+      <text x="194" y="138" class="diagram-trans" fill="#34d399" font-size="14" font-weight="700">Q</text>
+      <text x="172" y="196" class="diagram-soft">VCEQ</text>
+      <text x="66" y="140" class="diagram-soft">ICQ</text>
+    </svg>
+    </div>
+    <figcaption>A reta de carga conecta os pontos de saturação e de corte. O ponto Q (ponto de operação em repouso) deve ficar próximo do meio, na região ativa.</figcaption>
+  </figure>
+  <p>Se o ponto Q "chamar" para cima → saturação no sinal positivo; se "chamar" para baixo → corte no sinal negativo.
+  Em ambos os casos, o amplificador <b>distorce</b>.</p>
+</section>
+
+<!-- ================= 4. MÉTODOS ================= -->
+<section id="polarizacao">
+  <h2><span class="num">4</span> Métodos de polarização</h2>
+  <p>A evolução dos circuitos de polarização foi uma busca por <b>estabilidade</b>:
+  manter o ponto Q praticamente no mesmo lugar mesmo com variação de β (cada transistor tem um β diferente)
+  e com mudanças de temperatura (β aumenta com o calor).</p>
+
+  <h3>4.1 Polarização fixa (a mais simples)</h3>
+  <div class="two-col">
+    <figure>
+      <div class="figbox">
+      <svg viewBox="0 0 300 300" width="280" role="img" aria-label="Circuito de polarização fixa com NPN">
+        <line x1="70" y1="30" x2="230" y2="30" class="diagram-wire"/>
+        <text x="138" y="20" class="diagram-label">+ VCC</text>
+        <!-- RB -->
+        <line x1="80" y1="30" x2="80" y2="62" class="diagram-wire"/>
+        <polyline points="80,62 74,68 86,74 74,80 86,86 74,92 80,98" class="diagram-res"/>
+        <line x1="80" y1="98" x2="80" y2="150" class="diagram-wire"/>
+        <text x="48" y="82" class="diagram-label">RB</text>
+        <!-- RC -->
+        <line x1="190" y1="30" x2="190" y2="55" class="diagram-wire"/>
+        <polyline points="190,55 184,61 196,67 184,73 196,79 184,85 190,91" class="diagram-res"/>
+        <line x1="190" y1="91" x2="190" y2="103" class="diagram-wire"/>
+        <text x="204" y="74" class="diagram-label">RC</text>
+        <!-- base lead -->
+        <line x1="80" y1="150" x2="150" y2="150" class="diagram-wire"/>
+        <text x="100" y="143" class="diagram-label">B</text>
+        <!-- transistor -->
+        <rect x="150" y="125" width="8" height="50" class="diagram-bar"/>
+        <line x1="158" y1="135" x2="190" y2="103" class="diagram-trans"/>
+        <text x="198" y="98" class="diagram-label">C</text>
+        <line x1="158" y1="155" x2="190" y2="187" class="diagram-trans"/>
+        <polygon points="190,187 172.7,183.7 184.7,167.7" fill="#34d399"/>
+        <line x1="190" y1="187" x2="190" y2="240" class="diagram-wire"/>
+        <text x="198" y="200" class="diagram-label">E</text>
+        <!-- ground -->
+        <line x1="178" y1="240" x2="202" y2="240" class="diagram-wire"/>
+        <line x1="182" y1="246" x2="198" y2="246" class="diagram-wire"/>
+        <line x1="186" y1="252" x2="194" y2="252" class="diagram-wire"/>
+        <circle cx="80" cy="30" r="3" fill="#e2e8f0"/>
+        <circle cx="190" cy="30" r="3" fill="#e2e8f0"/>
+      </svg>
+      </div>
+      <figcaption>Polarização fixa: um único R<sub>B</sub> entre V<sub>CC</sub> e a base.</figcaption>
+    </figure>
+    <div>
+      <div class="formula">
+        <span class="lbl">I<sub>B</sub></span> = (V<sub>CC</sub> − 0,7 V)/R<sub>B</sub><br>
+        <span class="lbl">I<sub>C</sub></span> = β · I<sub>B</sub><br>
+        <span class="lbl">V<sub>CE</sub></span> = V<sub>CC</sub> − I<sub>C</sub>·R<sub>C</sub>
+      </div>
+      <p><span class="chip ok">Vantagem</span> Só 2 resistores, simples de calcular.</p>
+      <p><span class="chip bad">Problema</span> I<sub>B</sub> (e portanto I<sub>C</sub>) depende <b>diretamente de β</b>.
+      Trocar o transistor pelo lote seguinte pode mudar o ponto Q em 200–300%.
+      <u>Usada apenas em chaveamento e circuitos didáticos.</u></p>
+    </div>
+  </div>
+
+  <div class="calc">
+    <h3>🧮 Calculadora — polarização fixa</h3>
+    <p style="font-size:.9rem;color:var(--muted)">Digite os valores e clique em calcular. As resistências são em <b>kΩ</b>.</p>
+    <div class="fields">
+      <div><label for="fVCC">VCC (V)</label><input id="fVCC" type="number" step="0.1" value="12"></div>
+      <div><label for="fRB">RB (kΩ)</label><input id="fRB" type="number" step="any" value="240"></div>
+      <div><label for="fRC">RC (kΩ)</label><input id="fRC" type="number" step="any" value="1.8"></div>
+      <div><label for="fBeta">β (hFE)</label><input id="fBeta" type="number" step="any" value="100"></div>
+    </div>
+    <button onclick="calcFixed()">Calcular</button>
+    <div class="out" id="outFixed"></div>
+  </div>
+
+  <h3>4.2 Polarização com realimentação de emissor</h3>
+  <p>Acrescenta um resistor R<sub>E</sub> entre o emissor e o terra (o circuito anterior com um R<sub>E</sub> "pendurado" no emissor).
+  Se a corrente crescer, V<sub>E</sub> = I<sub>E</sub>·R<sub>E</sub> sobe, a tensão na base relativa ao emissor cai,
+  e I<sub>B</sub> diminui — <b>um efeito autorregulador</b> (feedback negativo).</p>
+  <div class="formula">
+    I<sub>B</sub> = (V<sub>CC</sub> − 0,7 V)/(R<sub>B</sub> + β·R<sub>E</sub>)<br>
+    I<sub>C</sub> = β · I<sub>B</sub>&nbsp;&nbsp;&nbsp; V<sub>CE</sub> = V<sub>CC</sub> − I<sub>C</sub>·(R<sub>C</sub> + R<sub>E</sub>)
+  </div>
+  <div class="note tip"><b class="tag">Regra dos 10%</b>
+  Projete para <b>V<sub>E</sub> ≈ 0,1 · V<sub>CC</sub></b>. Ex.: com V<sub>CC</sub> = 10 V, escolha R<sub>E</sub> para que V<sub>E</sub> ≈ 1 V.
+  Quanto maior V<sub>E</sub>, mais estável o ponto Q (e mais "folga" de tensão para o sinal).</div>
+</section>
+
+<!-- ================= 5. DIVISOR ================= -->
+<section id="divisor">
+  <h2><span class="num">5</span> Polarização por divisor de tensão <span class="chip ok">padrão da indústria</span></h2>
+  <p>Substitui o R<sub>B</sub> por <b>dois resistores em cascata</b> (R<sub>1</sub> de V<sub>CC</sub> até a base,
+  R<sub>2</sub> da base até o terra) — um divisor de tensão — e usa o R<sub>E</sub> de realimentação.
+  A tensão na base passa a ser definida quase que só pelos resistivos, ficando <b>quase independente de β</b>.</p>
+  <div class="two-col">
+    <figure>
+      <div class="figbox">
+      <svg viewBox="0 0 300 330" width="280" role="img" aria-label="Circuito de polarização por divisor de tensão">
+        <line x1="70" y1="30" x2="230" y2="30" class="diagram-wire"/>
+        <text x="138" y="20" class="diagram-label">+ VCC</text>
+        <!-- R1 -->
+        <line x1="80" y1="30" x2="80" y2="55" class="diagram-wire"/>
+        <polyline points="80,55 74,61 86,67 74,73 86,79 74,85 80,91" class="diagram-res"/>
+        <line x1="80" y1="91" x2="80" y2="140" class="diagram-wire"/>
+        <text x="48" y="75" class="diagram-label">R1</text>
+        <!-- R2 -->
+        <line x1="80" y1="140" x2="80" y2="170" class="diagram-wire"/>
+        <polyline points="80,170 74,176 86,182 74,188 86,194 74,200 80,206" class="diagram-res"/>
+        <line x1="80" y1="206" x2="80" y2="230" class="diagram-wire"/>
+        <text x="48" y="192" class="diagram-label">R2</text>
+        <line x1="68" y1="230" x2="92" y2="230" class="diagram-wire"/>
+        <line x1="72" y1="236" x2="88" y2="236" class="diagram-wire"/>
+        <line x1="76" y1="242" x2="84" y2="242" class="diagram-wire"/>
+        <!-- base -->
+        <line x1="80" y1="140" x2="150" y2="140" class="diagram-wire"/>
+        <text x="100" y="133" class="diagram-label">B</text>
+        <!-- transistor -->
+        <rect x="150" y="115" width="8" height="50" class="diagram-bar"/>
+        <line x1="158" y1="125" x2="190" y2="103" class="diagram-trans"/>
+        <text x="198" y="98" class="diagram-label">C</text>
+        <line x1="158" y1="155" x2="190" y2="187" class="diagram-trans"/>
+        <polygon points="190,187 172.7,183.7 184.7,167.7" fill="#34d399"/>
+        <!-- RC -->
+        <line x1="190" y1="30" x2="190" y2="55" class="diagram-wire"/>
+        <polyline points="190,55 184,61 196,67 184,73 196,79 184,85 190,91" class="diagram-res"/>
+        <line x1="190" y1="91" x2="190" y2="103" class="diagram-wire"/>
+        <text x="204" y="74" class="diagram-label">RC</text>
+        <!-- RE -->
+        <line x1="190" y1="187" x2="190" y2="197" class="diagram-wire"/>
+        <polyline points="190,197 184,203 196,209 184,215 196,221 184,227 190,233" class="diagram-res"/>
+        <line x1="190" y1="233" x2="190" y2="255" class="diagram-wire"/>
+        <text x="204" y="218" class="diagram-label">RE</text>
+        <line x1="178" y1="255" x2="202" y2="255" class="diagram-wire"/>
+        <line x1="182" y1="261" x2="198" y2="261" class="diagram-wire"/>
+        <line x1="186" y1="267" x2="194" y2="267" class="diagram-wire"/>
+        <circle cx="80" cy="140" r="3" fill="#e2e8f0"/>
+        <circle cx="80" cy="30" r="3" fill="#e2e8f0"/>
+        <circle cx="190" cy="30" r="3" fill="#e2e8f0"/>
+      </svg>
+      </div>
+      <figcaption>Divisor de tensão: V<sub>B</sub> vem do divisor R<sub>1</sub>/R<sub>2</sub>; R<sub>E</sub> dá estabilidade.</figcaption>
+    </figure>
+    <div>
+      <div class="formula">
+        V<sub>B</sub> = V<sub>CC</sub> · R<sub>2</sub>/(R<sub>1</sub>+R<sub>2</sub>)<br>
+        V<sub>E</sub> = V<sub>B</sub> − 0,7 V<br>
+        I<sub>E</sub> = V<sub>E</sub>/R<sub>E</sub>&nbsp;&nbsp;(I<sub>C</sub> ≈ I<sub>E</sub>)<br>
+        V<sub>CE</sub> = V<sub>CC</sub> − I<sub>C</sub>·(R<sub>C</sub>+R<sub>E</sub>)
+      </div>
+      <p><span class="chip ok">Vantagens</span> Ponto Q praticamente imune a variações de β;
+      permite escolher R<sub>C</sub>, R<sub>E</sub> e V<sub>CC</sub> quase livremente.</p>
+      <p><span class="chip mid">Regra de projeto</span> Escolha R<sub>1</sub> e R<sub>2</sub> "baixos o suficiente"
+      (corrente do divisor ≈ 10× I<sub>B</sub>, ou R<sub>1</sub>∥R<sub>2</sub> ≤ R<sub>E</sub>/10) para que a corrente de base não
+      "desbalance" o divisor.</p>
+    </div>
+  </div>
+
+  <div class="calc">
+    <h3>🧮 Calculadora — divisor de tensão</h3>
+    <p style="font-size:.9rem;color:var(--muted)">Resistências em <b>kΩ</b>, tensão em <b>V</b>.</p>
+    <div class="fields">
+      <div><label for="dVCC">VCC (V)</label><input id="dVCC" type="number" step="0.1" value="10"></div>
+      <div><label for="dR1">R1 (kΩ)</label><input id="dR1" type="number" step="any" value="68"></div>
+      <div><label for="dR2">R2 (kΩ)</label><input id="dR2" type="number" step="any" value="12"></div>
+      <div><label for="dRC">RC (kΩ)</label><input id="dRC" type="number" step="any" value="3.3"></div>
+      <div><label for="dRE">RE (kΩ)</label><input id="dRE" type="number" step="any" value="1"></div>
+      <div><label for="dBeta">β</label><input id="dBeta" type="number" step="any" value="100"></div>
+    </div>
+    <button onclick="calcDivisor()">Calcular</button>
+    <div class="out" id="outDivisor"></div>
+  </div>
+</section>
+
+<!-- ================= 6. COMPARAÇÃO ================= -->
+<section id="comparacao">
+  <h2><span class="num">6</span> Comparação dos métodos</h2>
+  <table>
+    <tr><th>Método</th><th>Componentes</th><th>Estabilidade do ponto Q</th><th>Sensível a β?</th><th>Quando usar</th></tr>
+    <tr><td><b>Polarização fixa</b></td><td>R<sub>B</sub>, R<sub>C</sub></td><td>baixa</td><td>sim — muito</td><td>Didática, chave simples</td></tr>
+    <tr><td><b>Realimentação de emissor</b></td><td>R<sub>B</sub>, R<sub>C</sub>, R<sub>E</sub></td><td>média</td><td>pouco</td><td>Amplificador barato</td></tr>
+    <tr><td><b>Divisor de tensão</b></td><td>R<sub>1</sub>, R<sub>2</sub>, R<sub>C</sub>, R<sub>E</sub></td><td><b>alta</b></td><td>mínimo</td><td>Padrão em amplificadores reais</td></tr>
+  </table>
+  <div class="note warn"><b class="tag">Erros comuns do técnico</b>
+  ① Esquecer o 0,7 V na junção B-E (o resultado "chama" para saturação).
+  ② Confundir R<sub>1</sub> e R<sub>2</sub> no divisor.
+  ③ Medir o transistor com o multímetro <i>ligado ao circuito</i> — sempre retire ou desligue antes.
+  ④ Acreditar que "β = 100" é constante: datasheet dá um intervalo; projete para o β <i>pior</i>.</div>
+  <div class="note tip"><b class="tag">Lembrete de bancada</b>
+  Beta varia de lote para lote. Um bom projeto de polarização deve continuar funcionando com β entre,
+  digamos, 50 e 300 — por isso o divisor de tensão + R<sub>E</sub> é o padrão da indústria.</div>
+</section>
+
+<!-- ================= 7. FET ================= -->
+<section id="fet">
+  <h2><span class="num">7</span> Olhando de lado: polarização do FET</h2>
+  <p>O transistor de efeito de campo (FET) se polariza de forma análoga. No <b>JFET</b> (n-canal),
+  o método clássico é a <b>polarização por realimentação</b>: gate ligado ao terra por R<sub>G</sub> (grande, ≈ 1 MΩ,
+  quase sem corrente) e o emissor → emissor do FET (source) com R<sub>S</sub>:</p>
+  <div class="formula">V<sub>GS</sub> = − I<sub>D</sub>·R<sub>S</sub>&nbsp;&nbsp;(para n-canal, V<sub>GS</sub> é negativa — correção de polarização direta da junção gate)</div>
+  <p>Como I<sub>D</sub> cresce, |V<sub>GS</sub>| cresce e I<sub>D</sub> é "freado" — o mesmo princípio de autorregulação
+  que vimos no R<sub>E</sub> do BJT. A ideia de <b>ponto Q no meio da reta de carga</b> vale exatamente igual.</p>
+  <p>Resumindo: BJT controla por <b>corrente</b> (base), FET por <b>tensão</b> (gate).
+  O objetivo da polarização é o mesmo: travar o Q no meio da região de ativa, imune a β.</p>
+</section>
+
+<!-- ================= 8. EXERCÍCIOS ================= -->
+<section id="exercicios">
+  <h2><span class="num">8</span> Exercícios resolvidos</h2>
+  <p>Prova-se resolvendo. Tente cada item antes de abrir a resolução.</p>
+
+  <details class="exercise">
+    <summary>1) Polarização fixa — V<sub>CC</sub> = 12 V, R<sub>B</sub> = 240 kΩ, R<sub>C</sub> = 1,8 kΩ, β = 100.</summary>
+    <div class="sol">
+      <p>Ponto Q: calcule I<sub>B</sub>, I<sub>C</sub> e V<sub>CE</sub>.</p>
+      <div class="formula">
+        I<sub>B</sub> = (12 − 0,7)/240k = <span class="res">47 µA</span><br>
+        I<sub>C</sub> = 100 × 47 µA = <span class="res">4,71 mA</span><br>
+        V<sub>CE</sub> = 12 − 4,71m × 1,8k = 12 − 8,48 = <span class="res">3,52 V</span>
+      </div>
+      <p>Q = (3,52 V; 4,71 mA). Verificação: V<sub>CE(sat)</sub> ≈ 0,2 V &lt; 3,52 V &lt; 12 V → está na região ativa. ✔</p>
+    </div>
+  </details>
+
+  <details class="exercise">
+    <summary>2) Divisor de tensão — V<sub>CC</sub> = 10 V, R<sub>1</sub> = 68 kΩ, R<sub>2</sub> = 12 kΩ, R<sub>C</sub> = 3,3 kΩ, R<sub>E</sub> = 1 kΩ, β = 100.</summary>
+    <div class="sol">
+      <div class="formula">
+        V<sub>B</sub> = 10 × 12/(68+12) = <span class="res">1,5 V</span><br>
+        V<sub>E</sub> = 1,5 − 0,7 = <span class="res">0,8 V</span><br>
+        I<sub>E</sub> ≈ I<sub>C</sub> = 0,8 V/1 kΩ = <span class="res">0,8 mA</span><br>
+        V<sub>CE</sub> = 10 − 0,8m × (3,3 + 1)k = 10 − 3,44 = <span class="res">6,56 V</span>
+      </div>
+      <p>Confira com a calculadora da seção 5. Note que V<sub>E</sub> ≈ 8% de V<sub>CC</sub> — próximo dos 10% ideais.</p>
+    </div>
+  </details>
+
+  <details class="exercise">
+    <summary>3) Conceitual — No circuito de polarização fixa, o que acontece se R<sub>B</sub> se soltar da solda?</summary>
+    <div class="sol">
+      <p>Com R<sub>B</sub> aberto, I<sub>B</sub> = 0 → o transistor entra em <b>corte</b>: I<sub>C</sub> ≈ 0 e
+      V<sub>CE</sub> sobe para V<sub>CC</sub> (12 V no exemplo do exercício 1).
+      Medir V<sub>CE</sub> ≈ V<sub>CC</sub> com o multímetro é o sintoma clássico de "sem polarização na base".</p>
+    </div>
+  </details>
+
+  <details class="exercise">
+    <summary>4) Projeto — Com V<sub>CC</sub> = 12 V, que valor de R<sub>E</sub> atende a regra dos 10% para I<sub>C</sub> ≈ 2 mA?</summary>
+    <div class="sol">
+      <div class="formula">
+        V<sub>E</sub> ≈ 0,1 × 12 = 1,2 V<br>
+        R<sub>E</sub> = V<sub>E</sub>/I<sub>E</sub> ≈ 1,2 / 2m = <span class="res">600 Ω</span> (valor comercial: 560 Ω ou 620 Ω)
+      </div>
+    </div>
+  </details>
+
+  <details class="exercise">
+    <summary>5) Saturação — No exemplo 1, o transistor está saturado se β = 400?</summary>
+    <div class="sol">
+      <div class="formula">
+        I<sub>B</sub> = 47 µA (não muda — R<sub>B</sub> é o mesmo)<br>
+        I<sub>C</sub> "desejada" = 400 × 47 µA = 18,8 mA → I<sub>C·RC</sub> = 33,9 V &gt; V<sub>CC</sub> = 12 V ✘
+      </div>
+      <p>O coletor não consegue passar de I<sub>C(sat)</sub> = 12/1,8k ≈ <b>6,6 mA</b>. O transistor
+      <b>satura</b> (V<sub>CE</sub> ≈ 0,2 V) — exatamente por isso a polarização fixa é instável:
+      troque β de 100 por 400 e o ponto Q salta de "ativo" para "saturado".</p>
+    </div>
+  </details>
+
+  <h3 style="margin-top:26px">Para levar para a prova</h3>
+  <ol>
+    <li>Polarizar = fixar o <b>ponto Q</b> no meio da reta de carga, na região <b>ativa</b>.</li>
+    <li>V<sub>BE</sub> ≈ 0,7 V sempre que a junção B-E está direta.</li>
+    <li>Polarização fixa: I<sub>B</sub> = (V<sub>CC</sub>−0,7)/R<sub>B</sub> — simples, mas sensível a β.</li>
+    <li>Divisor de tensão: V<sub>B</sub> = V<sub>CC</sub>·R<sub>2</sub>/(R<sub>1</sub>+R<sub>2</sub>), V<sub>E</sub> = V<sub>B</sub>−0,7, I<sub>C</sub> ≈ V<sub>E</sub>/R<sub>E</sub>.</li>
+    <li>Regra dos 10%: V<sub>E</sub> ≈ 0,1·V<sub>CC</sub>.</li>
+    <li>Corrente do divisor ≈ 10× I<sub>B</sub> para estabilidade.</li>
+  </ol>
+</section>
+
+<footer>
+  Aula de Eletrônica — Polarização de Transistores BJT • Elaborada para o curso técnico • v1.0
+</footer>
+
+</main>
+
+<script>
+function fmt(n, d){ return n.toLocaleString('pt-BR',{minimumFractionDigits:d, maximumFractionDigits:d}); }
+
+function calcFixed(){
+  const VCC=+document.getElementById('fVCC').value||0,
+        RBk=+document.getElementById('fRB').value||0,
+        RCk=+document.getElementById('fRC').value||0,
+        beta=+document.getElementById('fBeta').value||0;
+  const out=document.getElementById('outFixed');
+  if(!RBk||!beta||VCC<=0){ out.innerHTML='<p style="color:var(--danger)">Preencha todos os campos com valores positivos.</p>'; return; }
+  const RB=RBk*1e3, RC=RCk*1e3;
+  const IB=(VCC-0.7)/RB, IC=beta*IB, VCE=VCC-IC*RC;
+  let regime, chip;
+  if(VCE<=0.2){ regime='SATURAÇÃO — o sinal vai distorcer no topo; aumente RB.'; chip='chip bad'; }
+  else if(IC<=0){ regime='CORTE — nenhuma corrente flui.'; chip='chip bad'; }
+  else { regime='região ativa ✔'; chip='chip ok'; }
+  out.innerHTML = `
+    <div class="row"><span>I<sub>B</sub></span><span>${(IB*1e6).toLocaleString('pt-BR',{maximumFractionDigits:1})} µA</span></div>
+    <div class="row"><span>I<sub>C</sub> = β·I<sub>B</sub></span><span>${fmt(IC*1e3,2)} mA</span></div>
+    <div class="row"><span>V<sub>CE</sub></span><span>${fmt(Math.max(VCE,0),2)} V</span></div>
+    <div class="row"><span>Regime</span><span><span class="chip ${chip}">${regime}</span></span></div>`;
+}
+
+function calcDivisor(){
+  const VCC=+document.getElementById('dVCC').value||0,
+        R1k=+document.getElementById('dR1').value||0,
+        R2k=+document.getElementById('dR2').value||0,
+        RCk=+document.getElementById('dRC').value||0,
+        REk=+document.getElementById('dRE').value||0,
+        beta=+document.getElementById('dBeta').value||0;
+  const out=document.getElementById('outDivisor');
+  if(!R1k||!R2k||!REk||VCC<=0){ out.innerHTML='<p style="color:var(--danger)">Preencha todos os campos com valores positivos.</p>'; return; }
+  const RC=RCk*1e3, RE=REk*1e3;
+  const VB=VCC*R2k/(R1k+R2k), VE=VB-0.7;
+  if(VE<=0){
+    out.innerHTML=`<div class="row"><span>V<sub>B</sub></span><span>${fmt(VB,2)} V</span></div>
+      <div class="row"><span>V<sub>E</sub></span><span>${fmt(VE,2)} V</span></div>
+      <div class="row"><span>Regime</span><span><span class="chip bad">CORTE — V<sub>B</sub> menor que 0,7 V; reduza R1 ou aumente R2.</span></span></div>`;
+    return;
+  }
+  const IE=VE/RE, IC=IE, VCE=VCC-IC*(RC+RE);
+  const IB=IC/(beta||1);
+  let regime, chip;
+  if(VCE<=0.2){ regime='SATURAÇÃO'; chip='chip bad'; }
+  else { regime='região ativa ✔'; chip='chip ok'; }
+  out.innerHTML = `
+    <div class="row"><span>V<sub>B</sub> = VCC·R2/(R1+R2)</span><span>${fmt(VB,2)} V</span></div>
+    <div class="row"><span>V<sub>E</sub> = V<sub>B</sub> − 0,7</span><span>${fmt(VE,2)} V</span></div>
+    <div class="row"><span>I<sub>E</sub> ≈ I<sub>C</sub></span><span>${fmt(IC*1e3,2)} mA</span></div>
+    <div class="row"><span>V<sub>CE</sub></span><span>${fmt(Math.max(VCE,0),2)} V</span></div>
+    <div class="row"><span>Regime</span><span><span class="chip ${chip}">${regime}</span></span></div>`;
+}
+
+calcFixed(); calcDivisor();
+</script>
+</body>
+</html>
