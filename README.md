@@ -22,6 +22,7 @@ Sem instalação, sem build, sem dependências externas de CDN: cada app carrega
 | **Polarização de Transistores** | Ponto de operação do BJT: reta de carga, métodos de polarização e calculadoras interativas | [`apps/polarizacao-transistores/`](apps/polarizacao-transistores/) |
 | **Tetris** | O clássico em um arquivo, teclado e toque | [`apps/tetris/`](apps/tetris/) |
 | **Paciência · Klondike** | Jogo de cartas com arrastar e soltar | [`apps/paciencia/`](apps/paciencia/) |
+| **A Corrida Espacial · 1957–1975** | Globo com trinta missões de 1957 a 1975: linha do tempo arrastável, placar de recordes que muda de mãos e ficha de cada lançamento | [`apps/space-race/`](apps/space-race/) |
 | **Osciloscópio · Lissajous** | Modo X-Y com fósforo P1: frequências, fase, deriva e persistência; presets 1:1, 3:2 e 5:4 | [`apps/lissajous/`](apps/lissajous/) |
 | **Pêndulo duplo** | Bancada com RK4 e dissipação de Rayleigh: arrastar massas, atrito de mancal ou ar, gêmeo e regimes de caos | [`apps/double-pendulum/`](apps/double-pendulum/) |
 
