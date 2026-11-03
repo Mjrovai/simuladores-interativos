@@ -24,7 +24,7 @@ Sem instalação, sem build, sem dependências externas de CDN: cada app carrega
 | **Tetris** | O clássico em um arquivo, teclado e toque | [`apps/tetris/`](apps/tetris/) |
 | **Paciência · Klondike** | Jogo de cartas com arrastar e soltar | [`apps/paciencia/`](apps/paciencia/) |
 
-A página inicial é uma galeria com busca e filtros por tema.
+A página inicial é uma galeria com busca e filtros por tema. Cada card abre o simulador **em nova aba**, então a galeria continua disponível para escolher outro.
 
 > `apps/color-palette/` é a única exceção ao "sem build": é um app **Next.js 15** publicado como **export estático**. O código-fonte vive fora deste repositório; aqui está o resultado de `next build` com `output: "export"` e `basePath: "/simuladores-interativos/apps/color-palette"`.
 
@@ -50,10 +50,14 @@ O mesmo vale para a galeria: `python3 -m http.server 8000` na raiz e acesse <htt
 ## Estrutura
 
 ```
-index.html            galeria com busca e filtros
+index.html            galeria com busca e filtros (cards em nova aba)
 assets/thumbs/        miniaturas dos cards
 apps/<slug>/          um simulador por pasta (index.html quando é arquivo único)
+src/color-palette/    código-fonte do app Next.js + build.sh que gera apps/color-palette/
 ```
+
+Abrir a galeria por `file://` (duplo clique) funciona para os apps de arquivo único; ela mesma
+detecta o protocolo, aponta os links para os `index.html` e avisa quais três precisam de servidor.
 
 ### Adicionar um simulador novo
 
