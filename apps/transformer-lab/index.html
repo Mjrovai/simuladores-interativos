@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Transformer Lab — what a tiny GPT actually does</title>
+<meta name="description" content="A 198k-parameter GPT trained from scratch on Lewis Carroll. Type a prompt and watch attention, the next-token distribution and generation — all computed in your browser.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23003A70'/><circle cx='34' cy='34' r='9' fill='%23F37035'/><circle cx='66' cy='50' r='9' fill='%23F37035'/><circle cx='42' cy='70' r='9' fill='%23F37035'/><path d='M40 38 L60 47 M62 54 L48 66' stroke='%23F37035' stroke-width='4'/></svg>">
+<script>
+(function(){try{var t=localStorage.getItem('theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':(t==='dark'?'dark':(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')));}catch(e){}})();
+</script>
+<style>
+:root{
+  --navy:#003A70; --amber:#F37035; --amber-deep:#D9591C; --ugray:#A2AAAD;
+  --bg:#FBFCFD; --surface:#FFFFFF; --surface-2:#F3F6FA;
+  --ink:var(--navy); --ink-soft:#33383D; --muted:#6C7580; --slate:#3F6A92;
+  --line:rgba(0,58,112,.14); --line-soft:rgba(0,58,112,.07);
+  --glow:rgba(243,112,53,.20);
+  --font:Calibri,Carlito,"Segoe UI",-apple-system,system-ui,sans-serif;
+  --mono:"SF Mono",ui-monospace,Menlo,monospace;
+  --radius:14px;
+  --shadow:0 1px 2px rgba(0,58,112,.06),0 12px 32px -18px rgba(0,58,112,.28);
+  --cell-dim:#EEF2F6;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#002B52; --surface:#0A487F; --surface-2:#073E71;
+    --ink:#FFFFFF; --ink-soft:#CAD7E6; --muted:#8AA0BC; --slate:#8FB0D4;
+    --line:rgba(255,255,255,.15); --line-soft:rgba(255,255,255,.08);
+    --glow:rgba(243,112,53,.24); --cell-dim:#073E71;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 14px 34px -18px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#002B52; --surface:#0A487F; --surface-2:#073E71;
+  --ink:#FFFFFF; --ink-soft:#CAD7E6; --muted:#8AA0BC; --slate:#8FB0D4;
+  --line:rgba(255,255,255,.15); --line-soft:rgba(255,255,255,.08);
+  --glow:rgba(243,112,53,.24); --cell-dim:#073E71;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 14px 34px -18px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; font-family:var(--font); color:var(--ink-soft); background-color:var(--bg);
+  background-image:radial-gradient(1100px 560px at 88% -8%,var(--glow),transparent 62%),
+                   radial-gradient(var(--line-soft) 1px,transparent 1px);
+  background-size:auto,26px 26px; background-attachment:fixed,scroll;
+  font-size:16px; line-height:1.55; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1120px;margin:0 auto;padding:0 22px}
+a{color:#0A5CA8;text-decoration:none}
+a:hover{color:var(--amber-deep)}
+
+header.top{position:sticky;top:0;z-index:30;backdrop-filter:saturate(1.4) blur(10px);
+  background:color-mix(in srgb,var(--bg) 86%,transparent);border-bottom:1px solid var(--line-soft)}
+.top .wrap{display:flex;align-items:center;gap:12px;height:58px}
+.brand{display:inline-flex;align-items:baseline;gap:8px;font-weight:700;color:var(--ink);font-size:1rem}
+.brand i{width:9px;height:9px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 3px var(--glow);align-self:center}
+.brand small{font-weight:500;color:var(--muted);font-size:.8rem}
+.top nav{margin-left:auto;display:flex;gap:6px;align-items:center}
+.top nav a{font-size:.82rem;color:var(--ink-soft);padding:6px 9px;border-radius:8px}
+.top nav a:hover{background:var(--line-soft);color:var(--ink)}
+.theme-toggle{width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;
+  border:1px solid var(--line);border-radius:9px;background:transparent;color:var(--ink-soft);cursor:pointer}
+.theme-toggle:hover{border-color:var(--amber);background:var(--line-soft)}
+.theme-toggle svg{width:17px;height:17px;display:none}
+.theme-toggle .moon{display:block}
+:root[data-theme="dark"] .theme-toggle .moon{display:none}
+:root[data-theme="dark"] .theme-toggle .sun{display:block}
+
+.intro{padding:34px 0 6px}
+.eyebrow{font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--slate);font-weight:600;margin:0 0 10px}
+h1{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.1;letter-spacing:-.02em;color:var(--ink);margin:0;font-weight:700}
+h1 em{font-style:normal;color:var(--amber-deep)}
+.intro p.lede{margin:12px 0 0;max-width:70ch;font-size:1rem}
+.facts{display:flex;flex-wrap:wrap;gap:7px;margin:16px 0 0}
+.fact{font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);
+  border:1px solid var(--line);border-radius:999px;padding:4px 9px;background:var(--surface)}
+
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;padding:20px 0 40px;align-items:start}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+.card h2{margin:0 0 4px;font-size:.95rem;color:var(--ink);letter-spacing:.01em}
+.card .sub{margin:0 0 12px;font-size:.82rem;color:var(--muted)}
+.prompt{grid-column:1/-1}
+.prompt input[type=text]{
+  width:100%;font-family:var(--mono);font-size:1rem;color:var(--ink);background:var(--surface-2);
+  border:1px solid var(--line);border-radius:10px;padding:11px 13px;outline:none}
+.prompt input[type=text]:focus{border-color:var(--amber);box-shadow:0 0 0 3px var(--glow)}
+.hints{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.hint{font-family:var(--mono);font-size:.75rem;color:var(--slate);background:var(--surface-2);
+  border:1px solid var(--line);border-radius:999px;padding:4px 9px;cursor:pointer}
+.hint:hover{border-color:var(--amber);color:var(--amber-deep)}
+
+.tokens{display:flex;gap:4px;flex-wrap:wrap;margin:14px 0 0}
+.tok{font-family:var(--mono);font-size:.78rem;color:var(--ink);background:var(--surface-2);
+  border:1px solid var(--line);border-radius:6px;padding:3px 6px;cursor:pointer}
+.tok:hover{border-color:var(--slate)}
+.tok.sel{background:var(--navy);color:#fff;border-color:var(--navy)}
+:root[data-theme="dark"] .tok.sel{background:var(--amber);color:#1B1B1B;border-color:var(--amber)}
+.tok.unk{color:var(--muted);border-style:dashed}
+
+.attn-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg button{font:inherit;font-size:.78rem;padding:6px 10px;background:transparent;border:none;
+  color:var(--muted);cursor:pointer;border-right:1px solid var(--line);line-height:1}
+.seg button:last-child{border-right:none}
+.seg button[aria-pressed="true"]{background:var(--navy);color:#fff}
+:root[data-theme="dark"] .seg button[aria-pressed="true"]{background:var(--amber);color:#1B1B1B}
+.legend{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:.72rem;color:var(--muted)}
+.legend .sw{width:74px;height:8px;border-radius:4px;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--amber) 18%,var(--surface-2)),var(--amber),var(--navy))}
+
+.heat{overflow-x:auto}
+table.hm{border-collapse:separate;border-spacing:2px;font-family:var(--mono);font-size:.7rem}
+table.hm th{font-weight:500;color:var(--muted);padding:0 2px;white-space:nowrap}
+table.hm th.rowh{text-align:right;color:var(--ink-soft);max-width:88px;overflow:hidden;text-overflow:ellipsis}
+table.hm th.colh{height:74px;vertical-align:bottom;text-align:left}
+table.hm th.colh span{display:inline-block;transform:rotate(-60deg);transform-origin:left bottom;white-space:nowrap}
+table.hm td{width:var(--cell,22px);height:var(--cell,22px);border-radius:4px;background:var(--cell-dim);text-align:center;color:transparent}
+table.hm td.mask{background:repeating-linear-gradient(45deg,var(--cell-dim),var(--cell-dim) 3px,var(--surface) 3px,var(--surface) 6px)}
+table.hm tr.hl th.rowh{color:var(--amber-deep);font-weight:700}
+table.hm tr{cursor:default}
+table.hm td:hover{outline:2px solid var(--amber);outline-offset:1px}
+
+.bars{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+.bar{display:grid;grid-template-columns:70px 1fr 52px;gap:8px;align-items:center;font-family:var(--mono);font-size:.78rem}
+.bar .tk{color:var(--ink);text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar .tr{height:12px;background:var(--surface-2);border-radius:6px;overflow:hidden;border:1px solid var(--line-soft)}
+.bar .fl{display:block;height:100%;background:linear-gradient(90deg,var(--amber),var(--amber-deep));border-radius:6px}
+.bar .pc{color:var(--muted);text-align:right}
+
+.row{display:flex;align-items:center;gap:9px;margin:9px 0;font-size:.82rem}
+.row label{width:96px;color:var(--muted);flex:none}
+.row input[type=range]{flex:1;min-width:0;accent-color:var(--amber)}
+.row output{font-family:var(--mono);font-size:.78rem;color:var(--ink);width:56px;text-align:right;flex:none}
+.btn{font:inherit;font-size:.8rem;font-weight:600;padding:8px 12px;border-radius:9px;cursor:pointer;white-space:nowrap;
+  border:1px solid var(--navy);background:var(--navy);color:#fff}
+.btn:hover{background:var(--amber-deep);border-color:var(--amber-deep)}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.ghost:hover{border-color:var(--amber);color:var(--amber-deep)}
+.out{margin-top:12px;padding:12px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line-soft);
+  font-family:var(--mono);font-size:.85rem;line-height:1.6;color:var(--ink);min-height:56px;white-space:pre-wrap}
+
+aside.explain{display:flex;flex-direction:column;gap:12px}
+.note{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 15px;box-shadow:var(--shadow)}
+.note h3{margin:0 0 6px;font-size:.86rem;color:var(--ink)}
+.note p{margin:0;font-size:.82rem;color:var(--ink-soft);line-height:1.5}
+.note code{font-family:var(--mono);font-size:.78rem;background:var(--surface-2);border:1px solid var(--line-soft);border-radius:4px;padding:0 4px}
+footer.site{border-top:1px solid var(--line-soft);padding:20px 0 44px;color:var(--muted);font-size:.78rem}
+footer.site .wrap{display:flex;gap:14px;justify-content:space-between;flex-wrap:wrap}
+
+.loading{padding:26px 0;color:var(--muted);font-size:.9rem}
+@media(max-width:860px){
+  .layout{grid-template-columns:1fr}
+  .prompt{grid-column:auto}
+  .row label{width:74px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <span class="brand"><i></i>Transformer Lab <small>· trained from scratch</small></span>
+    <nav>
+      <a href="../../">← Gallery</a>
+      <a href="https://github.com/Mjrovai/simuladores-interativos/tree/main/src/transformer-lab" target="_blank" rel="noopener">Training code</a>
+      <button class="theme-toggle" type="button" aria-label="Toggle theme">
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.5 6.5 0 0 0 9.8 9.8z"/></svg>
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.4 5.4l1.6 1.6M17 17l1.6 1.6M18.6 5.4L17 7M7 17l-1.6 1.6"/></svg>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap intro">
+  <p class="eyebrow">decoder-only transformer · word-level</p>
+  <h1>What a tiny GPT <em>actually</em> does</h1>
+  <p class="lede">
+    A 198k-parameter transformer trained from scratch on <i>Alice's Adventures in Wonderland</i> and
+    <i>Through the Looking-Glass</i>. Type a prompt: the forward pass runs here in your browser, and you can
+    open every attention head that produces the next word.
+  </p>
+  <div class="facts" id="facts">
+    <span class="fact">198k parameters</span>
+    <span class="fact">2 layers · 4 heads</span>
+    <span class="fact">d = 64</span>
+    <span class="fact">context 32 tokens</span>
+    <span class="fact" id="fact-vocab">vocab —</span>
+    <span class="fact" id="fact-loss">val loss —</span>
+  </div>
+</div>
+
+<main class="wrap layout" id="layout">
+  <div class="loading" id="loading">Loading weights…</div>
+
+  <section class="card prompt" id="prompt-card" hidden>
+    <h2>Prompt</h2>
+    <p class="sub">Every word is one token. Hover or click a token to see what it looks at.</p>
+    <input type="text" id="prompt" value="the queen said" spellcheck="false" autocomplete="off" aria-label="Prompt">
+    <div class="hints">
+      <span class="hint">the queen said</span>
+      <span class="hint">alice was</span>
+      <span class="hint">she looked at the</span>
+      <span class="hint">the rabbit hole</span>
+    </div>
+    <div class="tokens" id="tokens"></div>
+  </section>
+
+  <section class="card" id="attn-card" hidden>
+    <h2>Attention</h2>
+    <p class="sub">Each row is a token asking a question; columns are the tokens it reads. Upper half is masked — the model cannot see the future.</p>
+    <div class="attn-head">
+      <div class="seg" id="layers" role="group" aria-label="Layer"></div>
+      <div class="seg" id="heads" role="group" aria-label="Head"></div>
+      <div class="legend"><span>0</span><span class="sw"></span><span>1</span></div>
+    </div>
+    <div class="heat"><table class="hm" id="hm"></table></div>
+    <p class="sub" id="attn-read" style="margin-top:10px"></p>
+  </section>
+
+  <section class="card" id="pred-card" hidden>
+    <h2>Next token</h2>
+    <p class="sub">The model's distribution after the last prompt token.</p>
+    <div class="row">
+      <label for="temp2">Temperature</label>
+      <input type="range" id="temp2" min="0.2" max="1.6" step="0.05" value="0.9">
+      <output id="temp2o">0.90</output>
+    </div>
+    <div class="bars" id="bars"></div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn" id="sample">Sample a token</button>
+      <button class="btn ghost" id="greedy">Take the top one</button>
+    </div>
+    <div class="out" id="sampled" hidden></div>
+  </section>
+
+  <section class="card" id="gen-card" hidden>
+    <h2>Generate</h2>
+    <p class="sub">Feed the sampled token back in, one step at a time — that is the whole trick.</p>
+    <div class="row">
+      <label for="temp">Temperature</label>
+      <input type="range" id="temp" min="0.2" max="1.6" step="0.05" value="0.85">
+      <output id="tempo">0.85</output>
+    </div>
+    <div class="row">
+      <label for="topk">Top-k</label>
+      <input type="range" id="topk" min="1" max="60" step="1" value="40">
+      <output id="topko">40</output>
+    </div>
+    <div class="row">
+      <label for="len">New tokens</label>
+      <input type="range" id="len" min="5" max="28" step="1" value="18">
+      <output id="leno">18</output>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn" id="run">Generate</button>
+      <button class="btn ghost" id="stop" hidden>Stop</button>
+    </div>
+    <div class="out" id="gen-out">—</div>
+  </section>
+
+  <aside class="explain" id="explain" hidden>
+    <div class="note">
+      <h3>Q, K, V</h3>
+      <p>Every token is projected three ways: a <code>query</code> (“what am I looking for?”), a <code>key</code> (“what do I offer?”) and a <code>value</code> (“what do I pass on?”). The score is <code>q·k / √d</code>, softmaxed over the past.</p>
+    </div>
+    <div class="note">
+      <h3>Why the triangle</h3>
+      <p>The mask sets the future to −∞ before the softmax, so a token can only attend to itself and what came before. That is what makes generation possible: the same weights work for every prefix.</p>
+    </div>
+    <div class="note">
+      <h3>Layer 1 vs layer 2</h3>
+      <p>Head patterns change with depth. Early heads usually track nearby words and punctuation; the second layer mixes those signals into something closer to “what kind of word comes next”.</p>
+    </div>
+    <div class="note">
+      <h3>What it cannot do</h3>
+      <p>198k parameters, 72k tokens of text, a 32-token memory. It has no world knowledge — it learned the rhythm of one author's sentences and little else. That is the point: you can see all of it.</p>
+    </div>
+  </aside>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <span>Weights and forward pass run locally · corpus: Lewis Carroll, public domain (Project Gutenberg)</span>
+    <a href="https://github.com/Mjrovai/simuladores-interativos" target="_blank" rel="noopener">Source on GitHub ↗</a>
+  </div>
+</footer>
+
+<script src="weights.js"></script>
+<script>
+(() => {
+  const W = window.TF_LAB;
+  if (!W) { document.getElementById('loading').textContent = 'weights.js not found.'; return; }
+  const CFG = W.config, VOCAB = W.vocab, V = CFG.vocab_size, C = CFG.d_model,
+        H = CFG.n_heads, L = CFG.n_layers, DH = C / H, CTX = CFG.ctx, FF = CFG.d_ff;
+  const EPS = 1e-5, UNK = 0;
+
+  /* ---------- fp16 → float32 ---------- */
+  const half2float = (h) => {
+    const s = (h & 0x8000) >> 15, e = (h >> 10) & 0x1f, f = h & 0x3ff;
+    if (e === 0) return (s ? -1 : 1) * Math.pow(2, -14) * (f / 1024);
+    if (e === 0x1f) return f ? NaN : (s ? -Infinity : Infinity);
+    return (s ? -1 : 1) * Math.pow(2, e - 15) * (1 + f / 1024);
+  };
+  const b64ToF32 = (b64) => {
+    const bin = atob(b64), n = bin.length / 2, out = new Float32Array(n);
+    const u8 = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    const u16 = new Uint16Array(u8.buffer);
+    for (let i = 0; i < n; i++) out[i] = half2float(u16[i]);
+    return out;
+  };
+  const T = {};
+  for (const k in W.tensors) T[k] = b64ToF32(W.tensors[k]);
+
+  /* ---------- math ---------- */
+  const erf = (x) => { // Abramowitz & Stegun 7.1.26, |erro| < 1.5e-7
+    const s = x < 0 ? -1 : 1; x = Math.abs(x);
+    const p = 0.3275911, a1 = 0.254829592, a2 = -0.284496736,
+          a3 = 1.421413741, a4 = -1.453152027, a5 = 1.061405429;
+    const t = 1 / (1 + p * x);
+    const poly = ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t;
+    return s * (1 - poly * Math.exp(-x * x));
+  };
+  const gelu = (x) => 0.5 * x * (1 + erf(x / Math.SQRT2));
+
+  function layerNorm(dst, src, w, b, Tn) {
+    for (let t = 0; t < Tn; t++) {
+      const o = t * C;
+      let mean = 0;
+      for (let i = 0; i < C; i++) mean += src[o + i];
+      mean /= C;
+      let v = 0;
+      for (let i = 0; i < C; i++) { const d = src[o + i] - mean; v += d * d; }
+      v /= C;
+      const inv = 1 / Math.sqrt(v + EPS);
+      for (let i = 0; i < C; i++) dst[o + i] = (src[o + i] - mean) * inv * w[i] + b[i];
+    }
+  }
+  // y[t,o] = sum_i W[o*inN+i] * x[t*inN+i] + b[o]
+  function linear(dst, x, Wm, b, Tn, inN, outN) {
+    for (let t = 0; t < Tn; t++) {
+      const xo = t * inN, yo = t * outN;
+      for (let o = 0; o < outN; o++) {
+        let s = b ? b[o] : 0;
+        const wo = o * inN;
+        for (let i = 0; i < inN; i++) s += Wm[wo + i] * x[xo + i];
+        dst[yo + o] = s;
+      }
+    }
+  }
+
+  function forward(ids) {
+    const Tn = ids.length;
+    let x = new Float32Array(Tn * C);
+    for (let t = 0; t < Tn; t++) {
+      const to = t * C;
+      for (let i = 0; i < C; i++) x[to + i] = T['tok.weight'][ids[t] * C + i] + T['pos.weight'][t * C + i];
+    }
+    const attnOut = [];
+    const norm = new Float32Array(Tn * C), qkv = new Float32Array(Tn * 3 * C),
+          att = new Float32Array(Tn * Tn), res = new Float32Array(Tn * C),
+          hid = new Float32Array(Tn * FF), ff = new Float32Array(Tn * C);
+
+    for (let l = 0; l < L; l++) {
+      const p = `blocks.${l}.`;
+      layerNorm(norm, x, T[p + 'ln1.weight'], T[p + 'ln1.bias'], Tn);
+      linear(qkv, norm, T[p + 'attn.qkv.weight'], T[p + 'attn.qkv.bias'], Tn, C, 3 * C);
+
+      const layerMaps = [];
+      res.fill(0);
+      for (let h = 0; h < H; h++) {
+        const map = new Float32Array(Tn * Tn);
+        for (let t = 0; t < Tn; t++) {
+          // scores vs keys <= t
+          let max = -Infinity;
+          for (let j = 0; j <= t; j++) {
+            let s = 0;
+            for (let d = 0; d < DH; d++)
+              s += qkv[t * 3 * C + h * DH + d] * qkv[j * 3 * C + C + h * DH + d];
+            s /= Math.sqrt(DH);
+            att[j] = s;
+            if (s > max) max = s;
+          }
+          let sum = 0;
+          for (let j = 0; j <= t; j++) { const e = Math.exp(att[j] - max); att[j] = e; sum += e; }
+          for (let j = 0; j <= t; j++) {
+            const a = att[j] / sum;
+            map[t * Tn + j] = a;
+            for (let d = 0; d < DH; d++)
+              res[t * C + h * DH + d] += a * qkv[j * 3 * C + 2 * C + h * DH + d];
+          }
+        }
+        layerMaps.push(map);
+      }
+      attnOut.push(layerMaps);
+
+      linear(ff, res, T[p + 'attn.proj.weight'], T[p + 'attn.proj.bias'], Tn, C, C);
+      for (let i = 0; i < Tn * C; i++) x[i] += ff[i];
+
+      layerNorm(norm, x, T[p + 'ln2.weight'], T[p + 'ln2.bias'], Tn);
+      linear(hid, norm, T[p + 'fc1.weight'], T[p + 'fc1.bias'], Tn, C, FF);
+      for (let i = 0; i < Tn * FF; i++) hid[i] = gelu(hid[i]);
+      linear(ff, hid, T[p + 'fc2.weight'], T[p + 'fc2.bias'], Tn, FF, C);
+      for (let i = 0; i < Tn * C; i++) x[i] += ff[i];
+    }
+
+    layerNorm(norm, x, T['ln_f.weight'], T['ln_f.bias'], Tn);
+    // logits for the last position, tied head
+    const last = (Tn - 1) * C, logits = new Float32Array(V);
+    for (let v = 0; v < V; v++) {
+      let s = 0;
+      for (let i = 0; i < C; i++) s += T['tok.weight'][v * C + i] * norm[last + i];
+      logits[v] = s;
+    }
+    return { logits, maps: attnOut, tokens: Tn };
+  }
+
+  /* ---------- tokenizer (same regex as training) ---------- */
+  const TOKEN_RE = /[a-z]+(?:'[a-z]+)?|[.,;:!?"()]|--/g;
+  const VOCAB_IDX = new Map(VOCAB.map((w, i) => [w, i]));
+  function tokenize(text) {
+    const norm = text.normalize('NFKD').toLowerCase().replace(/[\u0300-\u036f]/g, '');
+    const parts = norm.match(TOKEN_RE) || [];
+    return parts.slice(-CTX).map(w => {
+      const i = VOCAB_IDX.has(w) ? VOCAB_IDX.get(w) : UNK;
+      return { id: i, w };
+    });
+  }
+
+  /* ---------- state ---------- */
+  let prompt = 'the queen said', toks = [], state = null, layer = 0, head = 0, selRow = -1;
+
+  const el = (id) => document.getElementById(id);
+  const tokensBox = el('tokens'), hm = el('hm'), bars = el('bars'), attnRead = el('attn-read');
+
+  function run() {
+    toks = tokenize(prompt);
+    if (!toks.length) { tokensBox.innerHTML = ''; hm.innerHTML = ''; bars.innerHTML = ''; return; }
+    state = forward(toks.map(t => t.id));
+    if (selRow < 0 || selRow >= toks.length) selRow = toks.length - 1;
+    layer = Math.min(layer, L - 1);
+    renderTokens(); renderSegs(); renderHeat(); renderBars(); readAttn();
+    el('gen-out').textContent = '—';
+  }
+
+  function renderTokens() {
+    tokensBox.innerHTML = '';
+    toks.forEach((t, i) => {
+      const b = document.createElement('span');
+      b.className = 'tok' + (t.id === UNK ? ' unk' : '') + (i === selRow ? ' sel' : '');
+      b.textContent = t.w;
+      b.title = t.id === UNK ? 'not in the 1501-word vocabulary' : `token #${t.id}`;
+      b.addEventListener('mouseenter', () => { selRow = i; highlight(); });
+      b.addEventListener('click', () => { selRow = i; renderTokens(); renderHeat(); readAttn(); });
+      tokensBox.appendChild(b);
+    });
+  }
+
+  function renderSegs() {
+    const segL = el('layers'), segH = el('heads');
+    if (!segL.children.length) {
+      for (let i = 0; i < L; i++) {
+        const b = document.createElement('button');
+        b.type = 'button'; b.textContent = `Layer ${i + 1}`;
+        b.addEventListener('click', () => { layer = i; renderSegs(); renderHeat(); readAttn(); });
+        segL.appendChild(b);
+      }
+      const all = document.createElement('button');
+      all.type = 'button'; all.textContent = 'avg';
+      all.dataset.avg = '1';
+      all.addEventListener('click', () => { head = -1; renderSegs(); renderHeat(); readAttn(); });
+      segL.appendChild(all);
+    }
+    [...segL.children].forEach((b, i) => b.setAttribute('aria-pressed',
+      String(b.dataset.avg ? head === -1 : (head !== -1 && i === layer))));
+
+    if (!segH.children.length) {
+      for (let h = 0; h < H; h++) {
+        const b = document.createElement('button');
+        b.type = 'button'; b.textContent = `H${h + 1}`;
+        b.addEventListener('click', () => { head = h; renderSegs(); renderHeat(); readAttn(); });
+        segH.appendChild(b);
+      }
+    }
+    [...segH.children].forEach((b, i) => b.setAttribute('aria-pressed', String(head === i)));
+  }
+
+  const ramp = (a) => {
+    // 0 -> surface-2, 1 -> navy/amber mix; simple two-stop in sRGB
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const lo = dark ? [7, 62, 113] : [243, 246, 250];
+    const mid = [243, 112, 53];
+    const hi = dark ? [255, 190, 150] : [0, 58, 112];
+    const c1 = a < 0.5 ? lo : mid, c2 = a < 0.5 ? mid : hi;
+    const f = a < 0.5 ? a / 0.5 : (a - 0.5) / 0.5;
+    const c = c1.map((v, i) => Math.round(v + (c2[i] - v) * f));
+    return `rgb(${c[0]},${c[1]},${c[2]})`;
+  };
+
+  function headMatrix() {
+    const maps = state.maps[layer];
+    if (head >= 0) return maps[head];
+    const out = new Float32Array(toks.length * toks.length);
+    maps.forEach(m => { for (let i = 0; i < out.length; i++) out[i] += m[i] / maps.length; });
+    return out;
+  }
+
+  function renderHeat() {
+    const m = headMatrix(), n = toks.length;
+    const cell = Math.max(16, Math.min(38, Math.floor(560 / Math.max(n, 1))));
+    hm.style.setProperty('--cell', cell + 'px');
+    let html = '<tr><th class="rowh"></th>';
+    toks.forEach(t => { html += `<th class="colh"><span>${esc(t.w)}</span></th>`; });
+    html += '</tr>';
+    for (let i = 0; i < n; i++) {
+      html += `<tr data-r="${i}"${i === selRow ? ' class="hl"' : ''}><th class="rowh">${esc(toks[i].w)}</th>`;
+      for (let j = 0; j < n; j++) {
+        if (j > i) { html += '<td class="mask"></td>'; continue; }
+        const v = m[i * n + j];
+        html += `<td style="background:${ramp(v)}" title="${esc(toks[i].w)} → ${esc(toks[j].w)}: ${v.toFixed(3)}"></td>`;
+      }
+      html += '</tr>';
+    }
+    hm.innerHTML = html;
+    [...hm.querySelectorAll('tr[data-r]')].forEach(tr => {
+      tr.addEventListener('mouseenter', () => { selRow = +tr.dataset.r; highlight(); readAttn(); });
+    });
+  }
+
+  function highlight() {
+    [...hm.querySelectorAll('tr[data-r]')].forEach(tr =>
+      tr.classList.toggle('hl', +tr.dataset.r === selRow));
+    [...tokensBox.children].forEach((b, i) => b.classList.toggle('sel', i === selRow));
+  }
+
+  function readAttn() {
+    if (selRow < 0 || selRow >= toks.length) { attnRead.textContent = ''; return; }
+    const m = headMatrix(), n = toks.length;
+    const pairs = [];
+    for (let j = 0; j <= selRow; j++) pairs.push([j, m[selRow * n + j]]);
+    pairs.sort((a, b) => b[1] - a[1]);
+    const txt = pairs.slice(0, 3).map(([j, v]) => `“${toks[j].w}” ${(v * 100).toFixed(0)}%`).join(' · ');
+    const where = head >= 0 ? `layer ${layer + 1}, head ${head + 1}` : `layer ${layer + 1}, heads averaged`;
+    attnRead.innerHTML = `<b>“${esc(toks[selRow].w)}”</b> reads mostly from ${txt} <span style="color:var(--muted)">(${where})</span>`;
+  }
+
+  function topK(logits, temp, k) {
+    const arr = [];
+    for (let v = 0; v < V; v++) {
+      if (v === UNK) continue;                 // never sample <unk>
+      arr.push([v, logits[v] / temp]);
+    }
+    arr.sort((a, b) => b[1] - a[1]);
+    const top = arr.slice(0, k);
+    const max = top[0][1];
+    let sum = 0;
+    top.forEach(p => { p[2] = Math.exp(p[1] - max); sum += p[2]; });
+    top.forEach(p => { p[2] /= sum; });
+    return top;
+  }
+
+  function renderBars() {
+    const temp = +el('temp2').value;
+    const top = topK(state.logits, temp, 8);
+    bars.innerHTML = '';
+    top.forEach(([v, , p]) => {
+      const row = document.createElement('div');
+      row.className = 'bar';
+      row.innerHTML = `<span class="tk">${esc(VOCAB[v])}</span>
+        <span class="tr"><span class="fl" style="width:${Math.max(1, p * 100).toFixed(1)}%"></span></span>
+        <span class="pc">${(p * 100).toFixed(1)}%</span>`;
+      bars.appendChild(row);
+    });
+  }
+
+  function sampleFrom(logits, temp, k) {
+    const top = topK(logits, temp, k);
+    let r = Math.random(), acc = 0;
+    for (const [v, , p] of top) { acc += p; if (r <= acc) return { id: v, p }; }
+    return { id: top[0][0], p: top[0][2] };
+  }
+
+  /* ---------- generation ---------- */
+  let stopFlag = false;
+  async function generate() {
+    stopFlag = false;
+    el('stop').hidden = false;
+    const temp = +el('temp').value, k = +el('topk').value, n = +el('len').value;
+    const ids = toks.map(t => t.id);
+    const out = el('gen-out');
+    out.textContent = toks.map(t => t.w).join(' ');
+    for (let i = 0; i < n && !stopFlag; i++) {
+      const st = forward(ids.slice(-CTX));
+      const { id } = sampleFrom(st.logits, temp, k);
+      ids.push(id);
+      out.textContent = ids.map(x => VOCAB[x]).join(' ');
+      await new Promise(r => setTimeout(r, 40));
+    }
+    el('stop').hidden = true;
+  }
+
+  const esc = (s) => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  /* ---------- wiring ---------- */
+  let timer = null;
+  el('prompt').addEventListener('input', (e) => {
+    prompt = e.target.value;
+    clearTimeout(timer);
+    timer = setTimeout(run, 130);
+  });
+  document.querySelectorAll('.hint').forEach(h => h.addEventListener('click', () => {
+    prompt = h.textContent; el('prompt').value = prompt; run();
+  }));
+  el('temp2').addEventListener('input', (e) => { el('temp2o').value = (+e.target.value).toFixed(2); renderBars(); });
+  el('temp').addEventListener('input', (e) => el('tempo').value = (+e.target.value).toFixed(2));
+  el('topk').addEventListener('input', (e) => el('topko').value = e.target.value);
+  el('len').addEventListener('input', (e) => el('leno').value = e.target.value);
+  el('sample').addEventListener('click', () => {
+    const { id, p } = sampleFrom(state.logits, +el('temp2').value, 40);
+    const box = el('sampled'); box.hidden = false;
+    box.textContent = `“${VOCAB[id]}”  (p = ${(p * 100).toFixed(1)}% after temperature)`;
+  });
+  el('greedy').addEventListener('click', () => {
+    const top = topK(state.logits, 1e-6, 1);
+    const box = el('sampled'); box.hidden = false;
+    box.textContent = `“${VOCAB[top[0][0]]}”  (argmax, p ≈ 100%)`;
+  });
+  el('run').addEventListener('click', generate);
+  el('stop').addEventListener('click', () => { stopFlag = true; });
+
+  const themeBtn = document.querySelector('.theme-toggle');
+  themeBtn.addEventListener('click', () => {
+    const root = document.documentElement;
+    const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('theme', next); } catch (e) {}
+    renderHeat();
+  });
+
+  /* ---------- boot ---------- */
+  el('fact-vocab').textContent = `vocab ${VOCAB.length}`;
+  el('fact-loss').textContent = `val loss ${W.valLoss.toFixed(2)}`;
+  ['prompt-card', 'attn-card', 'pred-card', 'gen-card', 'explain'].forEach(id => el(id).hidden = false);
+  el('loading').remove();
+  run();
+
+  // hook de depuração usado nos testes de paridade com o PyTorch
+  window.__tf = (text, opts) => {
+    const tk = tokenize(text || prompt);
+    const st = forward(tk.map(t => t.id));
+    const probs = topK(st.logits, 1, 1e9).map(([v, , p]) => [VOCAB[v], p]);
+    return { tokens: tk.map(t => t.w), ids: tk.map(t => t.id), top: probs.slice(0, 10),
+             attn: st.maps.map(layerMaps => layerMaps.map(m => Array.from(m))) };
+  };
+})();
+</script>
+</body>
+</html>
