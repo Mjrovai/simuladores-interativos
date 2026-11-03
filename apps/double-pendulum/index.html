@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pêndulo duplo — bancada</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,500;1,6..72,300&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0E1621; --grid:#1B2836; --paper:#E8E4DA; --muted:#8496A6;
+    --bob1:#7B9FD4; --bob2:#CE7E96; --brass:#C9A227; --rule:#2B3D4F;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--ink);color:var(--paper);
+    font-family:"IBM Plex Mono",ui-monospace,monospace;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 22px 60px}
+  header{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;
+    border-bottom:1px solid var(--rule);padding-bottom:14px;margin-bottom:22px}
+  h1{font-family:"Newsreader",serif;font-weight:300;font-size:2.05rem;margin:0}
+  h1 em{font-style:italic;color:var(--brass)}
+  .sub{color:var(--muted);font-size:.74rem;letter-spacing:.09em;text-transform:uppercase}
+  .stage{display:grid;grid-template-columns:1fr 300px;gap:26px;align-items:start}
+  @media(max-width:840px){.stage{grid-template-columns:1fr}}
+  .frame{position:relative;border:1px solid var(--rule);background:
+    linear-gradient(var(--grid) 1px,transparent 1px) 0 0/26px 26px,
+    linear-gradient(90deg,var(--grid) 1px,transparent 1px) 0 0/26px 26px,
+    radial-gradient(120% 90% at 50% 0%,#16232F 0%,#0B121B 100%);
+    box-shadow:inset 0 0 90px rgba(0,0,0,.55)}
+  canvas{display:block;width:100%;height:auto;touch-action:none;cursor:grab}
+  canvas.grabbing{cursor:grabbing}
+  .hint{position:absolute;left:12px;bottom:10px;font-size:.68rem;color:var(--muted);pointer-events:none}
+  .panel{display:flex;flex-direction:column;gap:20px}
+  .block{border:1px solid var(--rule);padding:14px 14px 16px}
+  .block h2{margin:0 0 12px;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);font-weight:500}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  button{font-family:inherit;font-size:.76rem;color:var(--paper);background:transparent;
+    border:1px solid var(--rule);padding:8px 12px;cursor:pointer;
+    transition:border-color .15s,color .15s,background .15s}
+  button:hover{border-color:var(--brass);color:var(--brass)}
+  button:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+  button.on{background:var(--brass);border-color:var(--brass);color:#0E1621}
+  button.wide{flex:1}
+  label.slider{display:block;margin-bottom:13px}
+  label.slider:last-child{margin-bottom:0}
+  label.slider .lab{display:flex;justify-content:space-between;font-size:.72rem;
+    color:var(--muted);margin-bottom:6px}
+  label.slider .val{color:var(--paper)}
+  input[type=range]{width:100%;-webkit-appearance:none;background:transparent;height:16px;margin:0}
+  input[type=range]::-webkit-slider-runnable-track{height:1px;background:var(--rule)}
+  input[type=range]::-moz-range-track{height:1px;background:var(--rule)}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;
+    border-radius:50%;background:var(--brass);margin-top:-5px}
+  input[type=range]::-moz-range-thumb{width:11px;height:11px;border:0;border-radius:50%;background:var(--brass)}
+  input[type=range]:disabled::-webkit-slider-thumb{background:var(--rule)}
+  input[type=range]:disabled::-moz-range-thumb{background:var(--rule)}
+  .read{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;font-size:.8rem}
+  .read dt{color:var(--muted)}
+  .read dd{margin:0;text-align:right;font-variant-numeric:tabular-nums}
+  .drift{color:var(--brass)}
+  .mode{display:flex;justify-content:space-between;align-items:baseline;
+    padding:7px 0;border-bottom:1px dashed var(--rule);font-size:.76rem}
+  .mode:last-child{border-bottom:0}
+  .mode b{font-weight:400;color:var(--muted)}
+  footer{margin-top:34px;padding-top:16px;border-top:1px solid var(--rule);
+    color:var(--muted);font-size:.76rem;line-height:1.65;max-width:74ch}
+  footer b{color:var(--paper);font-weight:400}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Pêndulo duplo — <em>bancada</em></h1>
+  <div class="sub">m₁ = m₂ = m · l₁ = l₂ = l · RK4 · dissipação de Rayleigh</div>
+</header>
+
+<div class="stage">
+  <div class="frame">
+    <canvas id="cv" width="1400" height="1000"></canvas>
+    <div class="hint">arraste as massas para posicionar o pêndulo</div>
+  </div>
+
+  <div class="panel">
+
+    <div class="block">
+      <h2>Controle</h2>
+      <div class="row" style="margin-bottom:10px">
+        <button id="play" class="wide on">pausar</button>
+        <button id="reset" class="wide">reiniciar</button>
+      </div>
+      <div class="row">
+        <button id="btnTrail" class="wide on">rastro</button>
+        <button id="btnTwin" class="wide">gêmeo</button>
+      </div>
+    </div>
+
+    <div class="block">
+      <h2>Atrito</h2>
+      <div class="row" style="margin-bottom:12px">
+        <button data-f="none" class="wide on">nenhum</button>
+        <button data-f="joint" class="wide">mancal</button>
+        <button data-f="drag" class="wide">ar</button>
+      </div>
+      <label class="slider">
+        <span class="lab"><span id="labB">coeficiente</span><span class="val" id="vb">0.00</span></span>
+        <input type="range" id="sb" min="0" max="0.60" step="0.01" value="0.10" disabled>
+      </label>
+    </div>
+
+    <div class="block">
+      <h2>Condição inicial</h2>
+      <label class="slider">
+        <span class="lab"><span>φ₁</span><span class="val" id="v1">120°</span></span>
+        <input type="range" id="s1" min="-180" max="180" step="1" value="120">
+      </label>
+      <label class="slider">
+        <span class="lab"><span>φ₂</span><span class="val" id="v2">120°</span></span>
+        <input type="range" id="s2" min="-180" max="180" step="1" value="120">
+      </label>
+      <label class="slider">
+        <span class="lab"><span>velocidade da simulação</span><span class="val" id="vsp">1.0×</span></span>
+        <input type="range" id="ssp" min="0.1" max="2" step="0.1" value="1">
+      </label>
+    </div>
+
+    <div class="block">
+      <h2>Regimes</h2>
+      <div class="row">
+        <button data-p="slow" class="wide">modo lento</button>
+        <button data-p="fast" class="wide">modo rápido</button>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button data-p="chaos" class="wide">caos</button>
+        <button data-p="flip" class="wide">giro completo</button>
+      </div>
+    </div>
+
+    <div class="block">
+      <h2>Leitura</h2>
+      <dl class="read">
+        <dt>φ₁</dt><dd id="r1">—</dd>
+        <dt>φ₂</dt><dd id="r2">—</dd>
+        <dt>tempo</dt><dd id="rt">—</dd>
+        <dt>energia E/mgl</dt><dd id="re">—</dd>
+        <dt id="ld">deriva ΔE</dt><dd id="rd" class="drift">—</dd>
+        <dt>separação gêmeo</dt><dd id="rs">—</dd>
+      </dl>
+    </div>
+
+    <div class="block">
+      <h2>Modos normais (φ pequeno)</h2>
+      <div class="mode"><b>em fase</b><span>ω₋ = √((2−√2)g/l)</span></div>
+      <div class="mode"><b>&nbsp;</b><span>φ₂ = +√2 φ₁</span></div>
+      <div class="mode"><b>oposição</b><span>ω₊ = √((2+√2)g/l)</span></div>
+      <div class="mode"><b>&nbsp;</b><span>φ₂ = −√2 φ₁</span></div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <b>Sem atrito</b> o sistema é conservativo: a energia é constante e a trajetória nunca se fecha nem se acalma. A "deriva ΔE" mede apenas o erro do integrador — se ela crescer, o que você vê já é numérico, não físico.<br><br>
+  <b>Com atrito</b> o sistema passa a ser dissipativo, e isso muda a categoria do problema. Toda trajetória, por mais caótica que comece, termina no mesmo lugar: as duas massas paradas na vertical. O caos vira <em>transiente</em> — sobrevive enquanto há energia para gastar. O mancal (torque proporcional à taxa relativa de cada articulação) e o arrasto do ar (força −cv em cada massa) não são equivalentes: o arrasto pune muito mais a massa externa, que é a que anda rápido, então o pêndulo tende a "endireitar" a segunda haste antes da primeira. Compare os dois com o mesmo coeficiente.
+</footer>
+
+</div>
+
+<script>
+(() => {
+  const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+  const G = 9.81, L = 1.0, M = 1.0;
+
+  let y = [], yT = [], t = 0, E0 = 0, running = true;
+  let trail = true, twin = false, speed = 1;
+  let friction = 'none', bcoef = 0.10;
+  const path = [], pathT = [], MAXPATH = 2600;
+  const d2r = d => d * Math.PI / 180, r2d = r => r * 180 / Math.PI;
+
+  // --- dinâmica: M(φ)·φ¨ = f(φ,φ̇) + Q_dissipativo -------------------------
+  // 2φ̈₁ + φ̈₂cosΔ = −φ̇₂²sinΔ − 2(g/l)sinφ₁ + q₁
+  //  φ̈₁cosΔ + φ̈₂ = +φ̇₁²sinΔ −  (g/l)sinφ₂ + q₂
+  function damping(s) {
+    if (friction === 'none' || bcoef === 0) return [0, 0];
+    const [a, da, b, db] = s, cd = Math.cos(a - b);
+    if (friction === 'joint')                       // R = ½b φ̇₁² + ½b(φ̇₂−φ̇₁)²
+      return [(-bcoef * da + bcoef * (db - da)) / (L * L),
+              (-bcoef * (db - da)) / (L * L)];
+    // 'drag': R = ½c(v₁²+v₂²)  →  Q = −c l²[2φ̇₁+φ̇₂cosΔ , φ̇₂+φ̇₁cosΔ]
+    return [-bcoef * (2 * da + db * cd), -bcoef * (db + da * cd)];
+  }
+  function deriv(s) {
+    const [a, da, b, db] = s;
+    const d = a - b, sd = Math.sin(d), cd = Math.cos(d);
+    const [q1, q2] = damping(s);
+    const f1 = -db * db * sd - 2 * (G / L) * Math.sin(a) + q1;
+    const f2 =  da * da * sd -     (G / L) * Math.sin(b) + q2;
+    const det = 2 - cd * cd;                        // ≥ 1, nunca singular
+    return [da, (f1 - cd * f2) / det, db, (2 * f2 - cd * f1) / det];
+  }
+  function rk4(s, h) {
+    const add = (u, v, k) => u.map((x, i) => x + k * v[i]);
+    const k1 = deriv(s), k2 = deriv(add(s, k1, h / 2)),
+          k3 = deriv(add(s, k2, h / 2)), k4 = deriv(add(s, k3, h));
+    return s.map((x, i) => x + h / 6 * (k1[i] + 2 * k2[i] + 2 * k3[i] + k4[i]));
+  }
+  function energy(s) {
+    const [a, da, b, db] = s;
+    const T = 0.5 * M * L * L * (2 * da * da + db * db + 2 * da * db * Math.cos(a - b));
+    const V = -M * G * L * (2 * Math.cos(a) + Math.cos(b));
+    return T + V;
+  }
+
+  // --- desenho ------------------------------------------------------------
+  const PIV = { x: cv.width / 2, y: 340 }, SCALE = 250;
+  const pos = s => {
+    const x1 = PIV.x + SCALE * L * Math.sin(s[0]), y1 = PIV.y + SCALE * L * Math.cos(s[0]);
+    return { x1, y1, x2: x1 + SCALE * L * Math.sin(s[2]), y2: y1 + SCALE * L * Math.cos(s[2]) };
+  };
+  function drawPendulum(s, alpha, c1, c2, rod) {
+    const p = pos(s);
+    ctx.globalAlpha = alpha; ctx.lineCap = 'round';
+    ctx.strokeStyle = rod; ctx.lineWidth = 7;
+    ctx.beginPath(); ctx.moveTo(PIV.x, PIV.y); ctx.lineTo(p.x1, p.y1); ctx.lineTo(p.x2, p.y2); ctx.stroke();
+    const bob = (x, yy, col) => {
+      ctx.beginPath(); ctx.arc(x, yy, 21, 0, 7); ctx.fillStyle = col; ctx.fill();
+      ctx.lineWidth = 2.5; ctx.strokeStyle = '#0E1621'; ctx.stroke();
+    };
+    bob(p.x1, p.y1, c1); bob(p.x2, p.y2, c2);
+    ctx.globalAlpha = 1;
+  }
+  function drawTrail(pts, col, alpha) {
+    if (pts.length < 2) return;
+    ctx.lineWidth = 2; ctx.lineJoin = 'round';
+    for (let i = 1; i < pts.length; i++) {
+      const f = i / pts.length;
+      ctx.globalAlpha = alpha * f * f; ctx.strokeStyle = col;
+      ctx.beginPath(); ctx.moveTo(pts[i-1][0], pts[i-1][1]); ctx.lineTo(pts[i][0], pts[i][1]); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  }
+  function render() {
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.fillStyle = '#2B3D4F';
+    ctx.fillRect(PIV.x - 470, PIV.y - 20, 940, 20);
+    ctx.setLineDash([9, 9]); ctx.lineWidth = 1.5; ctx.strokeStyle = '#37506A';
+    ctx.beginPath(); ctx.moveTo(PIV.x - 480, PIV.y); ctx.lineTo(PIV.x + 480, PIV.y);
+    ctx.moveTo(PIV.x, PIV.y); ctx.lineTo(PIV.x, PIV.y + 620); ctx.stroke();
+    ctx.setLineDash([]);
+    if (trail) { if (twin) drawTrail(pathT, '#C9A227', .55); drawTrail(path, '#CE7E96', .85); }
+    if (twin) drawPendulum(yT, .45, '#C9A227', '#C9A227', '#7A6519');
+    drawPendulum(y, 1, '#7B9FD4', '#CE7E96', '#E8E4DA');
+    ctx.beginPath(); ctx.arc(PIV.x, PIV.y, 8, 0, 7); ctx.fillStyle = '#E8E4DA'; ctx.fill();
+  }
+
+  // --- laço ---------------------------------------------------------------
+  const H = 0.0015;
+  let acc = 0, last = performance.now();
+  function loop(now) {
+    const dt = Math.min((now - last) / 1000, 0.05); last = now;
+    if (running) {
+      acc += dt * speed;
+      while (acc >= H) {
+        y = rk4(y, H); if (twin) yT = rk4(yT, H);
+        t += H; acc -= H;
+      }
+      const p = pos(y);
+      path.push([p.x2, p.y2]); if (path.length > MAXPATH) path.shift();
+      if (twin) { const q = pos(yT); pathT.push([q.x2, q.y2]); if (pathT.length > MAXPATH) pathT.shift(); }
+    }
+    render(); readout(); requestAnimationFrame(loop);
+  }
+  const wrapDeg = r => { let d = r2d(r) % 360; if (d > 180) d -= 360; if (d < -180) d += 360; return d; };
+  function readout() {
+    document.getElementById('r1').textContent = wrapDeg(y[0]).toFixed(1) + '°';
+    document.getElementById('r2').textContent = wrapDeg(y[2]).toFixed(1) + '°';
+    document.getElementById('rt').textContent = t.toFixed(2) + ' s';
+    const E = energy(y) / (M * G * L);
+    document.getElementById('re').textContent = E.toFixed(5);
+    const diss = friction !== 'none' && bcoef > 0;
+    document.getElementById('ld').textContent = diss ? 'energia perdida' : 'deriva ΔE';
+    document.getElementById('rd').textContent = diss
+      ? (E0 - E).toFixed(4) : (E - E0).toExponential(1);
+    document.getElementById('rs').textContent = twin
+      ? Math.hypot(y[0] - yT[0], y[2] - yT[2]).toExponential(2) + ' rad' : '—';
+  }
+
+  // --- estado / UI --------------------------------------------------------
+  const s1 = document.getElementById('s1'), s2 = document.getElementById('s2'),
+        ssp = document.getElementById('ssp'), sb = document.getElementById('sb');
+  function syncLabels() {
+    document.getElementById('v1').textContent = (+s1.value) + '°';
+    document.getElementById('v2').textContent = (+s2.value) + '°';
+    document.getElementById('vsp').textContent = (+ssp.value).toFixed(1) + '×';
+    document.getElementById('vb').textContent = friction === 'none' ? '—' : (+sb.value).toFixed(2);
+    document.getElementById('labB').textContent =
+      friction === 'joint' ? 'b — mancal' : friction === 'drag' ? 'c — arrasto' : 'coeficiente';
+  }
+  function setInitial(a, b) {
+    y = [d2r(a), 0, d2r(b), 0];
+    yT = [d2r(a) + d2r(0.001), 0, d2r(b), 0];
+    t = 0; E0 = energy(y) / (M * G * L);
+    path.length = 0; pathT.length = 0;
+    s1.value = a.toFixed(0); s2.value = b.toFixed(0); syncLabels();
+  }
+  [s1, s2].forEach(s => s.addEventListener('input', () => setInitial(+s1.value, +s2.value)));
+  ssp.addEventListener('input', () => { speed = +ssp.value; syncLabels(); });
+  sb.addEventListener('input', () => { bcoef = +sb.value; syncLabels(); });
+
+  document.querySelectorAll('[data-f]').forEach(b => b.onclick = () => {
+    document.querySelectorAll('[data-f]').forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+    friction = b.dataset.f;
+    sb.disabled = (friction === 'none');
+    bcoef = sb.disabled ? 0 : +sb.value;
+    syncLabels();
+  });
+
+  const btnPlay = document.getElementById('play');
+  btnPlay.onclick = () => {
+    running = !running;
+    btnPlay.textContent = running ? 'pausar' : 'continuar';
+    btnPlay.classList.toggle('on', running);
+    last = performance.now();
+  };
+  document.getElementById('reset').onclick = () => setInitial(+s1.value, +s2.value);
+  const btnTrail = document.getElementById('btnTrail');
+  btnTrail.onclick = () => { trail = !trail; btnTrail.classList.toggle('on', trail); };
+  const btnTwin = document.getElementById('btnTwin');
+  btnTwin.onclick = () => {
+    twin = !twin; btnTwin.classList.toggle('on', twin);
+    if (twin) { yT = [y[0] + d2r(0.001), y[1], y[2], y[3]]; pathT.length = 0; }
+  };
+
+  const S2 = Math.SQRT2;
+  const PRESET = { slow: [8, 8 * S2], fast: [8, -8 * S2], chaos: [120, 120], flip: [170, -20] };
+  document.querySelectorAll('[data-p]').forEach(b => b.onclick = () => {
+    const [a, c] = PRESET[b.dataset.p];
+    setInitial(Math.round(a), Math.round(c));
+    running = true; btnPlay.textContent = 'pausar'; btnPlay.classList.add('on');
+  });
+
+  // --- arrastar -----------------------------------------------------------
+  let drag = null;
+  const toCv = e => {
+    const r = cv.getBoundingClientRect();
+    return { x: (e.clientX - r.left) * cv.width / r.width,
+             y: (e.clientY - r.top) * cv.height / r.height };
+  };
+  cv.addEventListener('pointerdown', e => {
+    const m = toCv(e), p = pos(y);
+    if (Math.hypot(m.x - p.x1, m.y - p.y1) < 40) drag = 1;
+    else if (Math.hypot(m.x - p.x2, m.y - p.y2) < 40) drag = 2;
+    if (drag) { cv.setPointerCapture(e.pointerId); cv.classList.add('grabbing'); }
+  });
+  cv.addEventListener('pointermove', e => {
+    if (!drag) return;
+    const m = toCv(e), p = pos(y);
+    let a = wrapDeg(y[0]), b = wrapDeg(y[2]);
+    if (drag === 1) a = r2d(Math.atan2(m.x - PIV.x, m.y - PIV.y));
+    else            b = r2d(Math.atan2(m.x - p.x1, m.y - p.y1));
+    setInitial(Math.round(a), Math.round(b));
+  });
+  const drop = () => { drag = null; cv.classList.remove('grabbing'); };
+  cv.addEventListener('pointerup', drop);
+  cv.addEventListener('pointercancel', drop);
+
+  setInitial(120, 120); syncLabels(); requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

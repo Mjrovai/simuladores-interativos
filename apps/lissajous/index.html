@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Osciloscópio — Figuras de Lissajous</title>
+<style>
+  :root {
+    --phosphor: #7dffa0;
+    --phosphor-dim: rgba(125, 255, 160, 0.25);
+    --panel-hi: #4a4e55;
+    --panel-lo: #24262a;
+    --text: #cfd4db;
+    --label: #9aa0a8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: #101114;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 12px;
+    font-family: "Segoe UI", Arial, sans-serif;
+  }
+  .scope {
+    width: 100%;
+    max-width: 920px;
+    background: linear-gradient(165deg, #40444a 0%, #2a2d31 50%, #1e2023 100%);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 14px 40px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.09);
+    display: grid;
+    grid-template-columns: 1fr 260px;
+    gap: 18px;
+  }
+  @media (max-width: 700px) { .scope { grid-template-columns: 1fr; } }
+
+  .scope-header {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    padding-bottom: 10px;
+  }
+  .scope-header h1 {
+    margin: 0;
+    font-size: 15px;
+    letter-spacing: 3px;
+    color: var(--text);
+    font-weight: 700;
+  }
+  .scope-header .model {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--label);
+  }
+  .led {
+    display: inline-block;
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--phosphor);
+    box-shadow: 0 0 10px var(--phosphor);
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+
+  /* ---------- CRT ---------- */
+  .crt-frame {
+    background: #0b0b0c;
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: inset 0 0 24px #000, 0 0 0 3px #060607;
+    position: relative;
+  }
+  canvas {
+    display: block;
+    width: 100%;
+    border-radius: 8px;
+    background: radial-gradient(ellipse at center, #0b1e10 0%, #05110a 70%, #030a05 100%);
+    cursor: crosshair;
+  }
+  .crt-label {
+    position: absolute;
+    bottom: 16px;
+    right: 24px;
+    color: #62666c;
+    font-size: 10px;
+    letter-spacing: 2px;
+    font-weight: 600;
+  }
+
+  /* ---------- Painel de controles ---------- */
+  .panel { display: flex; flex-direction: column; gap: 10px; }
+  .section {
+    background: rgba(0,0,0,.28);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .section h2 {
+    margin: 0 0 8px;
+    font-size: 10px;
+    letter-spacing: 1.8px;
+    color: var(--label);
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .row:last-child { margin-bottom: 0; }
+  .row label { color: var(--text); font-size: 11px; width: 62px; flex-shrink: 0; }
+  .row .val {
+    color: var(--phosphor);
+    font-family: "Courier New", monospace;
+    font-size: 11px;
+    width: 54px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  input[type=range] {
+    flex: 1;
+    min-width: 0; /* permite encolher dentro do painel (os valores saíam da moldura) */
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    border-radius: 2px;
+    background: #4a4e55;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 17px; height: 17px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #dbdfe5, #7d838c 60%, #4b4f56);
+    border: 1px solid #1d1f22;
+    box-shadow: 0 2px 4px rgba(0,0,0,.6);
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 17px; height: 17px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #dbdfe5, #7d838c 60%, #4b4f56);
+    border: 1px solid #1d1f22;
+    box-shadow: 0 2px 4px rgba(0,0,0,.6);
+  }
+  input[type=range]:focus-visible { outline: 2px solid var(--phosphor); outline-offset: 3px; }
+
+  .presets { display: flex; flex-wrap: wrap; gap: 6px; }
+  .presets button {
+    background: linear-gradient(180deg, #474b52, #2c2f34);
+    color: var(--text);
+    border: 1px solid #1a1c1f;
+    border-radius: 5px;
+    padding: 5px 10px;
+    font-size: 11px;
+    font-family: "Courier New", monospace;
+    cursor: pointer;
+    box-shadow: 0 2px 3px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.1);
+  }
+  .presets button:hover { background: linear-gradient(180deg, #52565e, #33363c); }
+  .presets button:active { transform: translateY(1px); box-shadow: 0 1px 1px rgba(0,0,0,.5); }
+  .presets button:focus-visible { outline: 2px solid var(--phosphor); outline-offset: 2px; }
+
+  .readout {
+    color: var(--phosphor);
+    font-family: "Courier New", monospace;
+    font-size: 12px;
+    background: #04120a;
+    border: 1px solid #0e2a18;
+    border-radius: 5px;
+    padding: 7px 8px;
+    text-align: center;
+    letter-spacing: 1px;
+    text-shadow: 0 0 6px var(--phosphor-dim);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    /* a animação do feixe continua (é o propósito do simulador),
+       mas a varredura automática de fase começa desligada por padrão */
+  }
+</style>
+</head>
+<body>
+
+<div class="scope">
+  <div class="scope-header">
+    <h1><span class="led"></span>LISSAJOUS&nbsp;SCOPE</h1>
+    <span class="model">MODO X-Y · CH1 → HORIZ · CH2 → VERT</span>
+  </div>
+
+  <div class="crt-frame">
+    <canvas id="crt" width="580" height="480"></canvas>
+    <div class="crt-label">CRT · FÓSFORO P1</div>
+  </div>
+
+  <div class="panel">
+    <div class="section">
+      <h2>Canal X — Horizontal</h2>
+      <div class="row">
+        <label for="fx">Freq. fx</label>
+        <input type="range" id="fx" min="1" max="9" step="1" value="3">
+        <span class="val" id="fxv">3</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Canal Y — Vertical</h2>
+      <div class="row">
+        <label for="fy">Freq. fy</label>
+        <input type="range" id="fy" min="1" max="9" step="1" value="2">
+        <span class="val" id="fyv">2</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Fase</h2>
+      <div class="row">
+        <label for="ph">δ (graus)</label>
+        <input type="range" id="ph" min="0" max="360" step="1" value="90">
+        <span class="val" id="phv">90°</span>
+      </div>
+      <div class="row">
+        <label for="sweep">Deriva</label>
+        <input type="range" id="sweep" min="0" max="45" step="1" value="0">
+        <span class="val" id="sweepv">off</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Traço</h2>
+      <div class="row">
+        <label for="persist">Persist.</label>
+        <input type="range" id="persist" min="10" max="98" step="1" value="90">
+        <span class="val" id="persistv">90%</span>
+      </div>
+      <div class="row">
+        <label for="bright">Intens.</label>
+        <input type="range" id="bright" min="20" max="100" step="1" value="85">
+        <span class="val" id="brightv">85%</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Presets fx : fy</h2>
+      <div class="presets">
+        <button data-p="1,1,90">1:1</button>
+        <button data-p="1,2,90">1:2</button>
+        <button data-p="2,3,90">2:3</button>
+        <button data-p="3,2,90">3:2</button>
+        <button data-p="3,4,90">3:4</button>
+        <button data-p="4,5,90">4:5</button>
+        <button data-p="5,4,0">5:4</button>
+        <button data-p="5,6,90">5:6</button>
+      </div>
+    </div>
+
+    <div class="readout" id="readout">fx:fy = 3:2 · δ = 90°</div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  const cv = document.getElementById("crt");
+  const ctx = cv.getContext("2d");
+  const W = cv.width, H = cv.height;
+  const cx = W / 2, cy = H / 2;
+  const Ax = W * 0.40, Ay = H * 0.40;
+
+  // x(t) = Ax·sin(fx·t + δ)   |   y(t) = Ay·sin(fy·t)
+  const S = {
+    fx: 3,
+    fy: 2,
+    phase: Math.PI / 2, // δ em radianos
+    sweep: 0,           // deriva de fase, graus por segundo
+    persist: 0.90,      // fração do traço que sobrevive a cada quadro
+    bright: 0.85
+  };
+
+  const $ = (id) => document.getElementById(id);
+
+  function mdc(a, b) { return b === 0 ? a : mdc(b, a % b); }
+
+  function updateReadout() {
+    const g = mdc(S.fx, S.fy);
+    const deg = ((Math.round(S.phase * 180 / Math.PI) % 360) + 360) % 360;
+    $("readout").textContent =
+      "fx:fy = " + (S.fx / g) + ":" + (S.fy / g) + " · δ = " + deg + "°";
+  }
+
+  function bind(id, fn) {
+    $(id).addEventListener("input", (e) => {
+      fn(parseFloat(e.target.value));
+      updateReadout();
+    });
+  }
+
+  bind("fx", (v) => { S.fx = v; $("fxv").textContent = v; });
+  bind("fy", (v) => { S.fy = v; $("fyv").textContent = v; });
+  bind("ph", (v) => { S.phase = v * Math.PI / 180; $("phv").textContent = v + "°"; });
+  bind("sweep", (v) => { S.sweep = v; $("sweepv").textContent = v === 0 ? "off" : v + "°/s"; });
+  bind("persist", (v) => { S.persist = v / 100; $("persistv").textContent = v + "%"; });
+  bind("bright", (v) => { S.bright = v / 100; $("brightv").textContent = v + "%"; });
+
+  document.querySelectorAll(".presets button").forEach((b) => {
+    b.addEventListener("click", () => {
+      const [a, c, d] = b.dataset.p.split(",").map(Number);
+      S.fx = a; S.fy = c; S.phase = d * Math.PI / 180;
+      $("fx").value = a; $("fxv").textContent = a;
+      $("fy").value = c; $("fyv").textContent = c;
+      $("ph").value = d; $("phv").textContent = d + "°";
+      updateReadout();
+    });
+  });
+
+  function drawGrid() {
+    ctx.save();
+    ctx.globalCompositeOperation = "source-over";
+    ctx.lineWidth = 1;
+
+    // retícula 10 x 10 divisões
+    ctx.strokeStyle = "rgba(90, 200, 120, 0.12)";
+    for (let i = 1; i < 10; i++) {
+      const x = i * (W / 10), y = i * (H / 10);
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    }
+
+    // eixos centrais com subdivisões (5 ticks por divisão)
+    ctx.strokeStyle = "rgba(90, 200, 120, 0.28)";
+    ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, H); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(W, cy); ctx.stroke();
+    for (let i = 0; i < 50; i++) {
+      const x = i * (W / 50), y = i * (H / 50);
+      ctx.beginPath(); ctx.moveTo(x, cy - 3); ctx.lineTo(x, cy + 3); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx - 3, y); ctx.lineTo(cx + 3, y); ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  let last = performance.now();
+  let beamT = 0; // parâmetro do feixe ao longo da curva
+
+  function frame(now) {
+    const dt = Math.min((now - last) / 1000, 0.05);
+    last = now;
+
+    // deriva de fase (faz a figura "girar", como duas fontes ligeiramente dessintonizadas)
+    if (S.sweep > 0) {
+      S.phase += S.sweep * Math.PI / 180 * dt;
+      const deg = ((Math.round(S.phase * 180 / Math.PI) % 360) + 360) % 360;
+      $("ph").value = deg;
+      $("phv").textContent = deg + "°";
+      updateReadout();
+    }
+
+    // decaimento do fósforo: um véu escuro semitransparente a cada quadro
+    ctx.globalCompositeOperation = "source-over";
+    ctx.fillStyle = "rgba(4, 14, 8, " + (1 - S.persist).toFixed(3) + ")";
+    ctx.fillRect(0, 0, W, H);
+
+    drawGrid();
+
+    // novo segmento do feixe
+    ctx.globalCompositeOperation = "lighter";
+    const cyclesPerSec = 2.2;
+    const span = cyclesPerSec * dt * 2 * Math.PI;
+    const steps = 280;
+
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = "rgba(125, 255, 160, " + (0.8 * S.bright).toFixed(3) + ")";
+    ctx.strokeStyle = "rgba(140, 255, 170, " + (0.85 * S.bright).toFixed(3) + ")";
+
+    ctx.beginPath();
+    for (let i = 0; i <= steps; i++) {
+      const t = beamT + span * (i / steps);
+      const x = cx + Ax * Math.sin(S.fx * t + S.phase);
+      const y = cy - Ay * Math.sin(S.fy * t);
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+
+    // ponto brilhante na cabeça do feixe
+    beamT += span;
+    const hx = cx + Ax * Math.sin(S.fx * beamT + S.phase);
+    const hy = cy - Ay * Math.sin(S.fy * beamT);
+    ctx.shadowBlur = 14;
+    ctx.fillStyle = "rgba(215, 255, 225, " + S.bright.toFixed(3) + ")";
+    ctx.beginPath();
+    ctx.arc(hx, hy, 2.4, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    requestAnimationFrame(frame);
+  }
+
+  // fundo inicial
+  ctx.fillStyle = "#04120a";
+  ctx.fillRect(0, 0, W, H);
+  drawGrid();
+  updateReadout();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
