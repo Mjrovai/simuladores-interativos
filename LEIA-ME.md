@@ -21,6 +21,7 @@ absolutos:
 | `apps/fog-mpm-3d/` | `import` de módulos ES (Three.js) |
 | `apps/v2-a4/` | idem |
 | `apps/color-palette/` | export do Next.js com `basePath` absoluto |
+| `apps/space-race/` | módulos ES (Three.js) + textura do globo |
 
 ## Publicado
 
