@@ -263,10 +263,10 @@ const EVENTS = [
   ['1959-01-02','ussr','baikonur','Luna 1',"First spacecraft to escape Earth's gravity and pass close to the Moon."],
   ['1959-09-13','ussr','baikonur','Luna 2','First human-made object to reach another world: it impacted the Moon carrying Soviet pennants.','lunar-impact'],
   ['1959-10-04','ussr','baikonur','Luna 3','First photographs of the far side. The images were developed on board and radioed home.','far-side'],
-  ['1961-04-12','ussr','baikonur','Vostok 1 · Gagarin','One orbit, 108 minutes, first human in space. The flight was automatic; Gagarin had no manual control.','human'],
-  ['1961-05-05','usa','cape','Freedom 7 · Shepard','A 15-minute suborbital hop. The US puts a man in space, but not yet in orbit.','us-human'],
+  ['1961-04-12','ussr','baikonur','Vostok 1 · Gagarin','Vostok 3KA-3: one orbit, 108 minutes, first human in space. The flight was automatic; Gagarin had no manual control.','human'],
+  ['1961-05-05','usa','cape','Freedom 7 · Shepard','Mercury-Redstone 3: a 15-minute suborbital hop, 187 km up. Shepard is the first American in space — but not yet in orbit.','us-human'],
   ['1961-08-06','ussr','baikonur','Vostok 2 · Titov','First flight longer than a day: 25 hours, 17 orbits. Titov also took the first sleep in space.','day'],
-  ['1962-02-20','usa','cape','Friendship 7 · Glenn','First American in orbit: three circuits in 4 h 55 min, with a heat-shield scare on re-entry.','us-orbit'],
+  ['1962-02-20','usa','cape','Friendship 7 · Glenn','Mercury-Atlas 6: Glenn is the first American to orbit — three circuits in 4 h 55 min, with a heat-shield scare on re-entry.','us-orbit'],
   ['1963-06-16','ussr','baikonur','Vostok 6 · Tereshkova','First woman in space, 48 orbits — more than any American had flown at that point.','woman'],
   ['1964-10-12','ussr','baikonur','Voskhod 1','First crew of three, squeezed into a converted Vostok without spacesuits.','multi'],
   ['1965-03-18','ussr','baikonur','Voskhod 2 · Leonov','First spacewalk: 12 minutes outside, and a suit that stiffened so much he had to bleed air to get back in.','eva'],
@@ -319,6 +319,7 @@ const cssVar = (n) => getComputedStyle(document.documentElement).getPropertyValu
 /* ======================= estado ======================= */
 let t = START, playing = false, speed = 1, selected = null, cardEvent = null, latest = null,
     dwellUntil = 0, eventPtr = 0, lastDone = -1, arcKey = null;
+const syncPtr = () => { eventPtr = ts.filter(x => x <= t).length; };
 
 /* ======================= globo 3D ======================= */
 const host = $('globe3d'), labelsBox = $('labels');
@@ -355,8 +356,8 @@ const grid = new THREE.LineSegments(
 );
 globe.add(grid);
 
-scene.add(new THREE.AmbientLight(0xffffff, 0.95));
-const sun = new THREE.DirectionalLight(0xfff3e6, 1.15);
+scene.add(new THREE.AmbientLight(0xffffff, 1.15));
+const sun = new THREE.DirectionalLight(0xfff3e6, 1.0);
 sun.position.set(3, 1.6, 2.4);
 scene.add(sun);
 const rim = new THREE.DirectionalLight(0x6fa8dc, 0.5);
@@ -401,10 +402,11 @@ for (const key in SITES) {
 /* ---- arcos ---- */
 const arcGroup = new THREE.Group();
 globe.add(arcGroup);
-let arcLine = null, arcDot = null, moonMesh = null, moonLine = null, cislunarSite = null;
+let arcLine = null, arcDot = null, moonMesh = null, moonLine = null, cislunarSite = null,
+    cislunarUntil = 0, rotBoost = 0;
 
 function clearArcs() {
-  cislunarSite = null;
+  if (performance.now() >= cislunarUntil) cislunarSite = null;
   [arcLine, arcDot, moonLine].forEach(o => { if (o) { arcGroup.remove(o); o.geometry?.dispose?.(); } });
   arcLine = arcDot = moonLine = null;
   if (moonMesh) moonMesh.visible = false;
@@ -435,9 +437,10 @@ function buildArc(ev) {
     arcGroup.add(arcLine);
     arcLine.userData.ring = {inc, lon, lat, color};
   } else {
-    // missão translunar: desenhada em 2D sobre o canvas (ver drawSky)
+    // missão translunar: desenhada em 2D sobre o canvas (ver drawSky) e mantida por 9 s
     arcLine = { userData: { moon: true, site: [lat, lon] } };
     cislunarSite = [lat, lon];
+    cislunarUntil = performance.now() + 9000;
   }
 
   if (!arcDot) {
@@ -471,36 +474,59 @@ const counts = {baikonur:0, cape:0, vandenberg:0};
 const sky = $('sky'), skx = sky.getContext('2d');
 function drawSky(now) {
   const w = host.clientWidth, h = host.clientHeight;
-  if (sky.width !== Math.round(w * (devicePixelRatio||1)) ) {
-    const dpr = Math.min(devicePixelRatio || 1, 2);
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  if (sky.width !== Math.round(w * dpr)) {
     sky.width = Math.round(w * dpr); sky.height = Math.round(h * dpr);
   }
-  const dpr = Math.min(devicePixelRatio || 1, 2);
   skx.setTransform(dpr, 0, 0, dpr, 0, 0);
   skx.clearRect(0, 0, w, h);
   if (!cislunarSite) return;
+  if (playing && now > cislunarUntil) { cislunarSite = null; return; }
 
   const [lat, lon] = cislunarSite;
+  const remain = cislunarUntil - now;
+  const fade = Math.max(0, Math.min(1, remain / 1400));
+  if (fade <= 0) { cislunarSite = null; return; }
   const v = ll2v(lat, lon, R*1.01).applyMatrix4(globe.matrixWorld).project(camera);
   const sx = (v.x*0.5+0.5)*w, sy = (-v.y*0.5+0.5)*h;
-  const mx = w*0.80, my = h*0.18;                  // lua em posição de tela fixa
-  const cxq = (sx+mx)/2, cyq = Math.min(sy, my) - h*0.14;
+  const mx = w*0.80, my = h*0.20;
+  const q = (t,a,b,c) => (1-t)*(1-t)*a + 2*(1-t)*t*b + t*t*c;
 
-  skx.strokeStyle = 'rgba(243,112,53,.75)';
-  skx.lineWidth = 1.6; skx.setLineDash([5, 5]);
-  skx.beginPath(); skx.moveTo(sx, sy); skx.quadraticCurveTo(cxq, cyq, mx, my); skx.stroke();
+  // ida (curva por cima) e volta (curva por baixo)
+  const c1x = (sx+mx)/2, c1y = Math.min(sy,my) - h*0.16;
+  const c2x = (sx+mx)/2, c2y = Math.max(sy,my) + h*0.10;
+
+  skx.lineWidth = 1.6;
+  skx.setLineDash([5,5]);
+  skx.strokeStyle = `rgba(243,112,53,${0.85*fade})`;
+  skx.beginPath(); skx.moveTo(sx,sy); skx.quadraticCurveTo(c1x,c1y,mx,my); skx.stroke();
+  skx.strokeStyle = `rgba(127,178,224,${0.55*fade})`;
+  skx.beginPath(); skx.moveTo(mx,my); skx.quadraticCurveTo(c2x,c2y,sx,sy); skx.stroke();
   skx.setLineDash([]);
 
+  // lua
   const mr = Math.max(9, w*0.022);
-  const g = skx.createRadialGradient(mx - mr*0.3, my - mr*0.3, mr*0.15, mx, my, mr);
-  g.addColorStop(0, '#EDEFF2'); g.addColorStop(1, '#A9B0B9');
-  skx.fillStyle = g; skx.beginPath(); skx.arc(mx, my, mr, 0, 7); skx.fill();
+  const g = skx.createRadialGradient(mx-mr*0.3, my-mr*0.3, mr*0.15, mx, my, mr);
+  g.addColorStop(0,'#EDEFF2'); g.addColorStop(1,'#A9B0B9');
+  skx.globalAlpha = fade; skx.fillStyle = g; skx.beginPath(); skx.arc(mx,my,mr,0,7); skx.fill();
 
-  const u = (now % 9000) / 9000;
-  const bx = (1-u)*(1-u)*sx + 2*(1-u)*u*cxq + u*u*mx;
-  const by = (1-u)*(1-u)*sy + 2*(1-u)*u*cyq + u*u*my;
-  skx.fillStyle = '#F37035';
-  skx.beginPath(); skx.arc(bx, by, 3.4, 0, 7); skx.fill();
+  // etiquetas das pernas
+  skx.font = `600 ${Math.max(9, w*0.015)}px ${getComputedStyle(document.body).fontFamily}`;
+  const px1 = q(0.55, sx, c1x, mx), py1 = q(0.55, sy, c1y, my);
+  skx.fillStyle = `rgba(243,112,53,${0.95*fade})`;
+  skx.fillText('outbound', px1 + 6, py1 - 10);
+  const px2 = q(0.72, mx, c2x, sx), py2 = q(0.72, my, c2y, sy);
+  skx.fillStyle = `rgba(127,178,224,${0.9*fade})`;
+  skx.fillText('return', px2 + 6, py2 + 18);
+
+  // pontos: ida e volta em fases opostas
+  const u = (now % 8000) / 8000;
+  const ox = q(u, sx, c1x, mx), oy = q(u, sy, c1y, my);
+  skx.fillStyle = '#F37035'; skx.beginPath(); skx.arc(ox, oy, 3.6, 0, 7); skx.fill();
+  skx.globalAlpha = 1;
+  const ru = (u + 0.5) % 1;
+  const rx = q(ru, mx, c2x, sx), ry = q(ru, my, c2y, sy);
+  skx.fillStyle = '#7FB2E0'; skx.beginPath(); skx.arc(rx, ry, 3.2, 0, 7); skx.fill();
 }
 
 /* ======================= linha do tempo ======================= */
@@ -599,7 +625,7 @@ function render(now = t, rebuildArc = false) {
     $('m-chip').innerHTML = rec ? `<span class="chip">${rec.title}</span>` : '';
     setPhoto(ev);
     cardEvent = ev;
-    if (rebuildArc || ev.name !== arcKey) { arcKey = ev.name; buildArc(ev); }
+    if (rebuildArc || ev.name !== arcKey) { arcKey = ev.name; buildArc(ev); rotBoost = performance.now() + 500; }
     focusLon = SITES[ev.site][1];
   } else if (upcoming) {
     const days = Math.round((norm(upcoming.date) - t) / DAY);
@@ -613,6 +639,7 @@ function render(now = t, rebuildArc = false) {
     if (rebuildArc || arcKey !== null) { arcKey = null; clearArcs(); }
     focusLon = SITES[upcoming.site][1];
   }
+  if (cislunarSite && performance.now() < cislunarUntil) focusLon = cislunarSite[1];
   drawTimeline();
   updateLabels();
 }
@@ -670,11 +697,13 @@ host.addEventListener('pointerup', (e) => {
 /* ======================= controles ======================= */
 $('scrub').addEventListener('input', (e) => {
   playing = false; $('play').textContent = '▶ Play';
-  selected = null;
+  selected = null; dwellUntil = 0;
   render(START + SPAN * (+e.target.value / 1000), true);
+  syncPtr();
 });
 $('play').addEventListener('click', () => {
-  if (t >= END - DAY) { t = START; eventPtr = 0; }
+  if (t >= END - DAY) { t = START; eventPtr = 0; render(START, true); }
+  if (!playing) syncPtr();          // retomar de onde o scrub deixou
   playing = !playing; dwellUntil = 0;
   $('play').textContent = playing ? '⏸ Pause' : '▶ Play';
 });
@@ -691,8 +720,9 @@ document.querySelectorAll('#spd button').forEach(b => b.addEventListener('click'
 tlC.addEventListener('click', (e) => {
   const r = tlC.getBoundingClientRect();
   const frac = (e.clientX - r.left) / r.width;
-  playing = false; $('play').textContent = '▶ Play'; selected = null;
+  playing = false; $('play').textContent = '▶ Play'; selected = null; dwellUntil = 0;
   render(START + SPAN * Math.max(0, Math.min(1, frac)), true);
+  syncPtr();
 });
 document.querySelector('.tgl').addEventListener('click', () => {
   const root = document.documentElement;
@@ -719,7 +749,10 @@ function tick(now) {
       // pausa curta na data do evento
     } else if (eventPtr < EVENTS.length && ts[eventPtr] <= t) {
       t = ts[eventPtr];
-      dwellUntil = now + DWELL;
+      const lunar = EVENTS[eventPtr] && (EVENTS[eventPtr].name.startsWith('Luna') ||
+        (EVENTS[eventPtr].name.startsWith('Apollo') && !['Apollo 1','Apollo–Soyuz'].includes(EVENTS[eventPtr].name)));
+      dwellUntil = now + (lunar ? DWELL * 2.2 : DWELL);
+      rotBoost = now + 450;
       eventPtr++;
       render(t, true);
       if (t >= END) { playing = false; $('play').textContent = '▶ Play'; }
@@ -733,9 +766,14 @@ function tick(now) {
   if (!dragging) {
     const want = lonToRot(focusLon);
     let d = ((want - rotY + Math.PI) % (2*Math.PI) + 2*Math.PI) % (2*Math.PI) - Math.PI;
-    rotY += d * (playing ? 0.075 : 0.06);
+    rotY += d * (now < rotBoost ? 0.22 : (playing ? 0.075 : 0.06));
     if (!playing && Math.abs(d) < 0.004) rotY += dt * 0.00002;   // deriva mínima
     globe.rotation.y = rotY;
+  }
+
+  if (arcLine && arcLine.material) {
+    const lunarOn = cislunarSite && performance.now() < cislunarUntil;
+    arcLine.material.opacity = lunarOn ? 0.22 : 0.9;
   }
 
   if (arcLine && arcDot) {
