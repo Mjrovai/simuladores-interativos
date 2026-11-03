@@ -3,7 +3,7 @@
 Coleção de laboratórios que rodam direto no navegador — 3D, CPU, IA, eletrônica, história e jogos.
 Sem instalação, sem build, sem dependências externas de CDN: cada app carrega tudo o que precisa do próprio repositório.
 
-**Abrir a galeria:** <https://mjrovai.github.io/simuladores-interativos/>
+**Abrir a galeria:** <https://mjrovai.github.io/simuladores-interativos/> — tema claro/escuro e idioma PT/EN, seguindo a identidade visual de [mjrovai.com](https://mjrovai.com/).
 
 ## O que tem aqui
 
