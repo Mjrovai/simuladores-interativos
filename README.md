@@ -16,11 +16,9 @@ Sem instalação, sem build, sem dependências externas de CDN: cada app carrega
 | **Windows 95** | Boot com BIOS, desktop, menu Iniciar com barra lateral, janelas arrastáveis, Notepad, Paint e Minesweeper jogável, até a tela de desligar | [`apps/windows95/`](apps/windows95/) |
 | **Macintosh 128K · 1984** | O gabinete original com chave de força: System Disk, Finder 1.0, MacPaint, Calculator, Note Pad, Puzzle e Alarm Clock em 1 bit | [`apps/mac1984/`](apps/mac1984/) |
 | **Simulador de Deep Learning** | Neurônio, ativações, forward e backprop com treino de XOR ao vivo; fronteira de decisão e curva de aprendizado. Bilíngue PT/EN | [`apps/deep-learning/`](apps/deep-learning/) |
-| **Transformer em 3 minutos** | Briefing executivo do mecanismo de atenção com demonstração interativa | [`apps/transformer-executivo/`](apps/transformer-executivo/) |
 | **Preditor de LLM local** | Tokens/s, TTFT, memória e energia de 23 modelos e 12 quantizações em Apple Silicon | [`apps/llm-predictor/`](apps/llm-predictor/) |
 | **Color Palette Generator** | Paletas com harmonia, trava de cores, contraste WCAG e exportação CSS/Tailwind/JSON/SVG (Next.js exportado) | [`apps/color-palette/`](apps/color-palette/) |
 | **Polarização de Transistores** | Ponto de operação do BJT: reta de carga, métodos de polarização e calculadoras interativas | [`apps/polarizacao-transistores/`](apps/polarizacao-transistores/) |
-| **A Corrida Espacial** | EUA × URSS, 1957–1975: protagonistas, marcos e legado | [`apps/corrida-espacial/`](apps/corrida-espacial/) · [EN](apps/corrida-espacial-en/) |
 | **Tetris** | O clássico em um arquivo, teclado e toque | [`apps/tetris/`](apps/tetris/) |
 | **Paciência · Klondike** | Jogo de cartas com arrastar e soltar | [`apps/paciencia/`](apps/paciencia/) |
 | **Osciloscópio · Lissajous** | Modo X-Y com fósforo P1: frequências, fase, deriva e persistência; presets 1:1, 3:2 e 5:4 | [`apps/lissajous/`](apps/lissajous/) |
