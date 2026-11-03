@@ -419,18 +419,21 @@ function buildArc(ev) {
     (ev.name.startsWith('Apollo') && ev.name !== 'Apollo 1' && ev.name !== 'Apollo–Soyuz');
 
   if (!cislunar) {
+    // órbita: anel inclinado que passa perto do sítio + satélite percorrendo
+    const inc = THREE.MathUtils.degToRad(ev.site === 'baikonur' ? 51.6 : ev.site === 'cape' ? 28.5 : 90);
     const pts = [];
-    for (let k = 0; k <= 80; k++) {
-      const u = k / 80;
-      const la = lat + 14 * Math.sin(u * Math.PI * 0.9) * (1 - u * 0.35);   // sobe e desce como um arco orbital
-      const lo = lon + u * 118;
-      pts.push(ll2v(la, lo, R*1.009));
+    for (let k = 0; k < 160; k++) {
+      const a = k / 160 * Math.PI * 2;
+      pts.push(new THREE.Vector3(Math.cos(a), Math.sin(a) * Math.cos(inc), Math.sin(a) * Math.sin(inc))
+        .multiplyScalar(R * 1.085));
     }
-    const curve = new THREE.CatmullRomCurve3(pts);
-    const geo = new THREE.TubeGeometry(curve, 96, 0.0055, 8, false);
-    arcLine = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({color, transparent:true, opacity:0.95}));
+    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+    arcLine = new THREE.LineLoop(geo, new THREE.LineBasicMaterial({color, transparent:true, opacity:0.9}));
+    // gira o anel para o nó ficar sobre a longitude do sítio e o plano cruzar a latitude
+    arcLine.rotation.y = lonToRot(lon) - Math.PI / 2;
+    arcLine.rotation.z = THREE.MathUtils.degToRad(lat) * 0.35;
     arcGroup.add(arcLine);
-    arcLine.userData.curve = curve;
+    arcLine.userData.ring = {inc, lon, lat, color};
   } else {
     // missão translunar: desenhada em 2D sobre o canvas (ver drawSky)
     arcLine = { userData: { moon: true, site: [lat, lon] } };
@@ -725,19 +728,27 @@ function tick(now) {
       if (t >= END) { t = END; playing = false; $('play').textContent = '▶ Play'; }
       render(t, false);
     }
-  } else if (!dragging) {
+  }
+
+  if (!dragging) {
     const want = lonToRot(focusLon);
     let d = ((want - rotY + Math.PI) % (2*Math.PI) + 2*Math.PI) % (2*Math.PI) - Math.PI;
-    rotY += d * 0.06;
-    if (Math.abs(d) < 0.004) rotY += dt * 0.00002;   // deriva mínima
+    rotY += d * (playing ? 0.075 : 0.06);
+    if (!playing && Math.abs(d) < 0.004) rotY += dt * 0.00002;   // deriva mínima
     globe.rotation.y = rotY;
   }
 
   if (arcLine && arcDot) {
-    const c = arcLine.userData.curve;
-    if (c) {
-      const u = ((now % 4200) / 4200);
-      arcDot.position.copy(c.getPointAt(u));
+    const ring = arcLine.userData.ring;
+    if (ring) {
+      const a = (now % 7000) / 7000 * Math.PI * 2;
+      const p = new THREE.Vector3(Math.cos(a), Math.sin(a) * Math.cos(ring.inc), Math.sin(a) * Math.sin(ring.inc))
+        .multiplyScalar(R * 1.085);
+      arcDot.position.copy(p);
+      arcDot.visible = true;
+    } else if (arcLine.userData.curve) {
+      arcDot.position.copy(arcLine.userData.curve.getPointAt((now % 4200) / 4200));
+      arcDot.visible = true;
     }
   }
   // recuo da câmera quando a Lua entra em cena
