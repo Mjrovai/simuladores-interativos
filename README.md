@@ -25,6 +25,7 @@ Sem instalação, sem build, sem dependências externas de CDN: cada app carrega
 | **A Corrida Espacial · 1957–1975** | Globo com trinta missões de 1957 a 1975: linha do tempo arrastável, placar de recordes que muda de mãos, trajetória da missão selecionada e fotos históricas de domínio público | [`apps/space-race/`](apps/space-race/) |
 | **Osciloscópio · Lissajous** | Modo X-Y com fósforo P1: frequências, fase, deriva e persistência; presets 1:1, 3:2 e 5:4 | [`apps/lissajous/`](apps/lissajous/) |
 | **Pêndulo duplo** | Bancada com RK4 e dissipação de Rayleigh: arrastar massas, atrito de mancal ou ar, gêmeo e regimes de caos | [`apps/double-pendulum/`](apps/double-pendulum/) |
+| **A História da IA · 1943–2026** | 53 marcos numa constelação em espiral: linha do tempo de 83 anos, grafo de linhagens que se acende, placar de “primeiros” por país e ficha com nota do marco | [`apps/ai-history/`](apps/ai-history/) |
 
 A página inicial é uma galeria com busca e filtros por tema. Cada card abre o simulador **em nova aba**, então a galeria continua disponível para escolher outro.
 

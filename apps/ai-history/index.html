@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The History of AI · 1943–2026 — a constellation of milestones</title>
+<meta name="description" content="Eighty-three years of artificial intelligence as a growing constellation: from the first mathematical neuron to frontier models and the AI Act.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230A1524'/><circle cx='32' cy='50' r='9' fill='%2335C3B0'/><circle cx='68' cy='34' r='9' fill='%234C8DF6'/><circle cx='68' cy='66' r='9' fill='%23F37035'/><path d='M40 47 L60 37 M40 53 L60 63' stroke='%23F37035' stroke-width='4'/></svg>">
+<style>
+:root{
+  --bg:#080F1A; --bg2:#0C1729; --panel:#101D33; --panel2:#0B1728;
+  --ink:#E8EEF7; --dim:#8FA3BF; --line:#1E3350;
+  --amber:#F37035; --teal:#35C3B0; --blue:#4C8DF6; --violet:#A78BFA; --pink:#F472B6; --green:#7ED957; --gold:#F0B33C; --grey:#7C8AA0;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:"Inter","Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:radial-gradient(1200px 700px at 20% -10%,#122444 0%,var(--bg) 55%);
+  color:var(--ink); font-family:var(--sans); overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit}
+/* ---------- topo ---------- */
+.top{
+  height:56px; display:flex; align-items:center; gap:14px; padding:0 18px;
+  border-bottom:1px solid var(--line); background:rgba(8,15,26,.72); backdrop-filter:blur(8px);
+}
+.brand{display:flex; align-items:baseline; gap:10px; font-weight:800; letter-spacing:.01em}
+.brand b{font-size:1.02rem}
+.brand .yrs{font-family:var(--mono); font-size:.8rem; color:var(--amber); font-weight:600}
+.top .spacer{flex:1}
+.top .meta{font-family:var(--mono); font-size:.74rem; color:var(--dim)}
+.legend{display:flex; gap:10px; flex-wrap:wrap}
+.legend i{display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:5px; vertical-align:1px}
+.legend span{font-size:.66rem; color:var(--dim); letter-spacing:.03em; text-transform:uppercase}
+/* ---------- grade ---------- */
+.grid{
+  height:calc(100svh - 56px - 150px); display:grid;
+  grid-template-columns:minmax(0,1fr) 366px; grid-template-rows:minmax(0,1fr); min-height:0;
+}
+.stage,.side{min-height:0}
+.stage{position:relative; overflow:hidden; border-right:1px solid var(--line)}
+#net{display:block; width:100%; height:100%}
+.stage .hud{
+  position:absolute; left:16px; top:14px; display:flex; gap:8px; align-items:center;
+  font-family:var(--mono); font-size:.7rem; color:var(--dim); letter-spacing:.04em;
+}
+.hud .chip{border:1px solid var(--line); border-radius:999px; padding:4px 9px; background:rgba(12,23,41,.72)}
+.hud .chip b{color:var(--ink)}
+.stage .hint{position:absolute; right:16px; bottom:12px; font-family:var(--mono); font-size:.64rem; color:#54708f; text-align:right; line-height:1.5}
+.hint em{display:block; color:#3E5C7E; font-style:normal}
+/* ---------- coluna direita ---------- */
+.side{display:grid; grid-template-rows:auto auto 54px auto minmax(0,1fr) auto; gap:12px; padding:14px 16px 10px; background:linear-gradient(180deg,#0B1728,#0A1424)}
+.clock .date{font-size:1.5rem; font-weight:800; letter-spacing:-.01em; line-height:1.1}
+.clock .sub{font-family:var(--mono); font-size:.7rem; color:var(--dim); margin-top:3px}
+.clock .era{margin-top:8px; display:inline-flex; align-items:center; gap:6px; font-size:.68rem; color:var(--dim); text-transform:uppercase; letter-spacing:.06em}
+.clock .era i{width:7px;height:7px;border-radius:50%}
+.ctrl{display:grid; grid-template-columns:auto 1fr auto; gap:8px; align-items:center}
+#play{background:var(--amber); color:#1B0F06; border:0; border-radius:9px; padding:9px 14px; font-weight:800; font-size:.8rem; cursor:pointer}
+#play:hover{filter:brightness(1.07)}
+.speeds{display:flex; gap:4px}
+.speeds button{background:transparent; border:1px solid var(--line); color:var(--dim); border-radius:7px; padding:6px 8px; font-family:var(--mono); font-size:.72rem; cursor:pointer}
+.speeds button.on{color:var(--ink); border-color:#2E4A6E; background:#132340}
+#scrub{width:100%; accent-color:var(--amber); height:18px}
+#tl{width:100%; height:54px; display:block; cursor:pointer}
+.score{display:grid; grid-template-columns:repeat(5,1fr); gap:6px}
+.sc{border:1px solid var(--line); border-radius:9px; padding:6px 4px; text-align:center; background:#0D1A2E}
+.sc b{display:block; font-size:1.02rem; line-height:1.1}
+.sc span{font-size:.58rem; letter-spacing:.07em; color:var(--dim); text-transform:uppercase}
+.recs{min-height:0; overflow-y:auto; overscroll-behavior:contain; padding-right:4px; mask-image:linear-gradient(180deg,#000 0,#000 calc(100% - 26px),transparent 100%)}
+.rec{display:grid; grid-template-columns:10px 1fr auto; gap:8px; align-items:center; padding:5px 4px; font-size:.78rem; border-radius:6px}
+.rec .d{width:6px;height:6px;border-radius:50%}
+.rec .t{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#CFDCEC}
+.rec .y{font-family:var(--mono); font-size:.68rem; color:var(--dim)}
+.rec.future{opacity:.32}
+.rec.fresh{animation:fresh 1.5s ease-out}
+@keyframes fresh{0%{background:rgba(243,112,53,.26)}100%{background:transparent}}
+.note{font-family:var(--mono); font-size:.64rem; color:#5B7897; text-align:right}
+/* ---------- faixa do marco ---------- */
+.card{
+  height:150px; border-top:1px solid var(--line); background:linear-gradient(90deg,#0A1424,#0D1B31 60%,#0A1424);
+  display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:18px; padding:14px 20px; align-items:start;
+  transition:opacity .2s;
+}
+.card .chip{display:inline-flex; align-items:center; gap:7px; font-family:var(--mono); font-size:.64rem; letter-spacing:.09em; text-transform:uppercase; color:var(--dim)}
+.card .chip i{width:7px;height:7px;border-radius:50%}
+.card h2{margin:5px 0 4px; font-size:1.12rem; letter-spacing:-.01em}
+.card p{margin:0; color:#B9C9DD; font-size:.82rem; line-height:1.45; max-width:76ch;
+  display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden}
+.card .first{margin-top:6px; font-family:var(--mono); font-size:.68rem; color:var(--amber); letter-spacing:.02em}
+.card .side-note{border-left:2px solid var(--line); padding-left:12px; height:100%; overflow:hidden}
+.card .side-note .lbl{font-family:var(--mono); font-size:.6rem; letter-spacing:.1em; color:#5B7897; text-transform:uppercase}
+.card .side-note q{display:block; margin-top:5px; font-size:.78rem; line-height:1.45; color:#D7E3F2; quotes:"“" "”"}
+.card .side-note .src{margin-top:6px; font-family:var(--mono); font-size:.62rem; color:#6C87A6}
+/* ---------- responsivo ---------- */
+@media (max-width:1080px){
+  body{overflow:auto}
+  .grid{height:auto; grid-template-columns:1fr}
+  .stage{height:56vh; border-right:0; border-bottom:1px solid var(--line)}
+  .side{grid-template-rows:auto auto 54px auto auto auto}
+  .recs{max-height:230px}
+  .card{height:auto; grid-template-columns:1fr}
+  .card .side-note{border-left:0; border-top:1px solid var(--line); padding:10px 0 0}
+}
+@media (max-width:640px){
+  .top{height:52px; padding:0 12px}
+  .brand .yrs{display:none}
+  .legend{display:none}
+  .card{padding:12px 14px}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><b>The History of AI</b><span class="yrs">1943–2026</span></div>
+  <div class="legend" id="legend"></div>
+  <div class="spacer"></div>
+  <div class="meta" id="meta">— / —</div>
+</header>
+
+<main class="grid">
+  <section class="stage">
+    <canvas id="net"></canvas>
+    <div class="hud">
+      <span class="chip" id="hud-era">—</span>
+      <span class="chip"><b id="hud-n">0</b> of <b id="hud-t">0</b> milestones</span>
+    </div>
+    <div class="hint">drag to pan · click a node<em>dates are publication dates; 2025–26 tracked to Nov 2026</em></div>
+  </section>
+
+  <aside class="side">
+    <div class="clock">
+      <div class="date" id="date">1 Dec 1943</div>
+      <div class="sub" id="sub">day 1 of 30 300</div>
+      <div class="era" id="era-chip"><i></i><span id="era-name">Cybernetics</span></div>
+    </div>
+
+    <div class="ctrl">
+      <button id="play">▶ Play</button>
+      <input id="scrub" type="range" min="0" max="1000" value="0" aria-label="scrub the timeline">
+      <div class="speeds">
+        <button data-s="1" class="on">1×</button>
+        <button data-s="4">4×</button>
+        <button data-s="16">16×</button>
+      </div>
+    </div>
+
+    <canvas id="tl"></canvas>
+
+    <div class="score" id="score"></div>
+    <div class="recs" id="recs"></div>
+    <div class="note" id="rec-note">—</div>
+  </aside>
+</main>
+
+<footer class="card" id="card">
+  <div>
+    <div class="chip" id="m-chip"><i></i><span id="m-era">era</span></div>
+    <h2 id="m-name">—</h2>
+    <p id="m-text"></p>
+    <div class="first" id="m-first"></div>
+  </div>
+  <div class="side-note" id="m-note">
+    <div class="lbl">note</div>
+    <q id="m-q"></q>
+    <div class="src" id="m-src"></div>
+  </div>
+</footer>
+
+<script>
+/* =======================================================================
+   A HISTÓRIA DA IA · 1943–2026
+   Cada marco é um nó de uma constelação: nasce perto do centro e se
+   afasta em espiral conforme o tempo passa. As arestas são linhagens
+   de ideias (perceptron → backprop → CNN → transformer).
+   ======================================================================= */
+
+const START = Date.UTC(1943, 11, 1);
+const END   = Date.UTC(2026, 10, 1);
+const DAY = 864e5, SPAN = END - START;
+const norm = d => Date.parse(d + 'T12:00:00Z');
+
+const ERAS = {
+  cyber:   {label:'Cybernetics',      color:'#35C3B0'},
+  symbolic:{label:'Symbolic AI',      color:'#4C8DF6'},
+  winter:  {label:'AI winters',       color:'#7C8AA0'},
+  expert:  {label:'Expert systems',   color:'#F0B33C'},
+  ml:      {label:'Statistical ML',   color:'#7ED957'},
+  deep:    {label:'Deep learning',    color:'#A78BFA'},
+  genai:   {label:'Generative AI',    color:'#F472B6'},
+  frontier:{label:'Frontier models',  color:'#F37035'},
+};
+
+const REGIONS = [
+  ['us','US'], ['uk','UK'], ['ca','Canada'], ['eu','Europe'], ['cn','China'],
+];
+
+/* [data, era, região, nome, texto, first, pais(array), nota, fonte] */
+const RAW = [
+['1943-12-01','cyber','us','The first mathematical neuron',
+ 'Warren McCulloch and Walter Pitts publish “A Logical Calculus of the Ideas Immanent in Nervous Activity”: a neuron is a threshold on weighted inputs, and networks of them can compute logic.',
+ 'First mathematical model of a neuron', [], 'Threshold logic is born. Everything later is, in some sense, a variation on this idea.', 'Bull. Math. Biophysics, 1943'],
+
+['1949-01-01','cyber','ca','Hebbian learning',
+ 'Donald Hebb proposes that when one neuron repeatedly fires another, the connection between them strengthens — “cells that fire together, wire together”.',
+ 'First learning rule for neural networks', ['neuron'], 'A rule so simple it is still, in spirit, what gradient descent approximates.', 'The Organization of Behavior, 1949'],
+
+['1950-10-01','cyber','uk','The Turing test',
+ 'Alan Turing asks “Can machines think?” and replaces the question with an operational one: can a machine’s conversation be told apart from a human’s?',
+ 'First operational test for machine intelligence', ['neuron'], 'The imitation game was never a definition of intelligence — it was a way to make the question answerable.', 'Mind, vol. 59, 1950'],
+
+['1951-05-01','cyber','us','SNARC, the first neural computer',
+ 'Marvin Minsky and Dean Edmonds build a machine of 40 Hebb synapses out of vacuum tubes and motors to model a rat learning a maze.',
+ 'First hardware neural network', ['hebb'], 'It learned slowly and unreliably — and it made the point that learning could be wired.', 'MIT, 1951'],
+
+['1956-07-18','symbolic','us','The Dartmouth workshop',
+ 'John McCarthy, Marvin Minsky, Claude Shannon and Nathaniel Rochester gather for a summer to try to make machines “use language, form abstractions and concepts”. McCarthy coins the name: artificial intelligence.',
+ 'The name and the field of AI', ['turing','neuron'], 'The proposal predicted a decade of work. It took seventy years, and it is still going.', 'Dartmouth proposal, 1955'],
+
+['1956-08-09','symbolic','us','Logic Theorist',
+ 'Allen Newell and Herbert Simon write a program that proves 38 theorems from Principia Mathematica, sometimes by routes more elegant than Russell and Whitehead’s.',
+ 'First program to prove mathematical theorems', ['dartmouth'], '“It feels like a mind.” The symbolic school begins.', 'RAND, 1956'],
+
+['1958-07-08','symbolic','us','The perceptron',
+ 'Frank Rosenblatt builds a trainable classifier that learns weights from examples — and the US Navy publicises it as the embryo of a machine that will “walk, talk, see and be conscious”.',
+ 'First trainable neural classifier', ['neuron','hebb'], 'The New York Times ran the Navy’s optimism as fact. The correction would take 30 years.', 'Psychological Review, 1958'],
+
+['1959-01-01','symbolic','us','Checkers that beat its author',
+ 'Arthur Samuel’s program learns to play checkers from experience and eventually defeats Samuel himself — and he calls it “machine learning”.',
+ 'First use of the term “machine learning”', ['perceptron'], 'Learning from games is still the standard demo — it scales better now.', 'IBM Journal, 1959'],
+
+['1965-01-01','symbolic','us','DENDRAL and the first expert system',
+ 'Feigenbaum, Lederberg and Buchanan encode chemists’ rules about mass spectrometry into a program that beats non-specialists at identifying molecules.',
+ 'First expert system', ['logictheorist'], 'Knowledge, not general reasoning, turned out to be where the early money was.', 'Stanford, 1965'],
+
+['1966-01-01','symbolic','us','ELIZA',
+ 'Joseph Weizenbaum writes a script that reflects a user’s sentences back as questions. People confide in it. Weizenbaum is horrified by how easily they do.',
+ 'First chatbot', ['dartmouth'], 'The “ELIZA effect” — we attribute understanding to pattern matching — is now a design problem at planetary scale.', 'CACM, 1966'],
+
+['1969-01-01','winter','us','Perceptrons: the book that froze the field',
+ 'Minsky and Papert prove that a single-layer perceptron cannot compute XOR, and argue that scaling up will not help. Funding for neural networks collapses for a decade.',
+ 'Proof of the limits of single-layer networks', ['perceptron'], 'The book was right about one layer and wrong about the remedy: depth. It cost the field ten years.', 'MIT Press, 1969'],
+
+['1970-01-01','symbolic','us','SHRDLU',
+ 'Terry Winograd’s program moves blocks in a simulated world and answers questions about what it just did, in English.',
+ 'First deep language understanding in a closed world', ['eliza'], 'Beautiful, and a trap: it worked because the world was tiny.', 'MIT, 1970'],
+
+['1972-01-01','symbolic','us','Shakey the robot',
+ 'SRI’s Shakey is the first mobile robot that reasons about its own actions: it plans, moves, and corrects itself.',
+ 'First robot to reason about its actions', ['shrdlu'], 'Shakey’s planner is the ancestor of every task graph an agent runs today.', 'SRI, 1972'],
+
+['1973-01-01','winter','uk','The Lighthill report',
+ 'James Lighthill tells the UK science council that AI has failed to deliver on its “grandiose objectives”. British funding is cut, and the first AI winter begins.',
+ 'The first AI winter', ['perceptrons'], 'Every boom since has had a Lighthill moment. The difference is what survives it.', 'UK Science Research Council, 1973'],
+
+['1980-01-01','expert','us','XCON: expert systems go to work',
+ 'Carnegie Mellon’s R1/XCON configures VAX computers for DEC and saves the company an estimated $25 M a year. The expert-system industry is born.',
+ 'First expert system in commercial production', ['dendral'], 'The lesson was not “rules work”. It was that knowledge capture is the bottleneck.', 'CMU / DEC, 1980'],
+
+['1982-01-01','expert','us','Hopfield networks',
+ 'John Hopfield shows that recurrent networks with symmetric weights have an energy function, so they can store and recall patterns like a physical system settling.',
+ 'Physics enters neural networks', ['perceptrons'], 'This is the bridge that later brought physicists — and a Nobel — into the field.', 'PNAS, 1982'],
+
+['1986-10-09','ml','us','Backpropagation, popularised',
+ 'Rumelhart, Hinton and Williams show in Nature that backpropagation trains multi-layer networks efficiently — the answer to the XOR objection of 1969.',
+ 'Practical training for deep networks', ['hopfield','perceptrons'], 'The algorithm was invented several times before. This is the paper that made people use it.', 'Nature, 323, 1986'],
+
+['1987-01-01','winter','us','The second AI winter',
+ 'The LISP-machine market collapses, expert systems prove brittle outside their narrow domains, and “AI” becomes a word companies avoid in funding requests.',
+ 'Second AI winter', ['xcon'], 'What survived: neural nets in labs, and the quiet statistical turn.', '1987–1993'],
+
+['1989-01-01','ml','us','LeNet and the convolutional network',
+ 'Yann LeCun trains a convolutional network by backpropagation to read handwritten zip codes at Bell Labs — the architecture that still powers vision today.',
+ 'First practical convolutional network', ['backprop'], 'Weight sharing was the insight: the same detector applied everywhere.', 'Neural Computation, 1989'],
+
+['1995-01-01','ml','us','Support vector machines',
+ 'Cortes and Vapnik’s SVMs find the maximum-margin boundary between classes and dominate machine learning for the next fifteen years.',
+ 'The statistical-learning high-water mark', ['backprop'], 'For a decade, “machine learning” meant kernels, not neurons.', 'Machine Learning, 1995'],
+
+['1997-05-11','ml','us','Deep Blue beats Kasparov',
+ 'IBM’s Deep Blue wins a six-game match against the world chess champion — the first time a machine beats a reigning champion under tournament conditions.',
+ 'First machine to beat a world chess champion', ['svm'], 'It was brute force plus hand-tuned evaluation. It still counted as a threshold crossing.', 'IBM, 1997'],
+
+['1997-11-15','ml','eu','Long short-term memory',
+ 'Hochreiter and Schmidhuber publish LSTM, a recurrent network with gates that keeps gradients alive across long sequences.',
+ 'First architecture that could remember over long spans', ['backprop'], 'LSTM ran speech recognition and translation for twenty years before attention replaced it.', 'Neural Computation, 1997'],
+
+['2006-07-28','deep','ca','Deep belief networks',
+ 'Hinton, Osindero and Teh show that deep networks can be trained layer by layer, and the phrase “deep learning” starts to mean something again.',
+ 'Deep networks become trainable', ['backprop','hopfield'], 'The rebranding mattered: “neural networks” was still radioactive in 2006.', 'Neural Computation, 2006'],
+
+['2009-06-01','deep','us','ImageNet',
+ 'Fei-Fei Li’s team releases ImageNet: millions of labelled images and a competition that gives vision a common scoreboard.',
+ 'First large-scale labelled image dataset', ['dbn'], 'Data, not just algorithms, was the missing ingredient — and it was now on the table.', 'CVPR 2009'],
+
+['2011-02-14','deep','us','Watson wins Jeopardy!',
+ 'IBM’s Watson beats the two greatest human players at a game of puns, ambiguity and speed.',
+ 'First machine to win a televised quiz championship', ['deepblue'], 'Question answering, not chess, was the demo that reached the general public.', 'IBM, 2011'],
+
+['2012-09-30','deep','ca','AlexNet',
+ 'Krizhevsky, Sutskever and Hinton train a deep convolutional network on two gaming GPUs and cut the ImageNet error from 26% to 15%.',
+ 'The deep-learning breakthrough', ['imagenet','lenet'], 'Every modern AI lab traces its funding to this result.', 'NIPS 2012'],
+
+['2014-06-10','deep','ca','Generative adversarial networks',
+ 'Ian Goodfellow proposes two networks — a forger and a detective — that improve by competing. Machines can now generate images that look real.',
+ 'First practical generative image model', ['alexnet'], 'Generative AI starts here, eight years before it becomes a product.', 'NIPS 2014'],
+
+['2014-12-01','deep','ca','Attention for translation',
+ 'Bahdanau, Cho and Bengio let a decoder look back at every part of the input instead of squeezing it into one vector.',
+ 'Attention enters sequence models', ['lstm','alexnet'], 'The idea that becomes the transformer was first a patch on an RNN.', 'ICLR 2015'],
+
+['2015-12-10','deep','us','ResNet',
+ 'Kaiming He’s team adds identity shortcuts so that 152-layer networks train better than 20-layer ones.',
+ 'Networks deeper than a hundred layers', ['alexnet'], 'Depth stopped being a liability and became a dial.', 'CVPR 2016'],
+
+['2016-03-15','deep','uk','AlphaGo beats Lee Sedol',
+ 'DeepMind’s AlphaGo wins 4–1 in Seoul. Move 37 of game two is a move no human would have played — and it was better.',
+ 'First machine to beat a top professional at Go', ['resnet','dqn'], 'Games were the measuring stick. Go was the one people said would take another decade.', 'DeepMind, 2016'],
+
+['2017-06-12','genai','us','Attention is all you need',
+ 'Eight Google researchers replace recurrence with self-attention. The transformer trains faster, scales further, and becomes the substrate of everything after.',
+ 'The transformer architecture', ['attention'], 'One architecture now runs language, vision, audio and protein folding.', 'arXiv 1706.03762'],
+
+['2018-10-11','genai','us','BERT',
+ 'Google pre-trains a transformer on unlabelled text in both directions and fine-tunes it to beat every language benchmark.',
+ 'Pre-training becomes the default', ['transformer'], '“Pre-train once, fine-tune everywhere” — the recipe that made models a platform.', 'arXiv 1810.04805'],
+
+['2019-02-14','genai','us','GPT-2 and the staged release',
+ 'OpenAI trains a 1.5-billion-parameter language model that writes coherent paragraphs, and withholds it — the first argument about releasing powerful models.',
+ 'The first AI release debate', ['transformer'], 'The safety debate and the capability curve arrived in the same paper.', 'OpenAI, 2019'],
+
+['2020-05-28','genai','us','GPT-3 and scaling laws',
+ 'A 175-billion-parameter model shows that capability improves predictably with scale. Few-shot prompting replaces task-specific training.',
+ 'Scaling becomes a strategy', ['gpt2'], 'The bet of the decade: more compute, more data, same architecture.', 'arXiv 2005.14165'],
+
+['2020-11-30','genai','uk','AlphaFold 2',
+ 'DeepMind’s system reaches experimental accuracy on the CASP14 protein-folding challenge, solving a 50-year-old problem in biology.',
+ 'Protein structure prediction at experimental accuracy', ['transformer','alphago'], 'A model of attention won a scientific prize, not a benchmark.', 'CASP14, 2020'],
+
+['2021-06-29','genai','us','GitHub Copilot',
+ 'A language model is placed inside the editor, completing code as you type. Programming starts to be a conversation with a model.',
+ 'First mainstream AI pair programmer', ['gpt3'], 'The first product where the model wrote more code than the human.', 'GitHub, 2021'],
+
+['2021-07-22','genai','uk','AlphaFold DB: 200 million structures',
+ 'DeepMind and EMBL release predicted structures for nearly every known protein, free to download.',
+ 'A model becomes scientific infrastructure', ['alphafold2'], 'Two years from a challenge result to a database the world uses daily.', 'DeepMind/EMBL, 2021'],
+
+['2022-04-06','genai','us','DALL·E 2',
+ 'Text-to-image generation becomes good enough to be unsettling: “an astronaut riding a horse” is no longer a joke prompt.',
+ 'Photorealistic text-to-image', ['gan','gpt3'], 'The image models arrived before the public argument about them.', 'OpenAI, 2022'],
+
+['2022-08-22','genai','eu','Stable Diffusion and open weights',
+ 'A latent diffusion model is released with downloadable weights. Anyone can run image generation on their own GPU.',
+ 'Open-weight image generation', ['dalle2'], 'The open-weights genie, out of the bottle two years before regulators noticed.', 'Stability AI / LMU, 2022'],
+
+['2022-11-30','genai','us','ChatGPT',
+ 'OpenAI wraps GPT-3.5 in a chat interface. It reaches an estimated 100 million users in two months — the fastest consumer adoption on record.',
+ 'The moment AI became a consumer product', ['gpt3'], 'The model was not new. The interface was. That is the whole lesson.', 'OpenAI, 2022'],
+
+['2023-03-14','genai','us','GPT-4',
+ 'A multimodal model that passes professional exams — the bar exam in the 90th percentile — and is deployed inside products within weeks.',
+ 'Frontier capability on professional benchmarks', ['chatgpt'], 'Evaluation suddenly became the hard part: what do you test when the tests are saturated?', 'OpenAI, 2023'],
+
+['2023-07-18','genai','us','Llama 2 and open weights',
+ 'Meta releases a family of models for commercial use. Fine-tuning, local inference and an open ecosystem follow.',
+ 'Open weights at frontier-adjacent quality', ['gpt4'], 'The open/closed split becomes the field’s main political axis.', 'Meta, 2023'],
+
+['2023-12-06','genai','us','Gemini 1.0',
+ 'Google ships a model trained natively on text, images and audio together, rather than bolting modalities on afterwards.',
+ 'Natively multimodal frontier model', ['gpt4'], 'Modality stopped being a feature and became an input format.', 'Google DeepMind, 2023'],
+
+['2024-03-13','frontier','eu','The EU AI Act',
+ 'The first comprehensive AI law is adopted; it enters into force on 1 August 2024 with obligations phased in by risk level and by model size.',
+ 'First comprehensive AI regulation', ['gemini1'], 'Europe chose to legislate the risk instead of the technology — a choice now copied and contested worldwide.', 'EU 2024/1689'],
+
+['2024-05-13','frontier','us','GPT-4o: real-time voice',
+ 'A single model handles text, vision and speech with latency low enough to feel like conversation — interrupting, laughing, translating live.',
+ 'Real-time multimodal conversation', ['gpt4'], 'Voice made the interface disappear; the model became a participant.', 'OpenAI, 2024'],
+
+['2024-05-08','frontier','uk','AlphaFold 3',
+ 'The model is extended from proteins to DNA, RNA, ligands and their interactions — the whole molecular machinery of the cell.',
+ 'Structure prediction beyond proteins', ['alphafold2'], 'Same lab, same architecture family, a much larger claim.', 'Nature, 2024'],
+
+['2024-10-09','frontier','eu','Two Nobel Prizes for AI',
+ 'The Nobel Prize in Physics goes to Hopfield and Hinton for neural networks; the Chemistry prize to Baker, Hassabis and Jumper for protein design and folding.',
+ 'AI work recognised by the Nobel committees', ['backprop','alphafold3'], 'The field stopped being a subdiscipline and became a method other sciences use.', 'Nobel Prize, 2024'],
+
+['2024-09-12','frontier','us','o1 and test-time reasoning',
+ 'OpenAI’s o1 spends more compute thinking before answering, trading latency for reasoning quality — a new scaling axis.',
+ 'Reasoning at inference time', ['gpt4o'], '“Think longer” turned out to be a second law of scaling.', 'OpenAI, 2024'],
+
+['2025-01-20','frontier','cn','DeepSeek R1',
+ 'A Chinese lab releases an open reasoning model trained at a fraction of the reported cost of frontier systems, with weights and a paper. Markets for AI hardware fall sharply.',
+ 'Open reasoning at frontier quality', ['o1'], 'The cost curve was the story: capability stopped being a monopoly of the largest budgets.', 'arXiv 2501.12948'],
+
+['2025-08-07','frontier','us','GPT-5',
+ 'OpenAI ships a model with reasoning built in by default, positioned as a unified system rather than a chat model.',
+ 'Reasoning becomes the default mode', ['r1'], 'The distinction between “model” and “system” quietly disappears.', 'OpenAI, Aug 2025'],
+
+['2025-11-18','frontier','us','Gemini 3',
+ 'Google’s frontier model arrives with deep-reasoning modes and long-context multimodality, and is rolled out across its products at once.',
+ 'Frontier capability distributed by default', ['gpt5'], 'Distribution, not the benchmark score, is the competitive edge.', 'Google, Nov 2025'],
+
+['2026-08-02','frontier','eu','The AI Act’s high-risk rules apply',
+ 'Enforcement powers for general-purpose and high-risk systems come into application, with the AI Office and national authorities able to act.',
+ 'First enforceable AI obligations at scale', ['aiact'], 'The test of the decade: can regulation keep pace with a model release cycle measured in months?', 'EU AI Act, Aug 2026'],
+
+['2026-10-07','frontier','us','GPT-6 and the agentic interface',
+ 'OpenAI releases a model built around computer use and long-horizon tasks, shipped with an interface that acts rather than answers.',
+ 'Agents as the primary product', ['gemini3'], 'The interface stops being a chat box and becomes a worker.', 'OpenAI, Oct 2026'],
+];
+
+const IDS = ['neuron','hebb','turing','snarc','dartmouth','logictheorist','perceptron','samuel','dendral','eliza',
+ 'perceptrons','shrdlu','shakey','lighthill','xcon','hopfield','backprop','winter2','lenet','svm','deepblue','lstm',
+ 'dbn','imagenet','watson','alexnet','gan','attention','resnet','alphago','transformer','bert','gpt2','gpt3',
+ 'alphafold2','copilot','afdb','dalle2','sd','chatgpt','gpt4','llama2','gemini1','aiact','gpt4o','af3','nobel',
+ 'o1','r1','gpt5','gemini3','aiact2','gpt6'];
+
+const EVENTS = RAW.map((r, i) => ({
+  id: IDS[i] || ('e'+i),
+  date: r[0], era: r[1], region: r[2], name: r[3], text: r[4],
+  first: r[5], parents: (r[6] || []).map(n => n), note: r[7] || '', src: r[8] || '',
+}));
+EVENTS.sort((a, b) => norm(a.date) - norm(b.date));        // o play depende de ts ascendente
+const ts = EVENTS.map(e => norm(e.date));
+const idx = {}; EVENTS.forEach((e, i) => idx[e.id] = i);
+document.getElementById('hud-t').textContent = EVENTS.length;
+
+/* ---------------- layout: espiral do tempo ---------------- */
+const POS = EVENTS.map((e, i) => {
+  const t = (ts[i] - START) / SPAN;
+  const ang = -1.35 + Math.pow(t, 0.92) * Math.PI * 5.0;
+  const rad = 0.055 + 0.95 * Math.pow(t, 0.78);
+  const wob = 0.035 * Math.sin(i * 2.7);
+  return { x: Math.cos(ang) * (rad + wob), y: Math.sin(ang) * (rad + wob), t, ang };
+});
+
+/* ---------------- canvases ---------------- */
+const net = document.getElementById('net'), nx = net.getContext('2d');
+const tlC = document.getElementById('tl'), tx = tlC.getContext('2d');
+
+function fit(cv, ctx) {
+  const w = cv.clientWidth, h = cv.clientHeight, dpr = Math.min(devicePixelRatio || 1, 2);
+  if (cv.width !== Math.round(w*dpr) || cv.height !== Math.round(h*dpr)) {
+    cv.width = Math.round(w*dpr); cv.height = Math.round(h*dpr);
+  }
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { w, h };
+}
+
+/* ---------------- estado ---------------- */
+let t = START, playing = false, speed = 1, selected = null, eventPtr = 0;
+let lastDone = -1, dwellUntil = 0, last = 0;
+let camX = 0, camY = 0, zoom = 1, focusIdx = 0, dragging = false, dragX = 0, dragY = 0;
+const $ = id => document.getElementById(id);
+
+const SPEEDS = { 1: 110, 4: 34, 16: 14 };   // segundos para varrer 1943–2026
+
+/* ---------------- legenda / score ---------------- */
+$('legend').innerHTML = Object.entries(ERAS).map(([k,v]) =>
+  `<span><i style="background:${v.color}"></i>${v.label}</span>`).join('');
+
+$('score').innerHTML = REGIONS.map(([k,label]) =>
+  `<div class="sc"><b id="n-${k}">0</b><span>${label}</span></div>`).join('');
+
+/* ---------------- render ---------------- */
+function fmtDate(ms) {
+  return new Date(ms).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric', timeZone:'UTC' });
+}
+
+let cardIdx = -1;
+
+function render(now = t) {
+  t = Math.max(START, Math.min(END, now));
+  $('scrub').value = Math.round(1000 * (t - START) / SPAN);
+  $('date').textContent = fmtDate(t);
+  const dayN = Math.round((t - START)/DAY) + 1, dayT = Math.round(SPAN/DAY) + 1;
+  $('sub').textContent = `day ${dayN.toLocaleString('en-GB')} of ${dayT.toLocaleString('en-GB')}`;
+
+  const done = EVENTS.filter((e,i) => ts[i] <= t);
+  const latest = done.length ? done[done.length-1] : null;
+  const nextEv = EVENTS.find((e,i) => ts[i] > t) || null;
+  const ev = selected ? EVENTS[selected] : (latest || nextEv || EVENTS[0]);
+  const evIdx = selected != null ? selected : (latest ? EVENTS.indexOf(latest) : 0);
+
+  // contadores por região
+  const counts = {}; REGIONS.forEach(([k]) => counts[k] = 0);
+  done.forEach(e => { if (e.first) counts[e.region] = (counts[e.region]||0) + 1; });
+  REGIONS.forEach(([k]) => $('n-'+k).textContent = counts[k] || 0);
+
+  $('meta').textContent = `${done.length} / ${EVENTS.length} milestones`;
+  $('hud-n').textContent = done.length;
+  const era = ERAS[ev.era];
+  $('hud-era').textContent = era.label;
+  $('hud-era').style.color = era.color;
+
+  // cartão
+  if (evIdx !== cardIdx) {
+    cardIdx = evIdx;
+    $('m-era').textContent = era.label;
+    $('m-chip').querySelector('i').style.background = era.color;
+    $('m-name').textContent = ev.name;
+    $('m-text').textContent = ev.text;
+    $('m-first').textContent = ev.first ? `◆ ${ev.first}` : '';
+    $('m-q').textContent = ev.note || '';
+    $('m-src').textContent = ev.src || '';
+    $('m-note').style.display = ev.note ? '' : 'none';
+    focusIdx = evIdx;
+  }
+
+  // chip da era no relógio
+  $('era-name').textContent = era.label;
+  $('era-chip').querySelector('i').style.background = era.color;
+
+  // lista
+  const recs = $('recs');
+  recs.innerHTML = '';
+  EVENTS.forEach((e, i) => {
+    const future = ts[i] > t;
+    const row = document.createElement('div');
+    row.className = 'rec' + (future ? ' future' : '');
+    row.innerHTML = `<span class="d" style="background:${ERAS[e.era].color}"></span>` +
+      `<span class="t">${e.name}</span><span class="y">${e.date.slice(0,4)}</span>`;
+    row.onclick = () => { selected = i; render(t); };
+    recs.appendChild(row);
+  });
+  if (done.length !== lastDone) {
+    lastDone = done.length;
+    requestAnimationFrame(() => {
+      const rows = [...recs.children];
+      const target = rows[Math.max(0, done.length-1)];
+      if (target) {
+        target.classList.add('fresh');
+        const rel = target.getBoundingClientRect().top - recs.getBoundingClientRect().top + recs.scrollTop;
+        recs.scrollTop = Math.max(0, rel - recs.clientHeight + target.offsetHeight + 14);
+      }
+    });
+    $('rec-note').textContent = `${done.length} of ${EVENTS.length} unlocked`;
+  }
+  drawTimeline();
+}
+
+/* ---------------- linha do tempo ---------------- */
+function drawTimeline() {
+  const { w, h } = fit(tlC, tx);
+  tx.clearRect(0, 0, w, h);
+  const y = 30, pad = 8, W = w - pad*2;
+  const X = ms => pad + W * (ms - START) / SPAN;
+
+  // faixas de era
+  EVENTS.forEach((e, i) => {
+    const a = ts[i], b = i+1 < EVENTS.length ? ts[i+1] : END;
+    tx.fillStyle = ERAS[e.era].color + '22';
+    tx.fillRect(X(a), y-9, Math.max(1, X(b)-X(a)), 18);
+  });
+  // eixo
+  tx.strokeStyle = '#22385A'; tx.lineWidth = 1;
+  tx.beginPath(); tx.moveTo(pad, y+.5); tx.lineTo(pad+W, y+.5); tx.stroke();
+
+  // décadas
+  tx.fillStyle = '#5B7897'; tx.font = '600 9px ui-monospace,monospace';
+  for (let yr = 1950; yr <= 2020; yr += 10) {
+    const x = X(Date.UTC(yr, 0, 1));
+    tx.fillRect(x, y+10, 1, 3);
+    tx.fillText(String(yr).slice(2), x-4, y+22);
+  }
+  // eventos
+  EVENTS.forEach((e, i) => {
+    const x = X(ts[i]);
+    const on = ts[i] <= t;
+    tx.fillStyle = on ? ERAS[e.era].color : '#2A425F';
+    tx.beginPath(); tx.arc(x, y+13, on ? 2.1 : 1.4, 0, 7); tx.fill();
+  });
+  // cabeça
+  const px = X(t);
+  tx.strokeStyle = '#F37035'; tx.lineWidth = 1.6;
+  tx.beginPath(); tx.moveTo(px, 8); tx.lineTo(px, y+22); tx.stroke();
+  tx.fillStyle = '#F37035';
+  tx.beginPath(); tx.arc(px, 8, 3, 0, 7); tx.fill();
+}
+
+/* ---------------- constelação ---------------- */
+function drawNet(now) {
+  const { w, h } = fit(net, nx);
+  nx.clearRect(0, 0, w, h);
+
+  const S = Math.min(w, h) * 0.46 * zoom;
+  const ox = w/2 - camX*S, oy = h/2 - camY*S;
+
+  // fundo estelar leve
+  nx.save();
+  nx.globalAlpha = .5;
+  for (let i = 0; i < 60; i++) {
+    const sx = ((i*137.7) % w), sy = ((i*89.3) % h);
+    nx.fillStyle = i % 7 === 0 ? '#2B4B75' : '#16283F';
+    nx.fillRect(sx, sy, 1, 1);
+  }
+  nx.restore();
+
+  // espiral do tempo: cada segmento na cor da era que ele inaugura
+  for (let i = 1; i < EVENTS.length; i++) {
+    const a = POS[i-1], b = POS[i];
+    const on = ts[i] <= t;
+    nx.beginPath();
+    nx.moveTo(ox + a.x*S, oy + a.y*S);
+    nx.lineTo(ox + b.x*S, oy + b.y*S);
+    nx.strokeStyle = ERAS[EVENTS[i].era].color + (on ? '77' : '22');
+    nx.lineWidth = on ? 1.6 : 1;
+    nx.stroke();
+  }
+
+  // arestas
+  EVENTS.forEach((e, i) => {
+    const alive = ts[i] <= t;
+    e.parents.forEach(pid => {
+      const j = idx[pid]; if (j === undefined) return;
+      const a = POS[j], b = POS[i];
+      nx.beginPath();
+      nx.moveTo(ox + a.x*S, oy + a.y*S);
+      const mx = (a.x+b.x)/2, my = (a.y+b.y)/2;
+      const dxv = b.x-a.x, dyv = b.y-a.y;
+      nx.quadraticCurveTo(ox + (mx - dyv*0.12)*S, oy + (my + dxv*0.12)*S, ox + b.x*S, oy + b.y*S);
+      const isActive = (i === focusIdx || j === focusIdx);
+      nx.strokeStyle = alive && ts[j] <= t
+        ? (isActive ? ERAS[e.era].color + 'cc' : 'rgba(120,160,210,.16)')
+        : 'rgba(120,160,210,.06)';
+      nx.lineWidth = isActive ? 1.5 : 1;
+      nx.stroke();
+    });
+  });
+
+  // nós
+  EVENTS.forEach((e, i) => {
+    const p = POS[i], x = ox + p.x*S, y = oy + p.y*S;
+    const alive = ts[i] <= t;
+    const active = i === focusIdx;
+    const col = ERAS[e.era].color;
+    const r = active ? 5.4 : (e.first ? 3.6 : 2.8);
+
+    if (active) {
+      const pulse = (Math.sin(now/320) + 1) / 2;
+      nx.beginPath(); nx.arc(x, y, r + 7 + pulse*7, 0, 7);
+      nx.fillStyle = col + '1f'; nx.fill();
+      nx.beginPath(); nx.arc(x, y, r + 3, 0, 7);
+      nx.fillStyle = col + '3d'; nx.fill();
+    }
+    if (alive) { nx.shadowColor = col; nx.shadowBlur = active ? 18 : 8; }
+    nx.beginPath(); nx.arc(x, y, r, 0, 7);
+    nx.fillStyle = alive ? col : 'rgba(120,150,185,.34)';
+    nx.fill();
+    nx.shadowBlur = 0;
+    if (alive && e.first && !active) {
+      nx.beginPath(); nx.arc(x, y, r + 2.6, 0, 7);
+      nx.strokeStyle = col + '55'; nx.lineWidth = 1; nx.stroke();
+    }
+  });
+
+  // próximo marco ainda não alcançado
+  const nextI = EVENTS.findIndex((e, i) => ts[i] > t);
+  if (nextI >= 0) {
+    const np = POS[nextI], nx2 = ox + np.x*S, ny2 = oy + np.y*S;
+    const pulse = (Math.sin(now/420) + 1) / 2;
+    nx.beginPath(); nx.arc(nx2, ny2, 6 + pulse*4, 0, 7);
+    nx.strokeStyle = ERAS[EVENTS[nextI].era].color + '88';
+    nx.lineWidth = 1.2; nx.stroke();
+  }
+
+  // rótulo do nó em foco
+  const fp = POS[focusIdx], fx = ox + fp.x*S, fy = oy + fp.y*S;
+  const ev = EVENTS[focusIdx], col = ERAS[ev.era].color;
+  nx.font = '800 13px Inter, Helvetica, sans-serif';
+  const label = ev.name, tw = nx.measureText(label).width;
+  const bx = Math.min(Math.max(10, fx + 12), w - tw - 26), by = Math.max(26, fy - 10);
+  nx.beginPath();
+  if (nx.roundRect) nx.roundRect(bx - 9, by - 16, tw + 18, 36, 10);
+  else nx.rect(bx - 9, by - 16, tw + 18, 36);
+  nx.fillStyle = 'rgba(8,15,26,.9)'; nx.fill();
+  nx.strokeStyle = col + '66'; nx.lineWidth = 1; nx.stroke();
+  nx.fillStyle = '#E8EEF7'; nx.font = '800 13px Inter, Helvetica, sans-serif';
+  nx.fillText(label, bx, by + 1);
+  nx.font = '600 10px ui-monospace,monospace'; nx.fillStyle = col;
+  nx.fillText(ev.date.slice(0,4) + (ev.region ? ' · ' + ev.region.toUpperCase() : ''), bx, by + 15);
+
+  // vínculo de foco com o pai
+  EVENTS[focusIdx].parents.forEach(pid => {
+    const j = idx[pid]; if (j === undefined) return;
+    if (ts[j] > t) return;
+    const pp = POS[j];
+    const px2 = ox + pp.x*S, py2 = oy + pp.y*S;
+    nx.beginPath(); nx.moveTo(px2, py2); nx.lineTo(fx, fy);
+    nx.strokeStyle = col + '88'; nx.lineWidth = 1.2;
+    nx.setLineDash([3,4]); nx.stroke(); nx.setLineDash([]);
+    if (Math.hypot(px2-fx, py2-fy) > 95) {          // só rotula o pai se houver espaço
+      nx.font = '700 10px Inter, sans-serif'; nx.fillStyle = col + 'cc';
+      nx.fillText(EVENTS[j].name, px2 + 8, py2 - 6);
+    }
+  });
+}
+
+/* ---------------- loop ---------------- */
+function tick(now) {
+  const dt = last ? Math.min(64, now - last) : 16; last = now;
+
+  if (playing) {
+    if (now < dwellUntil) {
+      /* pausa curta no marco */
+    } else if (eventPtr < EVENTS.length && ts[eventPtr] <= t) {
+      t = ts[eventPtr];
+      dwellUntil = now + 520;
+      eventPtr++;
+      render(t);
+      if (t >= END) { playing = false; $('play').textContent = '▶ Play'; }
+    } else {
+      t += SPAN / SPEEDS[speed] * dt / 1000;
+      if (t >= END) { t = END; playing = false; $('play').textContent = '▶ Play'; }
+      render(t);
+    }
+  }
+
+  // câmera: a espiral inteira em cena, com deriva suave para o marco em foco
+  const target = POS[focusIdx];
+  camX += (target.x * 0.42 - camX) * 0.045;
+  camY += (target.y * 0.42 - camY) * 0.045;
+  const zt = 0.98 - 0.30 * ((t - START) / SPAN);        // afasta conforme a história cresce
+  zoom += (zt - zoom) * 0.04;
+
+  drawNet(now);
+  requestAnimationFrame(tick);
+}
+
+/* ---------------- interação ---------------- */
+$('play').addEventListener('click', () => {
+  if (t >= END - DAY) { t = START; eventPtr = 0; render(t); }
+  playing = !playing;
+  $('play').textContent = playing ? '⏸ Pause' : '▶ Play';
+  dwellUntil = 0;
+});
+
+document.querySelectorAll('.speeds button').forEach(b => {
+  b.onclick = () => {
+    speed = +b.dataset.s;
+    document.querySelectorAll('.speeds button').forEach(o => o.classList.toggle('on', o === b));
+  };
+});
+
+$('scrub').addEventListener('input', e => {
+  playing = false; $('play').textContent = '▶ Play'; selected = null; dwellUntil = 0;
+  render(START + SPAN * (+e.target.value / 1000));
+  eventPtr = ts.filter(x => x <= t).length;
+});
+
+tlC.addEventListener('click', e => {
+  const r = tlC.getBoundingClientRect();
+  const frac = Math.max(0, Math.min(1, (e.clientX - r.left - 8) / (r.width - 16)));
+  playing = false; $('play').textContent = '▶ Play'; selected = null; dwellUntil = 0;
+  render(START + SPAN * frac);
+  eventPtr = ts.filter(x => x <= t).length;
+});
+
+// arrastar para deslocar a câmera / clique para escolher nó
+net.addEventListener('pointerdown', e => {
+  dragging = true; dragX = e.clientX; dragY = e.clientY;
+  net.setPointerCapture(e.pointerId);
+});
+net.addEventListener('pointermove', e => {
+  if (!dragging) return;
+  const w = net.clientWidth, h = net.clientHeight, S = Math.min(w,h)*0.46*zoom;
+  camX -= (e.clientX - dragX) / S;
+  camY -= (e.clientY - dragY) / S;
+  dragX = e.clientX; dragY = e.clientY;
+});
+net.addEventListener('pointerup', e => {
+  dragging = false;
+  const w = net.clientWidth, h = net.clientHeight, S = Math.min(w,h)*0.46*zoom;
+  const ox = w/2 - camX*S, oy = h/2 - camY*S;
+  const mx = e.clientX - net.getBoundingClientRect().left;
+  const my = e.clientY - net.getBoundingClientRect().top;
+  let best = -1, bd = 22;
+  EVENTS.forEach((ev, i) => {
+    if (ts[i] > t) return;
+    const d = Math.hypot(ox + POS[i].x*S - mx, oy + POS[i].y*S - my);
+    if (d < bd) { bd = d; best = i; }
+  });
+  if (best >= 0) { selected = best; render(t); }
+});
+
+window.addEventListener('resize', () => { drawTimeline(); });
+
+/* ---------------- start ---------------- */
+render(START);
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
