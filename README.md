@@ -13,15 +13,20 @@ Sem instalação, sem build, sem dependências externas de CDN: cada app carrega
 | **V-2 / A4 · Modelo 3D** | Modelo procedural do míssil balístico de 1942, com 14 sistemas, corte seccional, vista explodida e exportação GLB | [`apps/v2-a4/`](apps/v2-a4/) |
 | **Z80 Lab** | Dez lições de assembly Z80 com assembler, execução passo a passo e verificador de exercícios | [`apps/z80-lab/z80.html`](apps/z80-lab/z80.html) |
 | **Apple 1 Lab** | Dez lições de 6502 no Apple 1, com Woz Monitor, tela, teclado e verificador | [`apps/apple1-lab/a1.html`](apps/apple1-lab/a1.html) |
+| **Windows 95** | Desktop de 1995 em página única: boot, menu Iniciar, janelas, Notepad, Paint, Calculadora, Minesweeper | [`apps/windows95/`](apps/windows95/) |
+| **Macintosh 128K · 1984** | System 1.0 com Finder, disco de 400 KB, menu Apple, About This Macintosh e calculadora | [`apps/mac1984/`](apps/mac1984/) |
 | **Simulador de Deep Learning** | Neurônio, ativações, forward e backprop com treino de XOR ao vivo; fronteira de decisão e curva de aprendizado. Bilíngue PT/EN | [`apps/deep-learning/`](apps/deep-learning/) |
 | **Transformer em 3 minutos** | Briefing executivo do mecanismo de atenção com demonstração interativa | [`apps/transformer-executivo/`](apps/transformer-executivo/) |
 | **Preditor de LLM local** | Tokens/s, TTFT, memória e energia de 23 modelos e 12 quantizações em Apple Silicon | [`apps/llm-predictor/`](apps/llm-predictor/) |
+| **Color Palette Generator** | Paletas com harmonia, trava de cores, contraste WCAG e exportação CSS/Tailwind/JSON/SVG (Next.js exportado) | [`apps/color-palette/`](apps/color-palette/) |
 | **Polarização de Transistores** | Ponto de operação do BJT: reta de carga, métodos de polarização e calculadoras interativas | [`apps/polarizacao-transistores/`](apps/polarizacao-transistores/) |
 | **A Corrida Espacial** | EUA × URSS, 1957–1975: protagonistas, marcos e legado | [`apps/corrida-espacial/`](apps/corrida-espacial/) · [EN](apps/corrida-espacial-en/) |
 | **Tetris** | O clássico em um arquivo, teclado e toque | [`apps/tetris/`](apps/tetris/) |
 | **Paciência · Klondike** | Jogo de cartas com arrastar e soltar | [`apps/paciencia/`](apps/paciencia/) |
 
 A página inicial é uma galeria com busca e filtros por tema.
+
+> `apps/color-palette/` é a única exceção ao "sem build": é um app **Next.js 15** publicado como **export estático**. O código-fonte vive fora deste repositório; aqui está o resultado de `next build` com `output: "export"` e `basePath: "/simuladores-interativos/apps/color-palette"`.
 
 ## Rodar localmente
 

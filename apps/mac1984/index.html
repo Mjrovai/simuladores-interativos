@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Apple Macintosh 128K Simulator - 1984</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #1a1a1a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-family: 'Geneva', 'Helvetica Neue', Arial, sans-serif;
+  overflow: hidden;
+}
+
+/* === MAC BODY === */
+.mac-body {
+  width: 640px;
+  background: #e8e0d0;
+  border-radius: 18px;
+  padding: 30px 25px 50px;
+  box-shadow: 
+    0 0 0 3px #c8bfb0,
+    0 20px 60px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.4);
+  position: relative;
+}
+
+.mac-body::before {
+  content: '';
+  position: absolute;
+  top: 8px; left: 30%; right: 30%;
+  height: 1px;
+  background: rgba(255,255,255,0.3);
+}
+
+.mac-label {
+  text-align: center;
+  font-size: 10px;
+  color: #8a7e6b;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  font-weight: bold;
+}
+
+.mac-label .apple-icon {
+  display: inline-block;
+  width: 14px; height: 16px;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+
+/* === SCREEN FRAME === */
+.screen-frame {
+  background: #3a3528;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.6);
+}
+
+/* === SCREEN (CRT) === */
+.screen {
+  width: 570px;
+  height: 390px;
+  background: #c8d4a0;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.15);
+  image-rendering: pixelated;
+}
+
+/* CRT scanline effect */
+.screen::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.03) 2px,
+    rgba(0,0,0,0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* === BOOT SCREEN === */
+#boot-screen {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: #c8d4a0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 50;
+}
+
+#boot-screen.hidden { display: none; }
+
+.macintosh-logo {
+  width: 80px;
+  height: 96px;
+  margin-bottom: 20px;
+}
+
+.boot-text {
+  font-size: 14px;
+  color: #1a1a1a;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  animation: blink-cursor 1s infinite;
+  white-space: nowrap;
+}
+
+@keyframes blink-cursor {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.boot-subtitle {
+  margin-top: 8px;
+  font-size: 9px;
+  color: #4a4a2a;
+  letter-spacing: 2px;
+}
+
+/* === DESKTOP === */
+#desktop {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: none;
+  flex-direction: column;
+}
+
+#desktop.active { display: flex; }
+
+/* Menu Bar */
+.menu-bar {
+  height: 20px;
+  background: #ffffff;
+  border-bottom: 1px solid #000;
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+  position: relative;
+}
+
+.menu-item {
+  font-size: 12px;
+  color: #000;
+  padding: 1px 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.menu-item:hover, .menu-item.active {
+  background: #000;
+  color: #fff;
+}
+
+#apple-menu { font-weight: bold; }
+
+.menu-right {
+  margin-left: auto;
+  font-size: 10px;
+  color: #4a4a2a;
+}
+
+/* Desktop Content */
+.desktop-content {
+  flex: 1;
+  position: relative;
+  background: #ffffff;
+}
+
+/* Desktop Icons */
+.desktop-icon {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  width: 70px;
+  text-align: center;
+}
+
+.desktop-icon:active .icon-label {
+  background: #000;
+  color: #fff;
+}
+
+.icon-graphic {
+  width: 48px;
+  height: 52px;
+  margin-bottom: 3px;
+}
+
+.icon-label {
+  font-size: 10px;
+  color: #000;
+  padding: 1px 4px;
+  border-radius: 2px;
+  line-height: 1.3;
+}
+
+/* Trash can */
+.trash-icon {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  width: 48px;
+  height: 60px;
+  cursor: pointer;
+}
+
+/* === WINDOW SYSTEM === */
+.window {
+  position: absolute;
+  background: #fff;
+  border: 2px solid #000;
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.3);
+  display: none;
+}
+
+.window.open { display: block; }
+
+.window-header {
+  background: #fff;
+  border-bottom: 1px solid #000;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+  cursor: move;
+}
+
+.window-title {
+  font-size: 11px;
+  flex: 1;
+  text-align: center;
+  color: #000;
+}
+
+.window-controls {
+  display: flex;
+  gap: 4px;
+}
+
+.win-btn {
+  width: 12px; height: 12px;
+  border: 1px solid #000;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+}
+
+.win-btn:hover { background: #000; color: #fff; }
+
+.window-body {
+  padding: 10px;
+  min-height: 200px;
+}
+
+/* === CALCULATOR === */
+.calc-display {
+  background: #c8d4a0;
+  border: 1px solid #000;
+  text-align: right;
+  font-size: 16px;
+  padding: 5px 8px;
+  margin-bottom: 8px;
+  font-family: 'Courier New', monospace;
+  min-height: 28px;
+}
+
+.calc-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3px;
+}
+
+.calc-btn {
+  border: 1px solid #000;
+  background: #e8e0d0;
+  padding: 6px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 12px;
+  user-select: none;
+}
+
+.calc-btn:hover { background: #fff; }
+.calc-btn:active { background: #000; color: #fff; }
+.calc-btn.op { font-weight: bold; }
+
+/* === NOTEPAD === */
+.notepad-area {
+  width: 100%;
+  height: 250px;
+  border: none;
+  outline: none;
+  resize: none;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  background: transparent;
+}
+
+/* === ABOUT WINDOW === */
+.about-content {
+  text-align: center;
+  padding: 20px;
+}
+
+.about-content h2 {
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.about-content p {
+  font-size: 11px;
+  line-height: 1.6;
+  color: #333;
+}
+
+/* === APPLE MENU DROPDOWN === */
+.apple-dropdown {
+  position: absolute;
+  top: 20px;
+  left: 4px;
+  background: #fff;
+  border: 1px solid #000;
+  display: none;
+  z-index: 999;
+  min-width: 160px;
+}
+
+.apple-dropdown.open { display: block; }
+
+.apple-dropdown-item {
+  padding: 3px 20px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.apple-dropdown-item:hover {
+  background: #000;
+  color: #fff;
+}
+
+.apple-divider {
+  height: 1px;
+  background: #000;
+  margin: 3px 8px;
+}
+
+/* === CURSOR === */
+#cursor {
+  position: fixed;
+  width: 8px;
+  height: 12px;
+  background: #000;
+  pointer-events: none;
+  z-index: 9999;
+  display: none;
+}
+
+/* === VENTILATION === */
+.vents {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 3px;
+}
+
+.vent {
+  width: 40px; height: 2px;
+  background: #8a7e6b;
+  border-radius: 1px;
+}
+
+/* === POWER LIGHT === */
+.power-light {
+  position: absolute;
+  top: 15px;
+  right: 35px;
+  width: 6px; height: 6px;
+  background: #4a8c4a;
+  border-radius: 50%;
+  box-shadow: 0 0 4px #4a8c4a;
+}
+
+/* === BOOT ANIMATION === */
+@keyframes fade-in {
+  from { opacity: 0; } to { opacity: 1; }
+}
+
+.boot-fade { animation: fade-in 2s ease-out; }
+
+/* Sound toggle */
+.sound-toggle {
+  position: absolute;
+  top: 5px; right: 40px;
+  font-size: 9px;
+  cursor: pointer;
+  color: #8a7e6b;
+}
+
+</style>
+</head>
+<body>
+
+<div class="mac-body">
+  <div class="power-light"></div>
+  <span class="sound-toggle" onclick="toggleSound()">🔊</span>
+  
+  <div class="mac-label">
+    <svg class="apple-icon" viewBox="0 0 24 28">
+      <path d="M16.5 3c-1.7 0-3.3.9-4.3 2.4C10.5 6.3 9.6 7.8 9.6 9.5c0 .3 0 .6.1.8-.6.4-1.2 1-1.6 1.7-.8 1.3-1.3 2.8-1.3 4.3 0 3.4 2.8 6.5 5.8 6.5 1.3 0 2.2-.6 3.4-.6s2 .6 3.3.6c1.9 0 3.7-1.2 4.7-3-3.6-1.4-5.6-4.8-5.6-8.5 0-1.8.5-3.5 1.5-5C18.7 4 17.9 3 16.5 3z" fill="#2a2a2a"/>
+      <circle cx="13" cy="9" r="1.5" fill="#e8e0d0"/>
+    </svg>
+    Apple Macintosh
+  </div>
+
+  <div class="screen-frame">
+    <div class="screen" id="screen">
+      
+      <!-- BOOT SCREEN -->
+      <div id="boot-screen">
+        <canvas id="mac-logo-canvas" width="80" height="96"></canvas>
+        <div class="boot-text" id="boot-text"></div>
+        <div class="boot-subtitle" id="boot-subtitle">© 1984 Apple Computer, Inc.</div>
+      </div>
+
+      <!-- DESKTOP -->
+      <div id="desktop">
+        <div class="menu-bar" id="menu-bar">
+          <span class="menu-item" id="apple-menu" onclick="toggleAppleMenu()">🍎</span>
+          <span class="menu-item" onmouseenter="showDropdown('file')">File</span>
+          <span class="menu-item" onmouseenter="showDropdown('edit')">Edit</span>
+          <span class="menu-item" onmouseenter="showDropdown('view')">View</span>
+          <span class="menu-item" onmouseenter="showDropdown('special')">Special</span>
+          <span class="menu-right" id="clock"></span>
+        </div>
+
+        <div class="desktop-content" id="desktop-content">
+          
+          <!-- Desktop Icons -->
+          <div class="desktop-icon" style="top: 30px; left: 20px;" ondblclick="openWindow('hard-disk')">
+            <svg class="icon-graphic" viewBox="0 0 48 52">
+              <rect x="4" y="6" width="40" height="32" rx="2" fill="#fff" stroke="#000" stroke-width="1.5"/>
+              <circle cx="14" cy="16" r="4" fill="none" stroke="#000" stroke-width="1.5"/>
+              <rect x="10" y="22" width="28" height="3" fill="#000"/>
+              <text x="4" y="48" font-size="6" text-anchor="middle" fill="#000">Macintosh HD</text>
+            </svg>
+          </div>
+
+          <div class="desktop-icon" style="top: 120px; left: 20px;" ondblclick="openWindow('readme')">
+            <svg class="icon-graphic" viewBox="0 0 48 52">
+              <rect x="8" y="4" width="32" height="40" rx="1" fill="#fff" stroke="#000" stroke-width="1.5"/>
+              <line x1="14" y1="16" x2="34" y2="16" stroke="#000" stroke-width="1"/>
+              <line x1="14" y1="22" x2="34" y2="22" stroke="#000" stroke-width="1"/>
+              <line x1="14" y1="28" x2="28" y2="28" stroke="#000" stroke-width="1"/>
+              <line x1="14" y1="34" x2="30" y2="34" stroke="#000" stroke-width="1"/>
+            </svg>
+          </div>
+
+          <!-- Trash -->
+          <div class="trash-icon" ondblclick="openWindow('trash')">
+            <svg width="48" height="60" viewBox="0 0 48 60">
+              <rect x="10" y="22" width="28" height="35" rx="1" fill="#fff" stroke="#000" stroke-width="1.5"/>
+              <line x1="14" y1="30" x2="34" y2="30" stroke="#000" stroke-width="1"/>
+              <line x1="14" y1="36" x2="34" y2="36" stroke="#000" stroke-width="1"/>
+              <line x1="14" y1="42" x2="34" y2="42" stroke="#000" stroke-width="1"/>
+              <path d="M8 22 L16 14 L32 14 L40 22" fill="none" stroke="#000" stroke-width="1.5"/>
+              <rect x="18" y="10" width="12" height="6" rx="2" fill="#fff" stroke="#000" stroke-width="1"/>
+            </svg>
+          </div>
+
+          <!-- Windows -->
+          
+          <!-- Hard Disk Window -->
+          <div class="window" id="win-hard-disk" style="top: 40px; left: 90px; width: 320px;">
+            <div class="window-header" onmousedown="startDrag(event, 'win-hard-disk')">
+              <span class="window-title">Macintosh HD</span>
+              <div class="window-controls">
+                <span class="win-btn" onclick="closeWindow('hard-disk')">×</span>
+              </div>
+            </div>
+            <div class="window-body">
+              <p style="font-size: 12px; margin-bottom: 8px;">Available: 409,568 bytes</p>
+              <table style="width: 100%; font-size: 11px;" border="0">
+                <tr><td style="padding: 3px;">📁 Applications</td><td style="text-align:right;">System Folder</td></tr>
+                <tr><td style="padding: 3px;">📁 Documents</td><td style="text-align:right;"></td></tr>
+                <tr><td style="padding: 3px;">📄 Read Me.txt</td><td style="text-align:right;">Welcome!</td></tr>
+              </table>
+            </div>
+          </div>
+
+          <!-- About Window -->
+          <div class="window" id="win-about" style="top: 60px; left: 140px; width: 280px;">
+            <div class="window-header" onmousedown="startDrag(event, 'win-about')">
+              <span class="window-title">About This Macintosh</span>
+              <div class="window-controls">
+                <span class="win-btn" onclick="closeWindow('about')">×</span>
+              </div>
+            </div>
+            <div class="window-body about-content">
+              <h2>Apple Macintosh 128K</h2>
+              <p style="font-size: 9px; color: #666;">Version 1.0 (January 24, 1984)</p>
+              <br>
+              <table style="margin: auto; font-size: 11px;" border="0">
+                <tr><td>CPU:</td><td>Motorola 68000 @ 7.83 MHz</td></tr>
+                <tr><td>RAM:</td><td>128 KB (512 KB expandable)</td></tr>
+                <tr><td>Display:</td><td>9" CRT, 512×340 B&W</td></tr>
+                <tr><td>Storage:</td><td>400 KB Floppy Disk</td></tr>
+                <tr><td>Price:</td><td>$2,495 (≈ $7,800 today)</td></tr>
+              </table>
+              <br>
+              <p style="font-size: 10px;">"Personal computers are for everyone."</p>
+              <p style="font-size: 9px; color: #666; margin-top: 8px;">© Apple Computer, Inc. 1984</p>
+            </div>
+          </div>
+
+          <!-- Calculator Window -->
+          <div class="window" id="win-calc" style="top: 50px; left: 200px; width: 200px;">
+            <div class="window-header" onmousedown="startDrag(event, 'win-calc')">
+              <span class="window-title">Calculator</span>
+              <div class="window-controls">
+                <span class="win-btn" onclick="closeWindow('calc')">×</span>
+              </div>
+            </div>
+            <div class="window-body">
+              <div class="calc-display" id="calc-display">0</div>
+              <div class="calc-grid">
+                <div class="calc-btn op" onclick="calcClear()">C</div>
+                <div class="calc-btn op" onclick="calcInput('±')">±</div>
+                <div class="calc-btn op" onclick="calcInput('%')">%</div>
+                <div class="calc-btn op" onclick="calcOp('/')">÷</div>
+                
+                <div class="calc-btn" onclick="calcInput('7')">7</div>
+                <div class="calc-btn" onclick="calcInput('8')">8</div>
+                <div class="calc-btn" onclick="calcInput('9')">9</div>
+                <div class="calc-btn op" onclick="calcOp('*')">×</div>
+                
+                <div class="calc-btn" onclick="calcInput('4')">4</div>
+                <div class="calc-btn" onclick="calcInput('5')">5</div>
+                <div class="calc-btn" onclick="calcInput('6')">6</div>
+                <div class="calc-btn op" onclick="calcOp('-')">−</div>
+                
+                <div class="calc-btn" onclick="calcInput('1')">1</div>
+                <div class="calc-btn" onclick="calcInput('2')">2</div>
+                <div class="calc-btn" onclick="calcInput('3')">3</div>
+                <div class="calc-btn op" onclick="calcOp('+')">+</div>
+                
+                <div class="calc-btn" style="grid-column: span 2;" onclick="calcInput('0')">0</div>
+                <div class="calc-btn" onclick="calcInput('.')">.</div>
+                <div class="calc-btn op" onclick="calcEquals()">=</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notepad Window -->
+          <div class="window" id="win-notepad" style="top: 45px; left: 120px; width: 340px;">
+            <div class="window-header" onmousedown="startDrag(event, 'win-notepad')">
+              <span class="window-title">Notes</span>
+              <div class="window-controls">
+                <span class="win-btn" onclick="closeWindow('notepad')">×</span>
+              </div>
+            </div>
+            <div class="window-body" style="padding: 5px;">
+              <textarea class="notepad-area" placeholder="Type here... (limited to 128KB of RAM!)">Welcome to the Macintosh!
+
+This is a simulation of the original Apple Macintosh 128K, 
+introduced on January 24, 1984.
+
+It features:
+- A revolutionary graphical user interface
+- The first commercial mouse-controlled personal computer
+- 128 KB of RAM (that's less than one modern photo!)
+- A single 400KB floppy disk drive
+- The famous "Hello" message at startup
+
+"The Macintosh is a revolution in personal computing." 
+— Steve Jobs</textarea>
+            </div>
+          </div>
+
+          <!-- Read Me Window -->
+          <div class="window" id="win-readme" style="top: 55px; left: 130px; width: 320px;">
+            <div class="window-header" onmousedown="startDrag(event, 'win-readme')">
+              <span class="window-title">Read Me.txt</span>
+              <div class="window-controls">
+                <span class="win-btn" onclick="closeWindow('readme')">×</span>
+              </div>
+            </div>
+            <div class="window-body" style="font-size: 12px; line-height: 1.6;">
+              <p><strong>Welcome to Macintosh!</strong></p>
+              <br>
+              <p>The Apple Macintosh was introduced on January 24, 1984 during the famous "1984" Super Bowl commercial directed by Ridley Scott.</p>
+              <br>
+              <p><strong>Key Innovations:</strong></p>
+              <ul style="font-size: 11px; margin-left: 15px;">
+                <li>Graphical User Interface (GUI)</li>
+                <li>Mouse control</li>
+                <li>WYSIWYG editing</li>
+                <li>"Hello" startup message</li>
+              </ul>
+              <br>
+              <p><em>Double-click icons to open them.</em></p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Apple Menu Dropdown -->
+        <div class="apple-dropdown" id="apple-menu-dropdown">
+          <div class="apple-divider"></div>
+          <div class="apple-dropdown-item" onclick="openWindow('about'); toggleAppleMenu();">About This Macintosh</div>
+          <div class="apple-dropdown-item" onclick="openWindow('calc'); toggleAppleMenu();">Calculator...</div>
+          <div class="apple-divider"></div>
+          <div class="apple-dropdown-item" onclick="ejectAll(); toggleAppleMenu();">Eject Disk</div>
+        </div>
+
+      </div><!-- /desktop -->
+    </div><!-- /screen -->
+  </div><!-- /screen-frame -->
+
+  <div class="vents">
+    <div class="vent"></div><div class="vent"></div><div class="vent"></div>
+    <div class="vent"></div><div class="vent"></div><div class="vent"></div>
+    <div class="vent"></div><div class="vent"></div><div class="vent"></div>
+  </div>
+</div><!-- /mac-body -->
+
+<script>
+// === BOOT SEQUENCE ===
+const bootMessages = [
+  "Hello.",
+  "",
+  "Welcome to Macintosh.",
+  "",
+  "Personal computers are for everyone.",
+  ""
+];
+
+let bootIndex = 0;
+let charIndex = 0;
+let bootTimeout;
+let soundEnabled = true;
+
+function playBeep(freq, duration) {
+  if (!soundEnabled) return;
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = document.createElement('audio').getContext ? null : 
+      audioCtx.createGain && audioCtx.createGainNode();
+    
+    // Simple beep using oscillator directly
+    if (osc.connect) {
+      const gainNode = audioCtx.createGain();
+      osc.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      osc.frequency.value = freq;
+      osc.type = 'square';
+      gainNode.gain.value = 0.15;
+      osc.start();
+      setTimeout(() => { osc.stop(); }, duration);
+    }
+  } catch(e) {}
+}
+
+function typeBootMessage() {
+  if (bootIndex >= bootMessages.length) {
+    // Boot complete!
+    playBeep(800, 150);
+    setTimeout(() => playBeep(1000, 200), 200);
+    setTimeout(() => {
+      document.getElementById('boot-screen').classList.add('hidden');
+      document.getElementById('desktop').classList.add('active');
+      startClock();
+      initMacLogo();
+    }, 500);
+    return;
+  }
+
+  const textEl = document.getElementById('boot-text');
+  if (charIndex <= bootMessages[bootIndex].length) {
+    textEl.textContent = bootMessages[bootIndex].substring(0, charIndex);
+    playBeep(600 + Math.random() * 200, 30);
+    setTimeout(typeBootMessage, 60 + Math.random() * 40);
+    charIndex++;
+  } else {
+    charIndex = 0;
+    bootIndex++;
+    setTimeout(typeBootMessage, 400);
+  }
+}
+
+// === MACINTOSH LOGO (simple pixel art) ===
+function initMacLogo() {
+  const canvas = document.getElementById('mac-logo-canvas');
+  if (!canvas) return;
+  // Draw a simple smiley face icon
+  const ctx = canvas.getContext('2d');
+  
+  // Face circle
+  ctx.fillStyle = '#000';
+  ctx.beginPath();
+  ctx.arc(40, 50, 36, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Eyes
+  ctx.fillStyle = '#c8d4a0';
+  ctx.fillRect(28, 38, 5, 7);
+  ctx.fillRect(45, 38, 5, 7);
+  
+  // Smile
+  ctx.strokeStyle = '#c8d4a0';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(40, 48, 14, 0.2 * Math.PI, 0.8 * Math.PI);
+  ctx.stroke();
+  
+  // Bitten apple hint - small notch at top
+  ctx.fillStyle = '#c8d4a0';
+  ctx.beginPath();
+  ctx.arc(50, 22, 6, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+// === CLOCK ===
+function startClock() {
+  function update() {
+    const now = new Date();
+    const h = now.getHours().toString().padStart(2, '0');
+    const m = now.getMinutes().toString().padStart(2, '0');
+    document.getElementById('clock').textContent = h + ':' + m;
+  }
+  update();
+  setInterval(update, 30000); // Update every 30s like old Mac
+}
+
+// === WINDOW MANAGEMENT ===
+let dragTarget = null;
+let dragOffsetX = 0;
+let dragOffsetY = 0;
+
+function openWindow(name) {
+  const win = document.getElementById('win-' + name);
+  if (win) {
+    win.classList.add('open');
+    playBeep(400, 20);
+  }
+}
+
+function closeWindow(name) {
+  const win = document.getElementById('win-' + name);
+  if (win) {
+    win.classList.remove('open');
+    playBeep(350, 15);
+  }
+}
+
+function startDrag(e, id) {
+  dragTarget = document.getElementById(id);
+  const rect = dragTarget.getBoundingClientRect();
+  dragOffsetX = e.clientX - rect.left;
+  dragOffsetY = e.clientY - rect.top;
+  document.addEventListener('mousemove', onDrag);
+  document.addEventListener('mouseup', stopDrag);
+}
+
+function onDrag(e) {
+  if (!dragTarget) return;
+  const screenRect = document.getElementById('screen').getBoundingClientRect();
+  let x = e.clientX - screenRect.left - dragOffsetX + 15; // screen padding
+  let y = e.clientY - screenRect.top - dragOffsetY + 15;
+  
+  // Clamp within screen
+  x = Math.max(0, Math.min(x, screenRect.width - dragTarget.offsetWidth));
+  y = Math.max(0, Math.min(y, screenRect.height - dragTarget.offsetHeight));
+  
+  dragTarget.style.left = x + 'px';
+  dragTarget.style.top = y + 'px';
+}
+
+function stopDrag() {
+  dragTarget = null;
+  document.removeEventListener('mousemove', onDrag);
+  document.removeEventListener('mouseup', stopDrag);
+}
+
+// === APPLE MENU ===
+let appleMenuOpen = false;
+
+function toggleAppleMenu() {
+  const dd = document.getElementById('apple-menu-dropdown');
+  appleMenuOpen = !appleMenuOpen;
+  dd.classList.toggle('open', appleMenuOpen);
+  if (appleMenuOpen) playBeep(500, 15);
+}
+
+document.addEventListener('click', function(e) {
+  const dd = document.getElementById('apple-menu-dropdown');
+  const appleBtn = document.getElementById('apple-menu');
+  if (!dd.contains(e.target) && !appleBtn.contains(e.target)) {
+    appleMenuOpen = false;
+    dd.classList.remove('open');
+  }
+});
+
+// === CALCULATOR ===
+let calcDisplay = '0';
+let calcPrev = null;
+let calcOper = '';
+let calcNewNum = true;
+
+function updateCalcDisplay() {
+  const el = document.getElementById('calc-display');
+  if (el) {
+    let display = calcDisplay;
+    if (display.length > 10) display = display.substring(0, 10);
+    el.textContent = display;
+  }
+}
+
+function calcInput(n) {
+  playBeep(300 + Math.random() * 200, 15);
+  if (calcNewNum) {
+    calcDisplay = n === '.' ? '0.' : n;
+    calcNewNum = false;
+  } else {
+    if (n === '.' && calcDisplay.includes('.')) return;
+    if (calcDisplay.length >= 8) return; // 8 digit limit like real Mac
+    calcDisplay += n;
+  }
+  updateCalcDisplay();
+}
+
+function calcOp(op) {
+  playBeep(400, 15);
+  if (calcPrev !== null && !calcNewNum) {
+    calcEquals();
+  }
+  calcPrev = parseFloat(calcDisplay);
+  calcOper = op;
+  calcNewNum = true;
+}
+
+function calcEquals() {
+  playBeep(350, 15);
+  if (calcPrev === null || calcOper === '') return;
+  
+  const curr = parseFloat(calcDisplay);
+  let result;
+  
+  switch (calcOper) {
+    case '+': result = calcPrev + curr; break;
+    case '-': result = calcPrev - curr; break;
+    case '*': result = calcPrev * curr; break;
+    case '/': result = curr !== 0 ? calcPrev / curr : 'Error'; break;
+  }
+  
+  if (result === 'Error') {
+    playBeep(200, 300); // Error buzzer
+    calcDisplay = 'Error';
+  } else {
+    result = parseFloat(result.toPrecision(8));
+    calcDisplay = result.toString();
+  }
+  
+  calcPrev = null;
+  calcOper = '';
+  calcNewNum = true;
+  updateCalcDisplay();
+}
+
+function calcClear() {
+  playBeep(250, 10);
+  calcDisplay = '0';
+  calcPrev = null;
+  calcOper = '';
+  calcNewNum = true;
+  updateCalcDisplay();
+}
+
+// === EJECT ===
+function ejectAll() {
+  document.querySelectorAll('.window.open').forEach(w => w.classList.remove('open'));
+  playBeep(600, 100);
+  setTimeout(() => playBeep(400, 150), 150);
+}
+
+// === SOUND TOGGLE ===
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  document.querySelector('.sound-toggle').textContent = soundEnabled ? '🔊' : '🔇';
+}
+
+// === START BOOT ===
+window.addEventListener('load', function() {
+  setTimeout(typeBootMessage, 800);
+});
+
+</script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+User-Agent: *
+Allow: /
+
+Sitemap: https://mjrovai.github.io/simuladores-interativos/apps/color-palette/sitemap.xml

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="Color Palette Generator — create beautiful color palettes in seconds">
+  <rect width="1200" height="630" fill="#F8FAFC"/>
+  <rect x="0" y="0" width="1200" height="12" fill="#4F46E5"/>
+  <text x="80" y="250" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="76" font-weight="700" fill="#111827">Color Palette Generator</text>
+  <text x="80" y="330" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="34" fill="#475569">Create beautiful, accessible color palettes in seconds.</text>
+  <g>
+    <rect x="80" y="420" width="208" height="140" rx="16" fill="#264653"/>
+    <rect x="308" y="420" width="208" height="140" rx="16" fill="#2A9D8F"/>
+    <rect x="536" y="420" width="208" height="140" rx="16" fill="#E9C46A"/>
+    <rect x="764" y="420" width="208" height="140" rx="16" fill="#F4A261"/>
+    <rect x="992" y="420" width="208" height="140" rx="16" fill="#E76F51"/>
+  </g>
+</svg>

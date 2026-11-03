@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Windows 95</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden}
+body{font-family:"MS Sans Serif",Tahoma,"Segoe UI",sans-serif;font-size:11px;color:#000;user-select:none;-webkit-user-select:none;background:#000}
+button{font-family:inherit;font-size:11px}
+.hidden{display:none!important}
+textarea,input{font-family:inherit;font-size:11px}
+
+/* ---------- 3D bevels ---------- */
+.bevel-up{background:#c0c0c0;border:1px solid;border-color:#fff #404040 #404040 #fff;box-shadow:inset 1px 1px 0 #dfdfdf,inset -1px -1px 0 #808080}
+.field{background:#fff;border:1px solid;border-color:#808080 #fff #fff #808080;box-shadow:inset 1px 1px 0 #404040,inset -1px -1px 0 #dfdfdf}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;background:#c0c0c0;border:1px solid;border-color:#fff #404040 #404040 #fff;box-shadow:inset 1px 1px 0 #dfdfdf,inset -1px -1px 0 #808080;padding:3px 12px;min-width:70px;cursor:default}
+.btn:active,.btn.pressed{border-color:#808080 #fff #fff #808080;box-shadow:inset 1px 1px 0 #404040,inset -1px -1px 0 #dfdfdf}
+.btn.primary{outline:1px dotted #000;outline-offset:-5px}
+
+/* ---------- Windows ---------- */
+#desktop{position:fixed;top:0;left:0;right:0;bottom:28px;background:#008080;overflow:hidden}
+#icons{position:absolute;inset:0}
+#wins{position:absolute;inset:0;pointer-events:none}
+#selrect{position:absolute;border:1px dotted #000;pointer-events:none;z-index:50}
+.win{position:absolute;pointer-events:auto;background:#c0c0c0;border:1px solid #000;box-shadow:inset 1px 1px 0 #fff,inset -1px -1px 0 #404040,inset 2px 2px 0 #dfdfdf,inset -2px -2px 0 #808080;padding:2px 3px 3px;display:flex;flex-direction:column;min-width:150px;min-height:90px}
+.titlebar{height:18px;display:flex;align-items:center;gap:3px;padding:0 1px 0 4px;margin-bottom:2px;flex:0 0 auto}
+.win.active .titlebar,.dlg .titlebar{background:linear-gradient(90deg,#000080,#1084d0);color:#fff}
+.win:not(.active) .titlebar{background:linear-gradient(90deg,#808080,#c0c0c0);color:#c0c0c0}
+.ticon{width:14px;height:14px;flex:0 0 auto;display:flex}
+.ticon svg{width:14px;height:14px}
+.ttext{flex:1;overflow:hidden;white-space:nowrap;font-weight:bold}
+.tbtns{display:flex;gap:2px}
+.tbtn{width:16px;height:14px;display:flex;align-items:center;justify-content:center;background:#c0c0c0;border:1px solid;border-color:#fff #404040 #404040 #fff;box-shadow:inset 1px 1px 0 #dfdfdf,inset -1px -1px 0 #808080;padding:0}
+.tbtn:active{border-color:#808080 #fff #fff #808080;box-shadow:none}
+.tbtn svg{width:9px;height:9px;display:block}
+.win-body{flex:1;position:relative;overflow:hidden;display:flex;flex-direction:column}
+.rsz{position:absolute;z-index:6}
+.rsz[data-dir=n]{top:-3px;left:4px;right:4px;height:5px;cursor:n-resize}
+.rsz[data-dir=s]{bottom:-3px;left:4px;right:4px;height:5px;cursor:s-resize}
+.rsz[data-dir=e]{right:-3px;top:4px;bottom:4px;width:5px;cursor:e-resize}
+.rsz[data-dir=w]{left:-3px;top:4px;bottom:4px;width:5px;cursor:w-resize}
+.rsz[data-dir=ne]{top:-3px;right:-3px;width:9px;height:9px;cursor:ne-resize}
+.rsz[data-dir=nw]{top:-3px;left:-3px;width:9px;height:9px;cursor:nw-resize}
+.rsz[data-dir=se]{bottom:-3px;right:-3px;width:9px;height:9px;cursor:se-resize}
+.rsz[data-dir=sw]{bottom:-3px;left:-3px;width:9px;height:9px;cursor:sw-resize}
+
+/* ---------- Desktop icons ---------- */
+.dicon{position:absolute;width:76px;padding:2px;text-align:center}
+.dicon .img{width:32px;height:32px;margin:0 auto 2px}
+.dicon .img svg{width:32px;height:32px;display:block}
+.dicon .lbl{color:#fff;padding:1px 2px;text-shadow:1px 1px 0 rgba(0,0,0,.6);line-height:12px;word-wrap:break-word}
+.dicon.sel .lbl{background:#000080;outline:1px dotted #fff;text-shadow:none}
+.dicon.sel .img{outline:1px dotted #fff}
+
+/* ---------- Taskbar ---------- */
+#taskbar{position:fixed;left:0;right:0;bottom:0;height:28px;background:#c0c0c0;border-top:1px solid #fff;box-shadow:inset 0 1px 0 #dfdfdf;display:flex;align-items:center;gap:3px;padding:2px 3px;z-index:5000}
+#startbtn{display:flex;align-items:center;gap:3px;height:22px;padding:0 6px;font-weight:bold;background:#c0c0c0;border:1px solid;border-color:#fff #404040 #404040 #fff;box-shadow:inset 1px 1px 0 #dfdfdf,inset -1px -1px 0 #808080;flex:0 0 auto}
+#startbtn:active,#startbtn.pressed{border-color:#808080 #fff #fff #808080;box-shadow:none}
+#startbtn svg{width:16px;height:16px;display:block}
+#taskbtns{flex:1;display:flex;gap:3px;overflow:hidden}
+.taskbtn{display:flex;align-items:center;gap:4px;height:22px;min-width:110px;max-width:170px;padding:0 6px;background:#c0c0c0;border:1px solid;border-color:#fff #404040 #404040 #fff;box-shadow:inset 1px 1px 0 #dfdfdf,inset -1px -1px 0 #808080;overflow:hidden;white-space:nowrap;flex:0 1 auto}
+.taskbtn .ticon{width:14px;height:14px}
+.taskbtn span:last-child{overflow:hidden;text-overflow:ellipsis}
+.taskbtn.pressed{border-color:#808080 #fff #fff #808080;box-shadow:inset 1px 1px 0 #404040,inset -1px -1px 0 #dfdfdf;background-color:#c0c0c0;background-image:repeating-conic-gradient(#dfdfdf 0 25%,#c0c0c0 0 50%);background-size:2px 2px}
+#tray{height:22px;display:flex;align-items:center;padding:0 8px;border:1px solid;border-color:#808080 #fff #fff #808080;flex:0 0 auto}
+
+/* ---------- Start menu ---------- */
+#startmenu{position:fixed;left:2px;bottom:29px;width:176px;background:#c0c0c0;border:1px solid #000;box-shadow:inset 1px 1px 0 #fff,inset -1px -1px 0 #404040,inset 2px 2px 0 #dfdfdf,inset -2px -2px 0 #808080;display:flex;z-index:6000}
+.sm-banner{width:26px;background:#000080;display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px}
+.sm-banner span{writing-mode:vertical-rl;transform:rotate(180deg);color:#fff;font-size:16px;font-weight:bold;letter-spacing:1px;white-space:nowrap}
+.sm-banner em{font-style:normal;font-weight:normal}
+.sm-items{flex:1;padding:2px;display:flex;flex-direction:column;min-width:0}
+.sm-item{display:flex;align-items:center;gap:6px;padding:4px 8px;position:relative;white-space:nowrap;min-width:0}
+.sm-item .sicon{width:20px;height:20px;flex:0 0 auto;display:flex}
+.sm-item .sicon svg{width:20px;height:20px}
+.sm-item:hover{background:#000080;color:#fff}
+.sm-item.disabled{color:#808080;text-shadow:1px 1px 0 #fff}
+.sm-item.disabled:hover{background:transparent;color:#808080}
+.sm-item .arrow{margin-left:auto;font-size:9px}
+.sm-sep{height:1px;background:#808080;box-shadow:0 1px 0 #fff;margin:2px 3px}
+.sm-sub{position:absolute;left:100%;top:-2px;background:#c0c0c0;border:1px solid #000;box-shadow:inset 1px 1px 0 #fff,inset -1px -1px 0 #404040,inset 2px 2px 0 #dfdfdf,inset -2px -2px 0 #808080;padding:2px;min-width:150px;display:none;z-index:10}
+.sm-item:hover>.sm-sub,.sm-sub:hover{display:block}
+
+/* ---------- Menus (dropdown / context) ---------- */
+.menu{position:absolute;background:#c0c0c0;border:1px solid #000;box-shadow:inset 1px 1px 0 #fff,inset -1px -1px 0 #404040,inset 2px 2px 0 #dfdfdf,inset -2px -2px 0 #808080;padding:2px;z-index:7000;min-width:130px}
+.menu .mitem{padding:3px 22px 3px 24px;position:relative;white-space:nowrap}
+.menu .mitem:hover{background:#000080;color:#fff}
+.menu .mitem.disabled{color:#808080;text-shadow:1px 1px 0 #fff}
+.menu .mitem.disabled:hover{background:transparent;color:#808080}
+.menu .msep{height:1px;background:#808080;box-shadow:0 1px 0 #fff;margin:2px 2px}
+.menubar{display:flex;align-items:center;background:#c0c0c0;padding:1px 0;flex:0 0 auto;border-bottom:1px solid #808080;box-shadow:0 1px 0 #fff}
+.menubar .mroot{padding:2px 8px;position:relative}
+.menubar .mroot:hover,.menubar .mroot.open{background:#000080;color:#fff}
+.menubar .menu{top:100%;left:0;display:none}
+.menubar .mroot:hover .menu,.menubar .mroot.open .menu{display:block}
+.statusbar{display:flex;gap:2px;padding:1px 2px;flex:0 0 auto}
+.statusbar .sfield{border:1px solid;border-color:#808080 #fff #fff #808080;padding:2px 6px;flex:1;white-space:nowrap;overflow:hidden}
+
+/* ---------- Dialogs ---------- */
+.dlg{position:fixed;z-index:8000;display:flex;flex-direction:column;background:#c0c0c0;border:1px solid #000;box-shadow:inset 1px 1px 0 #fff,inset -1px -1px 0 #404040,inset 2px 2px 0 #dfdfdf,inset -2px -2px 0 #808080;padding:2px 3px 3px;min-width:280px}
+.dlg .titlebar{margin-bottom:2px}
+.dlg-body{display:flex;gap:12px;padding:14px 10px 6px;align-items:flex-start;flex:1}
+.dlg-icon{width:32px;height:32px;flex:0 0 auto}
+.dlg-icon svg{width:32px;height:32px}
+.dlg-msg{flex:1;line-height:14px;padding-top:4px}
+.dlg-btns{display:flex;justify-content:center;gap:8px;padding:8px 0 4px}
+.radio{display:flex;gap:5px;align-items:center;padding:2px 0}
+.radio .dot{width:8px;height:8px;border-radius:50%;background:#fff;border:1px solid #404040;box-shadow:inset 1px 1px 0 #808080;position:relative;flex:0 0 auto}
+.radio.on .dot::after{content:"";position:absolute;inset:2px;background:#000;border-radius:50%}
+.chk{display:flex;gap:5px;align-items:center}
+.chk .box{width:10px;height:10px;background:#fff;border:1px solid #404040;box-shadow:inset 1px 1px 0 #808080;position:relative;flex:0 0 auto}
+.chk.on .box::after{content:"";position:absolute;left:2px;top:0;width:5px;height:6px;border-left:2px solid #000;border-bottom:2px solid #000;transform:rotate(45deg) translate(0,-1px)}
+
+/* ---------- Boot / shutdown ---------- */
+#boot{position:fixed;inset:0;background:#000;z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.boot-logo{display:flex;align-items:center;gap:16px}
+.boot-logo svg{width:76px;height:64px}
+.boot-tx{color:#fff}
+.boot-ms{font-size:18px;letter-spacing:1px}
+.boot-w{font-size:42px;font-weight:bold;letter-spacing:3px}
+.boot-text{color:#c0c0c0;margin-top:26px}
+.boot-bar{position:absolute;bottom:11%;width:250px;height:16px;background:#000;border:2px solid #808080;overflow:hidden}
+.boot-bar-inner{display:flex;gap:2px;height:100%;width:56px;animation:bootslide 1.05s linear infinite}
+.boot-bar-inner i{flex:1;height:100%}
+.boot-bar-inner i:nth-child(1){background:#ff0000}
+.boot-bar-inner i:nth-child(2){background:#00a000}
+.boot-bar-inner i:nth-child(3){background:#ffcc00}
+.boot-bar-inner i:nth-child(4){background:#0000ff}
+@keyframes bootslide{from{transform:translateX(-58px)}to{transform:translateX(252px)}}
+#shutdown{position:fixed;inset:0;background:#000;z-index:10001;display:flex;align-items:center;justify-content:center;cursor:pointer}
+#shutdown .txt{color:#ff8000;font-size:28px;font-family:"Times New Roman",Times,serif;text-align:center;padding:0 20px}
+#shutdown .hint{position:absolute;bottom:24px;color:#606060;font-size:12px}
+
+/* ---------- Folder windows ---------- */
+.folder{display:flex;flex-wrap:wrap;align-content:flex-start;gap:2px;padding:6px;background:#fff;flex:1;overflow:auto}
+.ficon{width:84px;text-align:center;padding:4px 2px}
+.ficon .img{width:32px;height:32px;margin:0 auto 3px}
+.ficon .img svg{width:32px;height:32px;display:block}
+.ficon .lbl{font-size:11px;line-height:13px}
+.ficon:hover .lbl{background:#000080;color:#fff}
+.empty-note{padding:14px;color:#000}
+
+/* ---------- Minesweeper ---------- */
+.ms-head{display:flex;align-items:center;justify-content:space-between;padding:4px;margin:3px;border:1px solid;border-color:#808080 #fff #fff #808080;flex:0 0 auto}
+.ms-led{background:#000;color:#f00;font-family:"Courier New",monospace;font-size:20px;font-weight:bold;padding:0 4px;letter-spacing:2px;border:1px solid;border-color:#808080 #fff #fff #808080;line-height:22px}
+.ms-face{width:26px;height:26px;display:flex;align-items:center;justify-content:center;background:#c0c0c0;border:1px solid;border-color:#fff #404040 #404040 #fff;box-shadow:inset 1px 1px 0 #dfdfdf,inset -1px -1px 0 #808080;padding:0}
+.ms-face:active{border-color:#808080 #fff #fff #808080;box-shadow:none}
+.ms-face svg{width:20px;height:20px}
+.ms-board-wrap{flex:1;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:2px 2px 4px}
+.ms-board{display:grid;grid-template-columns:repeat(9,16px);background:#c0c0c0;border:2px solid;border-color:#808080 #fff #fff #808080}
+.ms-cell{width:16px;height:16px;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:11px;background:#c0c0c0;border:1px solid;border-color:#fff #404040 #404040 #fff;box-shadow:inset 1px 1px 0 #dfdfdf,inset -1px -1px 0 #808080}
+.ms-cell.open{border:1px solid #808080;box-shadow:none}
+.ms-cell.boom{background:#f00}
+.ms-cell .flag{width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-bottom:8px solid #f00;margin:0 0 2px 2px}
+.ms-cell .mine{width:8px;height:8px;border-radius:50%;background:#000;position:relative}
+.ms-cell .mine::before,.ms-cell .mine::after{content:"";position:absolute;background:#000}
+.ms-cell .mine::before{left:3px;top:-4px;width:2px;height:14px}
+.ms-cell .mine::after{left:-4px;top:3px;width:14px;height:2px}
+.ms-n1{color:#00f}.ms-n2{color:#080}.ms-n3{color:#f00}.ms-n4{color:#008}
+.ms-n5{color:#800}.ms-n6{color:#088}.ms-n7{color:#000}.ms-n8{color:#808080}
+
+/* ---------- Calculator ---------- */
+.calc{display:flex;flex-direction:column;gap:4px;padding:4px 4px 8px;height:100%}
+.calc-disp{height:28px;text-align:right;font-family:"Courier New",monospace;font-size:18px;padding:2px 5px;margin:0 3px 4px;flex:0 0 auto}
+.calc-grid{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(5,1fr);gap:4px;flex:1;min-height:0}
+.calc-grid .btn{min-width:0;padding:0;font-size:12px}
+
+/* ---------- Notepad ---------- */
+.np-area{flex:1;background:#fff;border:1px solid;border-color:#808080 #fff #fff #808080;box-shadow:inset 1px 1px 0 #404040;font-family:"Courier New",monospace;font-size:12px;resize:none;outline:none;padding:2px 4px;user-select:text;-webkit-user-select:text;overflow:auto}
+
+/* ---------- Paint ---------- */
+.paint{display:flex;height:100%}
+.paint-side{width:58px;display:flex;flex-direction:column;gap:3px;padding:3px;border-right:1px solid #808080;box-shadow:1px 0 0 #fff;flex:0 0 auto}
+.ptool{width:24px;height:24px;display:flex;align-items:center;justify-content:center;background:#c0c0c0;border:1px solid;border-color:#fff #404040 #404040 #fff;box-shadow:inset 1px 1px 0 #dfdfdf,inset -1px -1px 0 #808080;padding:0}
+.ptool svg{width:16px;height:16px}
+.ptool.on{border-color:#808080 #fff #fff #808080;box-shadow:inset 1px 1px 0 #404040,inset -1px -1px 0 #dfdfdf}
+.paint-pal{display:grid;grid-template-columns:repeat(2,13px);gap:2px;padding:4px 3px}
+.ppal{width:13px;height:13px;border:1px solid #000}
+.ppal.on{outline:1px dotted #000;outline-offset:1px}
+.paint-cv-wrap{flex:1;padding:3px;overflow:auto;background:#808080}
+#paintcv{background:#fff;border:1px solid;border-color:#808080 #fff #fff #808080;image-rendering:pixelated;display:block}
+
+/* ---------- Internet Explorer ---------- */
+.ie-toolbar{display:flex;gap:3px;padding:3px;align-items:center;border-bottom:1px solid #808080;box-shadow:0 1px 0 #fff;flex:0 0 auto}
+.ie-toolbar .btn{min-width:0;padding:2px 7px}
+.ie-addr{flex:1;height:20px;padding:2px 5px;min-width:60px}
+.ie-content{flex:1;background:#fff;overflow:auto;padding:14px;user-select:text;-webkit-user-select:text}
+.ie-content a{color:#0000ee}
+.ie-marquee{overflow:hidden;white-space:nowrap;background:#000080;color:#fff;padding:3px 0;margin-bottom:12px}
+.ie-marquee span{display:inline-block;padding-left:100%;animation:marq 14s linear infinite}
+@keyframes marq{to{transform:translateX(-100%)}}
+.ie-counter{font-family:"Courier New",monospace;background:#000;color:#0f0;padding:2px 6px;letter-spacing:3px}
+
+/* ---------- MS-DOS ---------- */
+.dos{flex:1;background:#000;color:#c0c0c0;font-family:"Courier New",monospace;font-size:13px;padding:4px 6px;overflow:auto;user-select:text;-webkit-user-select:text;line-height:15px;cursor:text}
+.dos .line{white-space:pre-wrap;word-break:break-all}
+.dos input{background:transparent;border:none;color:#c0c0c0;font:inherit;outline:none;width:60%}
+
+/* ---------- Display properties / misc ---------- */
+.dp{padding:10px;display:flex;flex-direction:column;gap:10px;overflow:auto;flex:1}
+.dp-grid{display:grid;grid-template-columns:repeat(8,26px);gap:3px}
+.swatch{width:26px;height:26px;border:1px solid #000}
+.swatch.on{outline:2px solid #000;outline-offset:1px}
+.dp-label{font-weight:bold}
+.findrow{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.findrow label{width:70px;text-align:right;flex:0 0 auto}
+.findrow input{flex:1;height:20px;padding:2px 4px}
+.welcome-c{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:16px;text-align:center;overflow:auto}
+.welcome-c svg{width:64px;height:54px}
+.welcome-c h2{font-size:18px}
+.about-c{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:16px;text-align:center;overflow:auto}
+.about-c svg{width:48px;height:40px}
+</style>
+</head>
+<body>
+<div id="boot"></div>
+<div id="desktop">
+  <div id="icons"></div>
+  <div id="wins"></div>
+</div>
+<div id="taskbar">
+  <div id="startbtn"></div>
+  <div id="taskbtns"></div>
+  <div id="tray"></div>
+</div>
+<script>
+/* ============ ICONS (SVG) ============ */
+const I = {
+pc:`<svg viewBox="0 0 32 32"><rect x="3" y="4" width="18" height="14" fill="#c0c0c0" stroke="#000"/><rect x="5" y="6" width="14" height="10" fill="#008080" stroke="#000"/><rect x="5" y="6" width="14" height="4" fill="#00a0a0"/><rect x="4" y="20" width="16" height="4" fill="#c0c0c0" stroke="#000"/><rect x="8" y="25" width="8" height="3" fill="#808080" stroke="#000"/><rect x="6" y="28" width="12" height="2" fill="#c0c0c0" stroke="#000"/><rect x="22" y="8" width="7" height="18" fill="#c0c0c0" stroke="#000"/><rect x="24" y="10" width="3" height="2" fill="#808080"/><rect x="24" y="14" width="3" height="2" fill="#808080"/></svg>`,
+folder:`<svg viewBox="0 0 32 32"><path d="M2 8h10l3 3h15v17H2z" fill="#ffcc00" stroke="#000"/><path d="M2 12h28v16H2z" fill="#ffff99" stroke="#000"/><path d="M2 12h28v2H2z" fill="#ffcc00"/></svg>`,
+folderOpen:`<svg viewBox="0 0 32 32"><path d="M2 8h10l3 3h15v4H2z" fill="#ffcc00" stroke="#000"/><path d="M4 15h26l-3 14H2z" fill="#ffff99" stroke="#000"/></svg>`,
+drive:`<svg viewBox="0 0 32 32"><rect x="2" y="10" width="28" height="12" fill="#c0c0c0" stroke="#000"/><rect x="4" y="12" width="24" height="8" fill="#dfdfdf" stroke="#808080"/><rect x="22" y="17" width="5" height="2" fill="#00a000"/><rect x="6" y="17" width="10" height="2" fill="#808080"/></svg>`,
+trash:`<svg viewBox="0 0 32 32"><path d="M9 10h14l-2 19H11z" fill="#c0c0c0" stroke="#000"/><path d="M11 13l1 14M14 13v14M17 13v14M20 13l-1 14" stroke="#808080"/><rect x="7" y="7" width="18" height="3" fill="#c0c0c0" stroke="#000"/><rect x="13" y="4" width="6" height="3" fill="#c0c0c0" stroke="#000"/></svg>`,
+net:`<svg viewBox="0 0 32 32"><rect x="2" y="12" width="14" height="10" fill="#c0c0c0" stroke="#000"/><rect x="4" y="14" width="10" height="6" fill="#008080" stroke="#000"/><rect x="20" y="6" width="10" height="8" fill="#c0c0c0" stroke="#000"/><rect x="22" y="8" width="6" height="4" fill="#008080" stroke="#000"/><path d="M16 17h6M19 17v-5h8" stroke="#000" fill="none"/></svg>`,
+notepad:`<svg viewBox="0 0 32 32"><rect x="7" y="3" width="18" height="26" fill="#fff" stroke="#000"/><path d="M10 8h12M10 12h12M10 16h12M10 20h8" stroke="#808080"/><rect x="7" y="3" width="18" height="3" fill="#000080"/></svg>`,
+paint:`<svg viewBox="0 0 32 32"><rect x="3" y="6" width="26" height="20" fill="#fff" stroke="#000"/><rect x="3" y="6" width="26" height="20" fill="none" stroke="#000"/><path d="M6 22l6-8 5 6 4-5 5 7z" fill="#00a000" stroke="#000"/><circle cx="22" cy="12" r="3" fill="#ffff00" stroke="#000"/><rect x="3" y="24" width="26" height="2" fill="#000080"/></svg>`,
+ie:`<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="11" fill="#00a0e3" stroke="#0050a0"/><ellipse cx="16" cy="16" rx="13" ry="5" fill="none" stroke="#ffcc00" stroke-width="2.5" transform="rotate(-20 16 16)"/><path d="M5 16a11 11 0 0 0 22 0z" fill="#0070c0" opacity=".5"/></svg>`,
+msdos:`<svg viewBox="0 0 32 32"><rect x="2" y="5" width="28" height="22" fill="#000" stroke="#808080"/><rect x="4" y="7" width="24" height="18" fill="#000"/><text x="6" y="17" font-family="monospace" font-size="8" fill="#c0c0c0" font-weight="bold">MS-DOS</text><rect x="6" y="21" width="4" height="2" fill="#c0c0c0"/></svg>`,
+mine:`<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="10" fill="#000"/><circle cx="12" cy="12" r="3" fill="#808080"/><path d="M16 2v28M2 16h28M7 7l18 18M25 7L7 25" stroke="#000" stroke-width="2"/></svg>`,
+calc:`<svg viewBox="0 0 32 32"><rect x="7" y="3" width="18" height="26" fill="#c0c0c0" stroke="#000"/><rect x="9" y="6" width="14" height="5" fill="#c0e0c0" stroke="#000"/><g fill="#000"><rect x="9" y="14" width="4" height="3"/><rect x="14" y="14" width="4" height="3"/><rect x="19" y="14" width="4" height="3"/><rect x="9" y="19" width="4" height="3"/><rect x="14" y="19" width="4" height="3"/><rect x="19" y="19" width="4" height="3"/><rect x="9" y="24" width="4" height="3"/><rect x="14" y="24" width="4" height="3"/><rect x="19" y="24" width="4" height="3"/></g></svg>`,
+help:`<svg viewBox="0 0 32 32"><rect x="4" y="4" width="24" height="24" fill="#ffffcc" stroke="#000"/><text x="10" y="24" font-family="serif" font-size="20" font-weight="bold" fill="#000080">?</text></svg>`,
+find:`<svg viewBox="0 0 32 32"><circle cx="13" cy="13" r="8" fill="#c0e0ff" stroke="#000" stroke-width="2"/><path d="M19 19l9 9" stroke="#000" stroke-width="4"/><rect x="4" y="22" width="24" height="6" fill="#ffcc00" stroke="#000" transform="rotate(-15 16 25)"/></svg>`,
+run:`<svg viewBox="0 0 32 32"><rect x="3" y="6" width="26" height="18" fill="#c0c0c0" stroke="#000"/><rect x="5" y="8" width="22" height="14" fill="#fff" stroke="#808080"/><text x="8" y="19" font-family="monospace" font-size="9" fill="#000">C:\&gt;</text><path d="M20 12l6 4-6 4z" fill="#000080"/></svg>`,
+shutdown:`<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="12" fill="#c0c0c0" stroke="#000"/><path d="M16 4a12 12 0 0 1 0 24z" fill="#000080"/><path d="M16 7v9" stroke="#fff" stroke-width="3"/></svg>`,
+doc:`<svg viewBox="0 0 32 32"><path d="M8 2h12l6 6v22H8z" fill="#fff" stroke="#000"/><path d="M20 2v6h6" fill="#c0c0c0" stroke="#000"/><path d="M11 14h10M11 18h10M11 22h7" stroke="#000"/></svg>`,
+readme:`<svg viewBox="0 0 32 32"><path d="M8 2h12l6 6v22H8z" fill="#fff" stroke="#000"/><path d="M20 2v6h6" fill="#c0c0c0" stroke="#000"/><rect x="11" y="13" width="10" height="8" fill="#000080"/><text x="12" y="20" font-size="6" fill="#fff" font-family="sans-serif">TXT</text></svg>`,
+txt:`<svg viewBox="0 0 32 32"><path d="M8 2h12l6 6v22H8z" fill="#fff" stroke="#000"/><path d="M20 2v6h6" fill="#c0c0c0" stroke="#000"/><path d="M11 14h10M11 18h10M11 22h7" stroke="#808080"/></svg>`,
+progman:`<svg viewBox="0 0 32 32"><rect x="3" y="4" width="26" height="24" fill="#c0c0c0" stroke="#000"/><rect x="3" y="4" width="26" height="5" fill="#000080"/><rect x="6" y="12" width="9" height="7" fill="#ffff99" stroke="#000"/><rect x="17" y="12" width="9" height="7" fill="#008080" stroke="#000"/><rect x="6" y="21" width="9" height="4" fill="#ffcc00" stroke="#000"/><rect x="17" y="21" width="9" height="4" fill="#c0c0c0" stroke="#000"/></svg>`,
+settings:`<svg viewBox="0 0 32 32"><rect x="4" y="8" width="24" height="16" fill="#c0c0c0" stroke="#000"/><circle cx="12" cy="16" r="5" fill="#fff" stroke="#000"/><circle cx="12" cy="16" r="2" fill="#000080"/><rect x="20" y="12" width="6" height="3" fill="#808080"/><rect x="20" y="18" width="6" height="3" fill="#808080"/></svg>`,
+printers:`<svg viewBox="0 0 32 32"><rect x="8" y="4" width="16" height="8" fill="#fff" stroke="#000"/><rect x="4" y="12" width="24" height="12" fill="#c0c0c0" stroke="#000"/><rect x="8" y="20" width="10" height="8" fill="#fff" stroke="#000"/><circle cx="23" cy="16" r="1.5" fill="#00a000"/></svg>`,
+tools:`<svg viewBox="0 0 32 32"><rect x="4" y="12" width="20" height="10" fill="#c0c0c0" stroke="#000"/><path d="M6 12V7h10v5M16 12V9h12v5" fill="#c0c0c0" stroke="#000"/><rect x="6" y="15" width="16" height="4" fill="#808080"/></svg>`,
+games:`<svg viewBox="0 0 32 32"><rect x="3" y="10" width="26" height="14" rx="7" fill="#c0c0c0" stroke="#000"/><rect x="8" y="13" width="2" height="8" fill="#000"/><rect x="5" y="16" width="8" height="2" fill="#000"/><circle cx="21" cy="15" r="2" fill="#f00"/><circle cx="25" cy="19" r="2" fill="#0000f0"/></svg>`,
+access:`<svg viewBox="0 0 32 32"><rect x="4" y="10" width="24" height="16" fill="#c0c0c0" stroke="#000"/><path d="M4 14c4-6 20-6 24 0" fill="#808080" stroke="#000"/><circle cx="12" cy="18" r="2" fill="#000"/><circle cx="20" cy="18" r="2" fill="#000"/></svg>`,
+clock:`<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="#fff" stroke="#000" stroke-width="2"/><path d="M16 8v8l6 4" stroke="#000" stroke-width="2" fill="none"/><circle cx="16" cy="16" r="1.5" fill="#000"/></svg>`,
+smallscreen:`<svg viewBox="0 0 32 32"><rect x="4" y="6" width="24" height="18" fill="#c0c0c0" stroke="#000"/><rect x="7" y="9" width="18" height="12" fill="#008080" stroke="#000"/><rect x="12" y="25" width="8" height="3" fill="#808080" stroke="#000"/></svg>`,
+spooler:`<svg viewBox="0 0 32 32"><rect x="6" y="6" width="20" height="20" fill="#c0c0c0" stroke="#000"/><rect x="9" y="9" width="14" height="6" fill="#fff" stroke="#000"/><rect x="9" y="18" width="14" height="6" fill="#fff" stroke="#000"/><circle cx="22" cy="12" r="1.5" fill="#00a000"/></svg>`,
+writemon:`<svg viewBox="0 0 32 32"><rect x="6" y="3" width="20" height="26" fill="#fff" stroke="#000"/><rect x="6" y="3" width="20" height="4" fill="#000080"/><path d="M9 11h14M9 15h14M9 19h9" stroke="#000"/><path d="M18 24l7-7 2 2-7 7-3 1z" fill="#ffcc00" stroke="#000"/></svg>`,
+};
+const LOGO = `<svg viewBox="0 0 64 54"><g transform="skewX(-6)"><rect x="4" y="4" width="26" height="20" fill="#ff0000"/><rect x="32" y="4" width="26" height="20" fill="#00a000"/><rect x="4" y="26" width="26" height="20" fill="#0000ff"/><rect x="32" y="26" width="26" height="20" fill="#ffcc00"/></g><text x="40" y="44" font-family="Arial" font-size="26" font-weight="bold" fill="#fff">95</text></svg>`;
+const FLAG = `<svg viewBox="0 0 16 16"><g transform="skewX(-8)"><rect x="1" y="1" width="6" height="6" fill="#ff0000"/><rect x="8" y="1" width="6" height="6" fill="#00a000"/><rect x="1" y="8" width="6" height="6" fill="#0000ff"/><rect x="8" y="8" width="6" height="6" fill="#ffcc00"/></g></svg>`;
+const QMIN=`<svg viewBox="0 0 10 10"><rect x="1" y="6" width="7" height="2" fill="#000"/></svg>`;
+const QMAX=`<svg viewBox="0 0 10 10"><rect x="1" y="1" width="8" height="8" fill="none" stroke="#000"/><rect x="1" y="1" width="8" height="2" fill="#000"/></svg>`;
+const QX=`<svg viewBox="0 0 10 10"><path d="M1 1l8 8M9 1l-8 8" stroke="#000" stroke-width="1.6"/></svg>`;
+const QHELP=`<svg viewBox="0 0 10 10"><text x="1" y="9" font-size="9" font-weight="bold" fill="#000">?</text></svg>`;
+const WARN = `<svg viewBox="0 0 32 32"><path d="M16 3L30 28H2z" fill="#ffff00" stroke="#000"/><rect x="15" y="12" width="2.5" height="9" fill="#000"/><rect x="15" y="23" width="2.5" height="2.5" fill="#000"/></svg>`;
+const INFO = `<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="#000080"/><text x="12" y="23" font-family="serif" font-size="20" font-weight="bold" fill="#fff">i</text></svg>`;
+const QUIT = `<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="#000080"/><path d="M16 6v10" stroke="#fff" stroke-width="3"/><path d="M16 10a8 8 0 1 0 8 8" fill="none" stroke="#fff" stroke-width="3"/></svg>`;
+const FACE_SMILE = `<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#ffff00" stroke="#000"/><circle cx="7" cy="8" r="1.3" fill="#000"/><circle cx="13" cy="8" r="1.3" fill="#000"/><path d="M6 12q4 3.5 8 0" stroke="#000" fill="none" stroke-width="1.4"/></svg>`;
+const FACE_DEAD = `<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#c0c0c0" stroke="#000"/><path d="M5 7l4 3M9 7l-4 3M11 7l4 3M15 7l-4 3" stroke="#000" stroke-width="1.2"/><path d="M6 14q4-2.5 8 0" stroke="#000" fill="none" stroke-width="1.4"/></svg>`;
+const FACE_WIN = `<svg viewBox="0 0 20 20"><g transform="skewX(-8)"><rect x="2" y="2" width="7" height="7" fill="#ff0000"/><rect x="11" y="2" width="7" height="7" fill="#00a000"/><rect x="2" y="11" width="7" height="7" fill="#0000ff"/><rect x="11" y="11" width="7" height="7" fill="#ffcc00"/></g></svg>`;
+</script>
+<script>
+/* ============ WINDOW MANAGER ============ */
+const wins = document.getElementById('wins');
+const desktop = document.getElementById('desktop');
+let zTop = 10, winCount = 0;
+const winList = [];
+
+function el(tag, cls, html, parent){
+  const e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(html != null) e.innerHTML = html;
+  if(parent) parent.appendChild(e);
+  return e;
+}
+
+function createWindow(opts){
+  // opts: title, icon, w, h, x, y, content(fn returning body element), onclose, noMin, noMax, resizable, menubar[{label,items}], statusbar[], app
+  const w = opts.w || 320, h = opts.h || 200;
+  const dw = desktop.clientWidth, dh = desktop.clientHeight;
+  const x = opts.x != null ? opts.x : Math.max(4, Math.min(dw - w - 8, 30 + (winCount % 6) * 26));
+  const y = opts.y != null ? opts.y : Math.max(2, Math.min(dh - h - 8, 24 + (winCount % 6) * 22));
+  const root = el('div', 'win', null, wins);
+  root.style.width = w + 'px'; root.style.height = h + 'px';
+  root.style.left = x + 'px'; root.style.top = y + 'px';
+  root.style.zIndex = ++zTop;
+  winCount++;
+
+  const tb = el('div', 'titlebar', null, root);
+  const ti = el('div', 'ticon', null, tb); ti.innerHTML = opts.icon || I.pc;
+  const tt = el('div', 'ttext', null, tb); tt.textContent = opts.title;
+  const tbns = el('div', 'tbtns', null, tb);
+  const bMin = el('button', 'tbtn', QMIN, tbns);
+  const bMax = el('button', 'tbtn', opts.noMax ? '' : QMAX, tbns);
+  if(opts.noMax) bMax.classList.add('hidden');
+  const bX = el('button', 'tbtn', QX, tbns);
+
+  let body = el('div', 'win-body', null, root);
+  if(opts.menubar){
+    const mb = el('div', 'menubar', null, body);
+    opts.menubar.forEach(m => {
+      const mr = el('div', 'mroot', null, mb);
+      mr.textContent = m.label;
+      const menu = el('div', 'menu', null, mr);
+      m.items.forEach(it => {
+        if(it === '-'){ el('div','msep',null,menu); return; }
+        const mi = el('div','mitem',null,menu);
+        mi.innerHTML = it.html || it.label;
+        if(it.disabled) mi.classList.add('disabled');
+        mi.addEventListener('click', e => { e.stopPropagation(); closeAllMenus(); if(!it.disabled && it.action) it.action(); });
+      });
+    });
+  }
+  const content = el('div', 'win-body', null, body);
+  content.style.flex = '1'; content.style.minHeight = '0';
+  if(opts.content) opts.content(content, root);
+  if(opts.statusbar){
+    const sb = el('div','statusbar',null,body);
+    opts.statusbar.forEach(s => el('div','sfield',s,sb));
+  }
+
+  if(opts.resizable !== false){
+    ['n','s','e','w','ne','nw','se','sw'].forEach(d => {
+      const r = el('div','rsz',null,root); r.dataset.dir = d;
+      r.addEventListener('mousedown', e => startResize(e, root, d));
+    });
+  }
+
+  const rec = { root, tb, tt, bMin, bMax, bX, title: opts.title, icon: opts.icon, app: opts.app, onclose: opts.onclose, noMin: opts.noMin, minimized: false, maximized: false, prev: null };
+  winList.push(rec);
+
+  // taskbar button
+  const tbtn = el('div','taskbtn',null,document.getElementById('taskbtns'));
+  tbtn.innerHTML = `<span class="ticon">${opts.icon || I.pc}</span><span>${opts.title}</span>`;
+  rec.tbtn = tbtn;
+  tbtn.addEventListener('mousedown', e => e.stopPropagation());
+  tbtn.addEventListener('click', () => {
+    if(rec.minimized){ restoreWin(rec); }
+    else if(root.classList.contains('active')){ minimizeWin(rec); }
+    else focusWin(rec);
+  });
+  rec.tbtn.addEventListener('dblclick', () => { if(rec.minimized) restoreWin(rec); });
+
+  // titlebar interactions
+  tb.addEventListener('mousedown', e => {
+    if(e.target.closest('.tbtn')) return;
+    if(rec.maximized) return;
+    startDrag(e, root, rec);
+  });
+  tb.addEventListener('dblclick', e => {
+    if(e.target.closest('.tbtn')) return;
+    if(!opts.noMax) toggleMax(rec);
+  });
+  root.addEventListener('mousedown', () => focusWin(rec));
+  bMin.addEventListener('click', e => { e.stopPropagation(); minimizeWin(rec); });
+  bMax.addEventListener('click', e => { e.stopPropagation(); toggleMax(rec); });
+  bX.addEventListener('click', e => { e.stopPropagation(); closeWin(rec); });
+
+  focusWin(rec);
+  return rec;
+}
+
+function focusWin(rec){
+  rec.root.classList.add('active');
+  rec.root.style.zIndex = ++zTop;
+  rec.tbtn.classList.add('pressed');
+}
+function unfocusWin(rec){
+  rec.root.classList.remove('active');
+  rec.tbtn.classList.remove('pressed');
+}
+function minimizeWin(rec){
+  rec.minimized = true;
+  rec.root.style.display = 'none';
+  unfocusWin(rec);
+}
+function restoreWin(rec){
+  rec.minimized = false;
+  rec.root.style.display = '';
+  focusWin(rec);
+}
+function toggleMax(rec){
+  if(rec.maximized){
+    rec.maximized = false;
+    const p = rec.prev;
+    rec.root.style.left = p.x + 'px'; rec.root.style.top = p.y + 'px';
+    rec.root.style.width = p.w + 'px'; rec.root.style.height = p.h + 'px';
+    rec.bMax.innerHTML = QMAX;
+  } else {
+    rec.maximized = true;
+    rec.prev = { x: rec.root.style.left, y: rec.root.style.top, w: rec.root.style.width, h: rec.root.style.height };
+    rec.root.style.left = '0px'; rec.root.style.top = '0px';
+    rec.root.style.width = desktop.clientWidth + 'px'; rec.root.style.height = desktop.clientHeight + 'px';
+    rec.bMax.innerHTML = `<svg viewBox="0 0 10 10"><rect x="1" y="3" width="7" height="6" fill="none" stroke="#000"/><rect x="3" y="1" width="7" height="6" fill="#c0c0c0" stroke="#000"/></svg>`;
+  }
+  focusWin(rec);
+}
+function closeWin(rec){
+  if(rec.onclose && rec.onclose() === false) return;
+  unfocusWin(rec);
+  rec.root.remove(); rec.tbtn.remove();
+  const i = winList.indexOf(rec); if(i >= 0) winList.splice(i, 1);
+}
+function closeAll(){ [...winList].forEach(closeWin); }
+
+/* drag */
+function startDrag(e, root, rec){
+  e.preventDefault();
+  const sx = e.clientX, sy = e.clientY;
+  const ox = root.offsetLeft, oy = root.offsetTop;
+  const move = ev => {
+    let nx = ox + ev.clientX - sx, ny = oy + ev.clientY - sy;
+    nx = Math.max(-root.offsetWidth + 60, Math.min(nx, desktop.clientWidth - 40));
+    ny = Math.max(0, Math.min(ny, desktop.clientHeight - 20));
+    root.style.left = nx + 'px'; root.style.top = ny + 'px';
+  };
+  const up = () => { document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); };
+  document.addEventListener('mousemove', move);
+  document.addEventListener('mouseup', up);
+}
+/* resize */
+function startResize(e, root, dir){
+  e.preventDefault(); e.stopPropagation();
+  const sx = e.clientX, sy = e.clientY;
+  const o = { l: root.offsetLeft, t: root.offsetTop, w: root.offsetWidth, h: root.offsetHeight };
+  const move = ev => {
+    const dx = ev.clientX - sx, dy = ev.clientY - sy;
+    let { l, t, w, h } = o;
+    if(dir.includes('e')) w = Math.max(140, o.w + dx);
+    if(dir.includes('s')) h = Math.max(80, o.h + dy);
+    if(dir.includes('w')){ w = Math.max(140, o.w - dx); l = o.l + (o.w - w); }
+    if(dir.includes('n')){ h = Math.max(80, o.h - dy); t = o.t + (o.h - h); }
+    root.style.left = l + 'px'; root.style.top = t + 'px';
+    root.style.width = w + 'px'; root.style.height = h + 'px';
+  };
+  const up = () => { document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); };
+  document.addEventListener('mousemove', move);
+  document.addEventListener('mouseup', up);
+}
+
+/* ============ DIALOGS ============ */
+function showDialog(opts){
+  // opts: title, icon, msg, buttons:[{label, primary, action}], radios:[{label, checked}], checks:[{label,checked}], onShow(dlg,api), w
+  const d = el('div','dlg',null,document.body);
+  d.style.zIndex = ++zTop + 100;
+  d.style.left = '50%'; d.style.top = '42%'; d.style.transform = 'translate(-50%,-50%)';
+  if(opts.w) d.style.width = opts.w + 'px';
+  const tb = el('div','titlebar',null,d);
+  const ti = el('div','ticon',null,tb); ti.innerHTML = opts.icon || I.pc;
+  const tt = el('div','ttext',null,tb); tt.textContent = opts.title;
+  const tbns = el('div','tbtns',null,tb);
+  const bX = el('button','tbtn',QX,tbns);
+  const body = el('div','dlg-body',null,d);
+  if(opts.icon){ const di = el('div','dlg-icon',null,body); di.innerHTML = opts.icon; }
+  const msg = el('div','dlg-msg',null,body);
+  if(typeof opts.msg === 'string') msg.innerHTML = opts.msg;
+  else opts.msg(msg);
+  if(opts.radios){
+    const box = el('div',null,null,body);
+    opts.radios.forEach((r,i) => {
+      const row = el('div','radio'+(r.checked?' on':''),null,box);
+      row.innerHTML = `<span class="dot"></span><span>${r.label}</span>`;
+      row.addEventListener('click', () => { box.querySelectorAll('.radio').forEach(x=>x.classList.remove('on')); row.classList.add('on'); });
+    });
+  }
+  if(opts.checks){
+    const box = el('div',null,null,body);
+    opts.checks.forEach(c => {
+      const row = el('div','chk'+(c.checked?' on':''),null,box);
+      row.innerHTML = `<span class="box"></span><span>${c.label}</span>`;
+      row.addEventListener('click', () => row.classList.toggle('on'));
+    });
+  }
+  const btns = el('div','dlg-btns',null,d);
+  const api = { dialog: d, close: () => d.remove(), getRadio: () => { const on = d.querySelector('.radio.on'); return on ? on.textContent.trim() : null; }, getChecks: () => [...d.querySelectorAll('.chk.on')].map(x=>x.textContent.trim()) };
+  (opts.buttons || [{label:'OK', primary:true}]).forEach(b => {
+    const btn = el('button','btn'+(b.primary?' primary':''),b.label,btns);
+    btn.addEventListener('click', () => { d.remove(); if(b.action) b.action(api); });
+  });
+  bX.addEventListener('click', () => d.remove());
+  if(opts.onShow) opts.onShow(d, api);
+  return api;
+}
+
+/* ============ MENUS (context) ============ */
+let openMenuEl = null;
+function closeAllMenus(){
+  if(openMenuEl){ openMenuEl.remove(); openMenuEl = null; }
+  document.querySelectorAll('.menubar .mroot.open').forEach(m => m.classList.remove('open'));
+}
+function showContextMenu(x, y, items){
+  closeAllMenus();
+  const m = el('div','menu',null,document.body);
+  m.style.left = Math.min(x, innerWidth - 150) + 'px';
+  m.style.top = Math.min(y, innerHeight - 10 - items.length * 22) + 'px';
+  items.forEach(it => {
+    if(it === '-'){ el('div','msep',null,m); return; }
+    const mi = el('div','mitem',null,m);
+    mi.innerHTML = it.html || it.label;
+    if(it.disabled) mi.classList.add('disabled');
+    mi.addEventListener('click', e => { e.stopPropagation(); closeAllMenus(); if(!it.disabled && it.action) it.action(); });
+  });
+  openMenuEl = m;
+  setTimeout(() => document.addEventListener('mousedown', ctxCloseOnce), 0);
+}
+function ctxCloseOnce(e){
+  if(openMenuEl && !openMenuEl.contains(e.target)) closeAllMenus();
+  document.removeEventListener('mousedown', ctxCloseOnce);
+}
+document.addEventListener('mousedown', e => {
+  if(openMenuEl && !openMenuEl.contains(e.target)) closeAllMenus();
+  if(!e.target.closest('.menubar')) document.querySelectorAll('.menubar .mroot.open').forEach(m => m.classList.remove('open'));
+});
+document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closeAllMenus(); hideStart(); } });
+
+/* ============ DESKTOP ICONS ============ */
+const DESKTOP_ICONS = [
+  { id:'mycomputer', label:'My Computer', icon:I.pc, x:12, y:12, open: () => openMyComputer() },
+  { id:'documents', label:'My Documents', icon:I.folder, x:12, y:96, open: () => openFolder('My Documents', 'doc') },
+  { id:'net', label:'Network Neighborhood', icon:I.net, x:12, y:180, open: () => openFolder('Network Neighborhood', 'net') },
+  { id:'trash', label:'Recycle Bin', icon:I.trash, x:12, y:264, open: () => openFolder('Recycle Bin', 'trash') },
+];
+const iconsDiv = document.getElementById('icons');
+let selIcon = null;
+DESKTOP_ICONS.forEach(ic => {
+  const d = el('div','dicon',null,iconsDiv);
+  d.style.left = ic.x + 'px'; d.style.top = ic.y + 'px';
+  d.innerHTML = `<div class="img">${ic.icon}</div><div class="lbl">${ic.label}</div>`;
+  d.addEventListener('click', e => {
+    e.stopPropagation();
+    if(selIcon) selIcon.classList.remove('sel');
+    d.classList.add('sel'); selIcon = d;
+  });
+  d.addEventListener('dblclick', e => { e.stopPropagation(); d.classList.remove('sel'); selIcon = null; ic.open(); });
+  /* drag & drop */
+  d.addEventListener('mousedown', e => {
+    if(e.button !== 0) return;
+    e.stopPropagation();
+    const sx = e.clientX, sy = e.clientY;
+    const ox = d.offsetLeft, oy = d.offsetTop;
+    let moved = false;
+    const move = ev => {
+      let nx = ox + ev.clientX - sx, ny = oy + ev.clientY - sy;
+      nx = Math.max(0, Math.min(nx, desktop.clientWidth - d.offsetWidth));
+      ny = Math.max(0, Math.min(ny, desktop.clientHeight - d.offsetHeight));
+      if(!moved && (Math.abs(nx - ox) > 2 || Math.abs(ny - oy) > 2)) moved = true;
+      if(moved){ d.style.left = nx + 'px'; d.style.top = ny + 'px'; }
+    };
+    const up = ev => {
+      document.removeEventListener('mousemove', move);
+      document.removeEventListener('mouseup', up);
+      if(moved){
+        ic.x = d.offsetLeft; ic.y = d.offsetTop;
+        d.style.zIndex = '2';
+        setTimeout(() => { d.style.zIndex = ''; }, 10);
+      }
+    };
+    document.addEventListener('mousemove', move);
+    document.addEventListener('mouseup', up);
+  });
+  d.addEventListener('contextmenu', e => {
+    e.preventDefault(); e.stopPropagation();
+    if(selIcon) selIcon.classList.remove('sel');
+    d.classList.add('sel'); selIcon = d;
+    showContextMenu(e.clientX, e.clientY, [
+      { label:'Open', action: () => ic.open() },
+      { label:'Open in New Window', action: () => ic.open() },
+      '-',
+      { label:'Cut', disabled:true },
+      { label:'Copy', disabled:true },
+      '-',
+      { label:'Rename', disabled:true },
+      { label:'Delete', disabled:true },
+      '-',
+      { label:'Properties', action: () => ic.open() },
+    ]);
+  });
+});
+desktop.addEventListener('mousedown', e => {
+  if(selIcon){ selIcon.classList.remove('sel'); selIcon = null; }
+  if(e.target === desktop || e.target === iconsDiv) startMarquee(e);
+});
+
+/* marquee selection */
+function startMarquee(e){
+  const rect = desktop.getBoundingClientRect();
+  const sx = e.clientX - rect.left, sy = e.clientY - rect.top;
+  const sel = el('div','selrect',null,desktop);
+  sel.style.left = sx+'px'; sel.style.top = sy+'px';
+  const move = ev => {
+    const cx = ev.clientX - rect.left, cy = ev.clientY - rect.top;
+    const x = Math.min(sx,cx), y = Math.min(sy,cy);
+    sel.style.left = x+'px'; sel.style.top = y+'px';
+    sel.style.width = Math.abs(cx-sx)+'px'; sel.style.height = Math.abs(cy-sy)+'px';
+  };
+  const up = () => { sel.remove(); document.removeEventListener('mousemove',move); document.removeEventListener('mouseup',up); };
+  document.addEventListener('mousemove',move); document.addEventListener('mouseup',up);
+}
+
+/* desktop right-click */
+desktop.addEventListener('contextmenu', e => {
+  e.preventDefault();
+  showContextMenu(e.clientX, e.clientY, [
+    { label:'Arrange Icons', disabled:true },
+    { label:'Refresh' },
+    '-',
+    { label:'Paste', disabled:true },
+    { label:'Paste Shortcut', disabled:true },
+    '-',
+    { label:'Properties', action: () => displayProps() },
+  ]);
+});
+
+/* ============ TASKBAR / TRAY ============ */
+const tray = document.getElementById('tray');
+const clockEl = document.createElement('span');
+tray.appendChild(clockEl);
+function tickClock(){
+  const d = new Date();
+  let h = d.getHours(), m = d.getMinutes();
+  const ap = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  clockEl.textContent = `${h}:${String(m).padStart(2,'0')} ${ap}`;
+}
+tickClock(); setInterval(tickClock, 10000);
+tray.addEventListener('click', () => {
+  const r = tray.getBoundingClientRect();
+  showContextMenu(r.left, r.top - 60, [
+    { label:'Show Desktop', action: () => [...winList].forEach(w => minimizeWin(w)) },
+    { label:'Display Properties', action: displayProps },
+    { label:'Control Panel', action: openControlPanel },
+  ]);
+});
+
+/* ============ START MENU ============ */
+const startBtn = document.getElementById('startbtn');
+startBtn.innerHTML = FLAG + '<span>Start</span>';
+let startMenu = null;
+function buildStartMenu(){
+  const m = el('div','',null,document.body);
+  m.id = 'startmenu';
+  m.innerHTML = `<div class="sm-banner"><span>Windows<em>95</em></span></div>`;
+  const items = el('div','sm-items',null,m);
+  const add = (html, action, opts={}) => {
+    const it = el('div','sm-item'+(opts.disabled?' disabled':''),html,items);
+    if(action) it.addEventListener('click', e => { e.stopPropagation(); hideStart(); action(); });
+    if(opts.sub){
+      const sub = el('div','sm-sub',null,it);
+      opts.sub(sub);
+    }
+    return it;
+  };
+  add(`<span class="sicon">${I.notepad}</span>Programs<span class="arrow">▶</span>`, null, { sub: sub => {
+    subStartItem(sub, I.notepad, 'Notepad', () => openApp('notepad'));
+    subStartItem(sub, I.paint, 'Paint', () => openApp('paint'));
+    subStartItem(sub, I.ie, 'Internet Explorer', () => openApp('ie'));
+    subStartItem(sub, I.msdos, 'MS-DOS Prompt', () => openApp('dos'));
+    subStartItem(sub, I.mine, 'Minesweeper', () => openApp('mine'));
+    subStartItem(sub, I.calc, 'Calculator', () => openApp('calc'));
+  }});
+  add(`<span class="sicon">${I.find}</span>Find<span class="arrow">▶</span>`, null, { sub: sub => {
+    subStartItem(sub, I.find, 'Files or Folders…', () => openFind());
+    subStartItem(sub, I.help, 'Help', () => openHelp('find'));
+  }});
+  add(`<span class="sicon">${I.settings}</span>Settings<span class="arrow">▶</span>`, null, { sub: sub => {
+    subStartItem(sub, I.settings, 'Control Panel', () => openControlPanel());
+    subStartItem(sub, I.smallscreen, 'Display…', () => displayProps());
+    subStartItem(sub, I.printers, 'Printers', () => openFolder('Printers', 'printers'));
+  }});
+  add(`<span class="sicon">${I.doc}</span>Documents<span class="arrow">▶</span>`, null, { sub: sub => {
+    subStartItem(sub, I.readme, 'README.TXT', () => openNotepadFile('README.TXT', README_TEXT));
+  }});
+  add(`<span class="sicon">${I.help}</span>Help`);
+  items.lastChild.addEventListener('click', e => { e.stopPropagation(); hideStart(); openHelp('help'); });
+  add(`<span class="sicon">${I.run}</span>Run…`);
+  items.lastChild.addEventListener('click', e => { e.stopPropagation(); hideStart(); openRun(); });
+  el('div','sm-sep',null,items);
+  add(`<span class="sicon">${I.shutdown}</span>Shut Down…`);
+  items.lastChild.addEventListener('click', e => { e.stopPropagation(); hideStart(); openShutdown(); });
+  startMenu = m;
+}
+function subStartItem(parent, icon, label, action){
+  const it = el('div','sm-item',`<span class="sicon">${icon}</span>${label}`,parent);
+  it.addEventListener('click', e => { e.stopPropagation(); hideStart(); action(); });
+}
+function hideStart(){ if(startMenu){ startMenu.remove(); startMenu = null; } startBtn.classList.remove('pressed'); }
+function toggleStart(){ if(startMenu) hideStart(); else { buildStartMenu(); startBtn.classList.add('pressed'); } }
+startBtn.addEventListener('mousedown', e => e.stopPropagation());
+startBtn.addEventListener('click', e => { e.stopPropagation(); toggleStart(); });
+document.addEventListener('mousedown', e => {
+  if(startMenu && !startMenu.contains(e.target) && !startBtn.contains(e.target)) hideStart();
+});
+</script>
+<script>
+/* ============ FILE DATA ============ */
+const README_TEXT = `Welcome to Windows 95!
+
+This is a faithful re-creation of the Windows 95 desktop,
+built entirely with HTML, CSS and JavaScript.
+
+Things to try:
+  - Double-click desktop icons to open them
+  - Drag windows by their title bars
+  - Resize windows from any edge or corner
+  - Minimize, maximize and close windows
+  - Right-click the desktop or the tray for menus
+  - Open the Start menu and explore Programs
+  - Play Minesweeper
+  - Draw something in Paint
+  - Type commands in the MS-DOS Prompt
+  - Shut down when you are done (and turn it back on!)
+
+Copyright (c) 1995. All rights reserved.
+`;
+
+/* ============ FOLDER WINDOWS ============ */
+function folderIcon(id){ return I[id] || I.doc; }
+function openFolder(title, kind, items){
+  const it = items || defaultFolderItems(kind);
+  createWindow({
+    title, icon: I.folder, w: 380, h: 240,
+    content: body => {
+      const mb = el('div','menubar',null,body);
+      menuRoot(mb,'File',[{label:'Open',disabled:true},{label:'Close',action:()=>closeWin(body.closest('.win') && winList.find(w=>w.root===body.closest('.win')))}]);
+      menuRoot(mb,'Edit',[{label:'Select All',disabled:true},{label:'Refresh',disabled:true}]);
+      menuRoot(mb,'View',[{label:'Large Icons',disabled:true},{label:'Small Icons',disabled:true},{label:'List',disabled:true}]);
+      menuRoot(mb,'Help',[{label:'Help Topics',action:()=>openHelp('folder')}]);
+      const f = el('div','folder',null,body);
+      if(it.length === 0){
+        f.innerHTML = `<div class="empty-note">This folder is empty.</div>`;
+      } else {
+        it.forEach(fi => {
+          const ic = el('div','ficon',null,f);
+          ic.innerHTML = `<div class="img">${folderIcon(fi.icon)}</div><div class="lbl">${fi.label}</div>`;
+          ic.addEventListener('dblclick', () => fi.open && fi.open());
+        });
+      }
+    },
+    statusbar: [it.length + ' object(s)'],
+  });
+}
+function defaultFolderItems(kind){
+  switch(kind){
+    case 'c': return [
+      { label:'README.TXT', icon:'readme', open: () => openNotepadFile('README.TXT', README_TEXT) },
+      { label:'AUTOEXEC.BAT', icon:'txt', open: () => openNotepadFile('AUTOEXEC.BAT', '@ECHO OFF\nPROMPT $P$G\nPATH=C:\\WINDOWS;C:\\WINDOWS\\COMMAND\nSET TEMP=C:\\TEMP\nSET TMP=C:\\TEMP\n') },
+      { label:'CONFIG.SYS', icon:'txt', open: () => openNotepadFile('CONFIG.SYS', 'DEVICE=C:\\WINDOWS\\HIMEM.SYS\nDOS=HIGH\nDOS=UMB\nFILES=30\nBUFFERS=20\n') },
+      { label:'COMMAND.COM', icon:'doc', open: null },
+      { label:'WIN.COM', icon:'doc', open: null },
+      { label:'WINDOWS', icon:'folder', open: () => openFolder('C:\\WINDOWS','empty') },
+      { label:'PROGRAM FILES', icon:'folder', open: () => openFolder('C:\\PROGRAM FILES','empty') },
+    ];
+    case 'doc': return [
+      { label:'README.TXT', icon:'readme', open: () => openNotepadFile('README.TXT', README_TEXT) },
+      { label:'My Pictures', icon:'folder', open: () => openFolder('My Pictures','empty') },
+      { label:'Budget 95.XLS', icon:'doc', open: null },
+      { label:'Resume.DOC', icon:'doc', open: null },
+    ];
+    case 'net': return [
+      { label:'MARCELOS-PC', icon:'pc', open: () => openFolder('MARCELOS-PC','empty') },
+      { label:'GUESTS', icon:'folder', open: () => openFolder('GUESTS','empty') },
+    ];
+    case 'trash': return [];
+    case 'printers': return [
+      { label:'Generic / Text Only', icon:'printers', open: null },
+      { label:'LPT1: Printer', icon:'printers', open: null },
+    ];
+    default: return [];
+  }
+}
+function menuRoot(mb, label, items){
+  const mr = el('div','mroot',null,mb); mr.textContent = label;
+  const menu = el('div','menu',null,mr);
+  items.forEach(it => {
+    if(it === '-'){ el('div','msep',null,menu); return; }
+    const mi = el('div','mitem',null,menu); mi.textContent = it.label;
+    if(it.disabled) mi.classList.add('disabled');
+    mi.addEventListener('click', e => { e.stopPropagation(); closeAllMenus(); if(!it.disabled && it.action) it.action(); });
+  });
+}
+function openMyComputer(){
+  createWindow({
+    title:'My Computer', icon:I.pc, w:380, h:250,
+    content: (body, root) => {
+      const mb = el('div','menubar',null,body);
+      menuRoot(mb,'File',[{label:'Open',disabled:true},{label:'Close',action:()=>closeWin(winList.find(w=>w.root===root))}]);
+      menuRoot(mb,'Edit',[{label:'Select All',disabled:true}]);
+      menuRoot(mb,'View',[{label:'Large Icons',disabled:true}]);
+      menuRoot(mb,'Help',[{label:'Help Topics',action:()=>openHelp('folder')}]);
+      const f = el('div','folder',null,body);
+      const items = [
+        { label:'3½ Floppy (A:)', icon:'drive', open: () => floppyDialog() },
+        { label:'(C:)', icon:'drive', open: () => openFolder('(C:)','c') },
+        { label:'(D:)', icon:'drive', open: () => openFolder('(D:)','empty') },
+        { label:'Control Panel', icon:'settings', open: openControlPanel },
+        { label:'Printers', icon:'printers', open: () => openFolder('Printers','printers') },
+      ];
+      if(!defaultFolderItems('c')) {}
+      items.forEach(fi => {
+        const ic = el('div','ficon',null,f);
+        ic.innerHTML = `<div class="img">${folderIcon(fi.icon)}</div><div class="lbl">${fi.label}</div>`;
+        ic.addEventListener('dblclick', () => fi.open && fi.open());
+      });
+    },
+    statusbar: ['5 object(s)'],
+  });
+}
+function floppyDialog(){
+  showDialog({
+    title:'3½ Floppy (A:)', icon: I.drive,
+    msg: 'Not ready error.<br><br>Make sure that a disk is inserted in A:.',
+    buttons:[{label:'Retry'},{label:'Cancel',primary:true}],
+  });
+}
+
+/* ============ NOTEPAD ============ */
+function openNotepadFile(name, text){
+  createWindow({
+    title: (name || 'Untitled') + ' - Notepad', icon: I.notepad, w: 400, h: 280,
+    menubar: [
+      { label:'File', items:[
+        { label:'New', action: () => { const t = document.querySelector('.np-area'); if(t) t.value=''; } },
+        { label:'Open…', disabled:true },
+        { label:'Save', disabled:true },
+        '-',
+        { label:'Exit', action: () => closeWin(winList.find(w => w.title && w.title.includes('Notepad'))) },
+      ]},
+      { label:'Edit', items:[
+        { label:'Undo', action: () => {} },
+        '-',
+        { label:'Cut', disabled:true }, { label:'Copy', disabled:true }, { label:'Paste', disabled:true },
+        '-',
+        { label:'Time/Date', action: () => { const t = document.querySelector('.np-area'); if(t) t.value += new Date().toLocaleString(); } },
+      ]},
+      { label:'Search', items:[ { label:'Find…', disabled:true } ] },
+      { label:'Help', items:[ { label:'Help Topics', action: () => openHelp('notepad') } ] },
+    ],
+    content: body => {
+      const ta = el('textarea','np-area',null,body);
+      ta.value = text || '';
+      ta.spellcheck = false;
+    },
+  });
+}
+function openNotepad(){ openNotepadFile('Untitled', ''); }
+
+/* ============ CALCULATOR ============ */
+function openCalc(){
+  let cur = '0', prev = null, op = null, fresh = true;
+  const rec = createWindow({
+    title:'Calculator', icon:I.calc, w:210, h:252, noMax:true, resizable:false,
+    menubar: [
+      { label:'Edit', items:[
+        { label:'Copy', action: () => navigator.clipboard && navigator.clipboard.writeText(cur) },
+        { label:'Paste', disabled:true },
+      ]},
+      { label:'View', items:[ { label:'Standard', action:() => {} }, { label:'Scientific', disabled:true } ] },
+      { label:'Help', items:[ { label:'Help Topics', action: () => openHelp('calc') } ] },
+    ],
+    content: body => {
+      const wrap = el('div','calc',null,body);
+      const disp = el('div','calc-disp field',null,wrap);
+      const grid = el('div','calc-grid',null,wrap);
+      const keys = ['7','8','9','/','4','5','6','*','1','2','3','-','0','.','=','+','C','±','⌫'];
+      keys.forEach(k => {
+        const b = el('button','btn',k,grid);
+        if(k === '=') b.classList.add('primary');
+        b.addEventListener('click', () => press(k));
+      });
+      const fmt = v => {
+        if(v === 'Error') return v;
+        const n = parseFloat(v);
+        if(!isFinite(n)) return 'Error';
+        let s = String(Math.round(n * 1e10) / 1e10);
+        if(s.length > 14) s = n.toExponential(6);
+        return s;
+      };
+      const calc = (a, b, o) => {
+        a = parseFloat(a); b = parseFloat(b);
+        switch(o){ case '+': return a+b; case '-': return a-b; case '*': return a*b; case '/': return b === 0 ? 'Error' : a/b; }
+      };
+      function press(k){
+        if(k >= '0' && k <= '9'){
+          if(fresh){ cur = k; fresh = false; }
+          else if(cur === '0') cur = k;
+          else cur = cur.length < 14 ? cur + k : cur;
+        }
+        else if(k === '.'){ if(fresh){ cur = '0.'; fresh = false; } else if(!cur.includes('.')) cur += '.'; }
+        else if(k === 'C'){ cur = '0'; prev = null; op = null; fresh = true; }
+        else if(k === '±'){ cur = fmt(-parseFloat(cur)); }
+        else if(k === '⌫'){ cur = fresh ? '0' : (cur.length > 1 ? cur.slice(0,-1) : '0'); }
+        else if(k === '='){
+          if(op != null && prev != null){ cur = fmt(calc(prev, cur, op)); prev = null; op = null; fresh = true; }
+        }
+        else { // operator
+          if(op != null && prev != null && !fresh) cur = fmt(calc(prev, cur, op));
+          prev = cur; op = k; fresh = true;
+        }
+        disp.textContent = cur;
+      }
+      disp.textContent = '0';
+    },
+  });
+}
+
+/* ============ MS-DOS PROMPT ============ */
+function openDos(){
+  const rec = createWindow({
+    title:'MS-DOS Prompt', icon:I.msdos, w:480, h:320,
+    menubar: [
+      { label:'Edit', items:[ { label:'Copy', action: () => {} }, { label:'Paste', disabled:true } ] },
+      { label:'Help', items:[ { label:'Help Topics', action: () => openHelp('dos') } ] },
+    ],
+    content: body => {
+      const scr = el('div','dos',null,body);
+      const history = [];
+      function line(txt){
+        const l = el('div','line',txt,scr);
+        scr.scrollTop = scr.scrollHeight;
+      }
+      line('Microsoft(R) Windows 95');
+      line('');
+      line('(C)Copyright Microsoft Corp 1985-1995.');
+      line('');
+      const prompt = () => {
+        const p = el('div','line',null,scr);
+        p.innerHTML = 'C:\\&gt;<input autocomplete="off" spellcheck="false">';
+        const inp = p.querySelector('input');
+        inp.focus();
+        scr.scrollTop = scr.scrollHeight;
+        inp.addEventListener('keydown', e => {
+          if(e.key === 'Enter'){
+            const cmd = inp.value;
+            inp.remove();
+            line('C:\\&gt;' + cmd);
+            history.push(cmd);
+            run(cmd);
+            prompt();
+          } else if(e.key === 'ArrowUp'){
+            e.preventDefault();
+            if(history.length) inp.value = history[history.length - 1];
+          }
+        });
+      };
+      const files = ['AUTOEXEC.BAT','CONFIG.SYS','README.TXT','WIN.COM','COMMAND.COM'];
+      function run(cmd){
+        const c = cmd.trim().toUpperCase();
+        if(!c) return;
+        if(c === 'DIR'){
+          line(' Volume in drive C is WIN95');
+          line(' Directory of C:\\');
+          line('');
+          line('AUTOEXEC     BAT             214 08-14-26  10:00a');
+          line('CONFIG       SYS              96 08-14-26  10:00a');
+          line('README       TXT             402 08-14-26  10:00a');
+          line('COMMAND      COM           54,528 08-14-26  10:00a');
+          line('WIN          COM           23,072 08-14-26  10:00a');
+          line('              5 file(s)         78,312 bytes');
+          line('              0 dir(s)  655,360,000 bytes free');
+        }
+        else if(c === 'CLS'){ scr.querySelectorAll('.line').forEach(l => l.remove()); }
+        else if(c === 'VER'){ line(''); line('Windows 95'); line(''); }
+        else if(c === 'DATE'){ line('Current date is Fri 08-14-2026.  Enter new date: '); }
+        else if(c === 'TIME'){ line('Current time is 10:00:00.  Enter new time: '); }
+        else if(c === 'WIN' || c === 'WIN.COM'){ line(''); line('Starting Windows 95...'); line(''); }
+        else if(c === 'HELP'){ line('Available commands: DIR, CLS, VER, DATE, TIME, WIN, HELP'); }
+        else if(c === 'EXIT'){ line(''); closeWin(winList.find(w => w.title === 'MS-DOS Prompt')); }
+        else { line('Bad command or file name'); }
+      }
+      scr.addEventListener('click', () => { const i = scr.querySelector('input'); if(i) i.focus(); });
+      prompt();
+    },
+  });
+}
+
+/* ============ MINESWEEPER ============ */
+function openMine(){
+  const W = 9, H = 9, MINES = 10;
+  let grid, started, dead, flags, firstCell;
+  const rec = createWindow({
+    title:'Minesweeper', icon:I.mine, w:160, h:222, noMax:true, resizable:false,
+    content: body => {
+      const head = el('div','ms-head',null,body);
+      const led = el('div','ms-led','010',head);
+      const face = el('button','ms-face',FACE_SMILE,head);
+      const timer = el('div','ms-led','000',head);
+      const wrap = el('div','ms-board-wrap',null,body);
+      const board = el('div','ms-board',null,wrap);
+      board.style.gridTemplateColumns = `repeat(${W},16px)`;
+      let t = 0, tInt = null;
+      const n2 = n => String(Math.max(0, Math.min(999, n))).padStart(3,'0');
+      function reset(){
+        grid = Array.from({length:H}, () => Array.from({length:W}, () => ({ m:false, open:false, flag:false, n:0 })));
+        started = false; dead = false; flags = 0; firstCell = null; t = 0;
+        clearInterval(tInt); tInt = null;
+        timer.textContent = '000'; led.textContent = n2(MINES);
+        face.innerHTML = FACE_SMILE;
+        board.innerHTML = '';
+        for(let y = 0; y < H; y++) for(let x = 0; x < W; x++){
+          const c = el('div','ms-cell',null,board);
+          c.dataset.x = x; c.dataset.y = y;
+          c.addEventListener('click', () => clickCell(x,y,c));
+          c.addEventListener('contextmenu', e => { e.preventDefault(); flagCell(x,y,c); });
+        }
+      }
+      function neighbors(x,y){
+        const out = [];
+        for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++){
+          if(!dx && !dy) continue;
+          const nx=x+dx, ny=y+dy;
+          if(nx>=0&&nx<W&&ny>=0&&ny<H) out.push([nx,ny]);
+        }
+        return out;
+      }
+      function plant(sx,sy){
+        const safe = new Set([sx+','+sy]);
+        neighbors(sx,sy).forEach(([a,b]) => safe.add(a+','+b));
+        let placed = 0;
+        while(placed < MINES){
+          const x = Math.floor(Math.random()*W), y = Math.floor(Math.random()*H);
+          if(grid[y][x].m || safe.has(x+','+y)) continue;
+          grid[y][x].m = true; placed++;
+        }
+        for(let y=0;y<H;y++) for(let x=0;x<W;x++)
+          grid[y][x].n = neighbors(x,y).filter(([a,b])=>grid[b][a].m).length;
+      }
+      function reveal(x,y){
+        const c = grid[y][x];
+        if(c.open || c.flag) return;
+        c.open = true;
+        const cell = board.children[y*W+x];
+        cell.classList.add('open');
+        if(c.m){ cell.classList.add('boom'); cell.innerHTML = '<span class="mine"></span>'; lose(); return; }
+        if(c.n){ cell.innerHTML = `<span class="ms-n${c.n}">${c.n}</span>`; }
+        else neighbors(x,y).forEach(([a,b]) => reveal(a,b));
+        if(won()) winGame();
+      }
+      function clickCell(x,y,cell){
+        if(dead) return;
+        if(!started){ started = true; plant(x,y); tInt = setInterval(() => { t = Math.min(999,t+1); timer.textContent = n2(t); }, 1000); }
+        if(grid[y][x].flag) return;
+        reveal(x,y);
+      }
+      function flagCell(x,y,cell){
+        if(dead || grid[y][x].open) return;
+        grid[y][x].flag = !grid[y][x].flag;
+        flags += grid[y][x].flag ? 1 : -1;
+        led.textContent = n2(MINES - flags);
+        cell.innerHTML = grid[y][x].flag ? '<span class="flag"></span>' : '';
+      }
+      function lose(){
+        dead = true; clearInterval(tInt);
+        face.innerHTML = FACE_DEAD;
+        for(let y=0;y<H;y++) for(let x=0;x<W;x++){
+          const c = grid[y][x], cell = board.children[y*W+x];
+          if(c.m && !c.flag){ cell.classList.add('open'); cell.innerHTML = '<span class="mine"></span>'; }
+        }
+      }
+      function won(){
+        let open = 0;
+        for(let y=0;y<H;y++) for(let x=0;x<W;x++) if(grid[y][x].open) open++;
+        return open === W*H - MINES;
+      }
+      function winGame(){
+        dead = true; clearInterval(tInt);
+        face.innerHTML = FACE_WIN;
+        for(let y=0;y<H;y++) for(let x=0;x<W;x++)
+          if(grid[y][x].m){ grid[y][x].flag = true; board.children[y*W+x].innerHTML = '<span class="flag"></span>'; }
+        led.textContent = '000';
+      }
+      face.addEventListener('click', reset);
+      reset();
+    },
+  });
+}
+
+/* ============ PAINT ============ */
+function openPaint(){
+  const rec = createWindow({
+    title:'untitled - Paint', icon:I.paint, w:460, h:340,
+    menubar: [
+      { label:'File', items:[ { label:'New', action: () => { const cv = document.getElementById('paintcv'); if(cv){ const c=cv.getContext('2d'); c.fillStyle='#fff'; c.fillRect(0,0,cv.width,cv.height); } } }, { label:'Save', disabled:true }, { label:'Print…', disabled:true }, '-', { label:'Exit', action: () => closeWin(winList.find(w => w.title === 'untitled - Paint')) } ] },
+      { label:'Edit', items:[ { label:'Undo', disabled:true }, { label:'Select', disabled:true }, { label:'Invert Colors', disabled:true } ] },
+      { label:'View', items:[ { label:'Zoom', disabled:true } ] },
+      { label:'Image', items:[ { label:'Flip/Rotate', disabled:true }, { label:'Stretch/Skew…', disabled:true }, { label:'Size…', disabled:true } ] },
+      { label:'Colors', items:[ { label:'Define Custom Colors…', disabled:true } ] },
+      { label:'Help', items:[ { label:'Help Topics', action: () => openHelp('paint') } ] },
+    ],
+    content: body => {
+      const wrap = el('div','paint',null,body);
+      const side = el('div','paint-side',null,wrap);
+      const tools = [
+        { n:'pencil', svg:`<svg viewBox="0 0 16 16"><path d="M2 14l1-3 8-8 2 2-8 8-3 1z" fill="#fff" stroke="#000"/></svg>` },
+        { n:'brush', svg:`<svg viewBox="0 0 16 16"><path d="M3 13c0-2 1-3 3-3s3 1 3 3c0 2-2 3-3 3s-3-1-3-3z" fill="#808080"/><rect x="8" y="2" width="3" height="8" fill="#c0c0c0" stroke="#000"/></svg>` },
+        { n:'eraser', svg:`<svg viewBox="0 0 16 16"><rect x="3" y="6" width="10" height="6" fill="#fff" stroke="#000" transform="rotate(-20 8 9)"/></svg>` },
+        { n:'fill', svg:`<svg viewBox="0 0 16 16"><path d="M6 2l6 6-4 4-6-6z" fill="#00a0e3" stroke="#000"/><path d="M12 10c1 2 1 3 0 4-1-1-1-2 0-4z" fill="#00a0e3"/></svg>` },
+        { n:'text', svg:`<svg viewBox="0 0 16 16"><text x="2" y="13" font-size="13" font-weight="bold" font-family="serif" fill="#000">A</text></svg>` },
+      ];
+      let tool = 'pencil', color = '#000000';
+      tools.forEach((tl,i) => {
+        const b = el('button','ptool'+(i===0?' on':''),tl.svg,side);
+        b.title = tl.n;
+        b.addEventListener('click', () => { side.querySelectorAll('.ptool').forEach(x=>x.classList.remove('on')); b.classList.add('on'); tool = tl.n; });
+      });
+      const pal = el('div','paint-pal',null,side);
+      const colors = ['#000000','#808080','#800000','#ff0000','#808000','#ffff00','#008000','#00ff00','#008080','#00ffff','#000080','#0000ff','#800080','#ff00ff','#ffffff','#c0c0c0'];
+      colors.forEach((c,i) => {
+        const s = el('div','ppal'+(i===0?' on':''),null,pal);
+        s.style.background = c;
+        s.addEventListener('click', () => { pal.querySelectorAll('.ppal').forEach(x=>x.classList.remove('on')); s.classList.add('on'); color = c; });
+      });
+      const cvwrap = el('div','paint-cv-wrap',null,wrap);
+      const cv = el('canvas', null, null, cvwrap);
+      cv.id = 'paintcv'; cv.width = 380; cv.height = 260;
+      const ctx = cv.getContext('2d');
+      ctx.fillStyle = '#fff'; ctx.fillRect(0,0,cv.width,cv.height);
+      let drawing = false, last = null;
+      const pos = e => {
+        const r = cv.getBoundingClientRect();
+        return [Math.floor((e.clientX - r.left) * cv.width / r.width), Math.floor((e.clientY - r.top) * cv.height / r.height)];
+      };
+      cv.addEventListener('mousedown', e => {
+        drawing = true; last = pos(e);
+        if(tool === 'fill'){ floodFill(last[0], last[1], color); drawing = false; return; }
+        if(tool === 'text'){
+          const txt = prompt('Text:');
+          if(txt){ ctx.fillStyle = color; ctx.font = '14px "Courier New"'; ctx.fillText(txt, last[0], last[1]); }
+          drawing = false; return;
+        }
+        dot(last[0], last[1]);
+      });
+      cv.addEventListener('mousemove', e => {
+        if(!drawing) return;
+        const p = pos(e);
+        if(tool === 'eraser') lineTo(last, p, '#ffffff', 6);
+        else if(tool === 'brush') lineTo(last, p, color, 3);
+        else lineTo(last, p, color, 1);
+        last = p;
+      });
+      const up = () => drawing = false;
+      document.addEventListener('mouseup', up);
+      function dot(x,y){ ctx.fillStyle = color; ctx.fillRect(x,y,1,1); }
+      function lineTo(a,b,c,w){
+        ctx.strokeStyle = c; ctx.lineWidth = w; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(a[0],a[1]); ctx.lineTo(b[0],b[1]); ctx.stroke();
+      }
+      function floodFill(sx, sy, hex){
+        const img = ctx.getImageData(0,0,cv.width,cv.height);
+        const d = img.data;
+        const target = [d[sy*cv.width*4+sx*4], d[sy*cv.width*4+sx*4+1], d[sy*cv.width*4+sx*4+2]];
+        const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+        if(target[0]===r&&target[1]===g&&target[2]===b) return;
+        const stack = [[sx,sy]];
+        while(stack.length){
+          const [x,y] = stack.pop();
+          if(x<0||y<0||x>=cv.width||y>=cv.height) continue;
+          const i = (y*cv.width+x)*4;
+          if(d[i]===r&&d[i+1]===g&&d[i+2]===b) continue;
+          if(d[i]!==target[0]||d[i+1]!==target[1]||d[i+2]!==target[2]) continue;
+          d[i]=r; d[i+1]=g; d[i+2]=b; d[i+3]=255;
+          stack.push([x+1,y],[x-1,y],[x,y+1],[x,y-1]);
+        }
+        ctx.putImageData(img,0,0);
+      }
+    },
+  });
+}
+
+/* ============ INTERNET EXPLORER ============ */
+function openIE(){
+  const rec = createWindow({
+    title:'Microsoft Internet Explorer', icon:I.ie, w:480, h:340,
+    content: body => {
+      const tb = el('div','ie-toolbar',null,body);
+      const back = el('button','btn','‹ Back',tb); back.classList.add('disabled');
+      const fwd = el('button','btn','Forward ›',tb); fwd.classList.add('disabled');
+      const stop = el('button','btn','Stop',tb);
+      const ref = el('button','btn','Refresh',tb);
+      const home = el('button','btn','Home',tb);
+      const addr = el('input','field ie-addr',null,tb);
+      addr.value = 'http://www.microsoft.com/windows95/';
+      const content = el('div','ie-content',null,body);
+      function loadHome(){
+        content.innerHTML = `
+          <div class="ie-marquee"><span>Welcome to the World Wide Web! &nbsp;•&nbsp; You have received (1) new e-mail &nbsp;•&nbsp; Today's top story: Windows 95 ships worldwide &nbsp;•&nbsp; Get Plug and Play today!</span></div>
+          <h1 style="font-family:Arial;font-size:22px;color:#000080">Microsoft Windows 95</h1>
+          <p style="margin:8px 0">The next generation of personal computing. Plug and Play. Long file names. Multitasking that just works.</p>
+          <p><a href="#">What's New in Windows 95</a><br>
+          <a href="#">Internet Zone: browse the web</a><br>
+          <a href="#">Download the latest drivers</a><br>
+          <a href="#">Order Windows 95 by phone</a></p>
+          <p style="margin-top:14px">Visitors since 1995: <span class="ie-counter">004217</span></p>
+          <hr>
+          <p style="color:#808080">Best viewed at 800×600. This page is best experienced with a 256K modem.</p>`;
+      }
+      function loadURL(u){
+        content.innerHTML = `<p style="padding:20px">Connecting to <b>${u}</b> …</p>`;
+        setTimeout(() => {
+          content.innerHTML = `<p style="padding:20px">The page cannot be displayed.<br><br>Cannot find the server computer using the DNS service.<br><br><i>(This is a simulation — only the home page is available.)</i></p>`;
+        }, 900);
+      }
+      home.addEventListener('click', () => { addr.value = 'http://www.microsoft.com/windows95/'; loadHome(); });
+      ref.addEventListener('click', () => { addr.value = 'http://www.microsoft.com/windows95/'; loadHome(); });
+      addr.addEventListener('keydown', e => { if(e.key === 'Enter') loadURL(addr.value); });
+      loadHome();
+    },
+    statusbar: ['Done'],
+  });
+}
+
+/* ============ APP REGISTRY ============ */
+const APPS = {
+  notepad: openNotepad, paint: openPaint, calc: openCalc, dos: openDos,
+  mine: openMine, ie: openIE,
+};
+function openApp(name){ if(APPS[name]) APPS[name](); }
+</script>
+<script>
+/* ============ RUN DIALOG ============ */
+function openRun(){
+  showDialog({
+    title:'Run', icon: I.run, w: 320,
+    msg: msg => {
+      msg.innerHTML = `<div class="findrow"><label>Open:</label><input id="runinput" autocomplete="off" spellcheck="false"></div>`;
+    },
+    buttons: [
+      { label:'OK', primary:true, action: api => {
+        const v = (api.dialog.querySelector('#runinput') || {}).value || '';
+        const c = v.trim().toLowerCase();
+        const map = {
+          'notepad': openNotepad, 'paint': openPaint, 'calc': openCalc, 'mspaint': openPaint,
+          'winmine': openMine, 'mine': openMine, 'command': openDos, 'cmd': openDos,
+          'msdos': openDos, 'iexplore': openIE, 'explorer': openMyComputer, 'control': openControlPanel,
+        };
+        if(map[c]) map[c]();
+        else showDialog({ title:'Run', icon: I.warn, msg: `Cannot find the file '${v}' (or one of its components). Make sure the path and filename are correct and that all required libraries are available.`, buttons:[{label:'OK',primary:true}] });
+      }},
+      { label:'Cancel' },
+      { label:'Browse…', disabled:true },
+    ],
+    onShow: (d, api) => {
+      const inp = d.querySelector('#runinput');
+      if(inp){ inp.focus(); inp.addEventListener('keydown', e => { if(e.key === 'Enter') d.querySelector('.dlg-btns .btn.primary').click(); if(e.key === 'Escape') d.remove(); }); }
+    },
+  });
+}
+
+/* ============ SHUT DOWN ============ */
+function openShutdown(){
+  showDialog({
+    title:'Shut Down Windows', icon: I.shutdown, w: 300,
+    msg: msg => {
+      msg.innerHTML = `<p style="margin-bottom:8px">Are you sure you want to:</p>`;
+    },
+    radios: [
+      { label:'Shut down the computer?', checked:true },
+      { label:'Restart the computer' },
+      { label:'Restart in MS-DOS mode' },
+    ],
+    buttons: [
+      { label:'Yes', primary:true, action: api => {
+        const choice = api.getRadio() || 'Shut down the computer?';
+        doShutdown(choice.startsWith('Shut down'));
+      }},
+      { label:'No' },
+    ],
+  });
+}
+function doShutdown(restart){
+  const sh = el('div','',null,document.body);
+  sh.id = 'shutdown';
+  sh.innerHTML = `<div class="txt">${restart ? 'It\'s now safe to turn off<br>your computer.' : 'It\'s now safe to turn off<br>your computer.'}</div><div class="hint">click anywhere to turn the power back on</div>`;
+  if(restart){
+    sh.querySelector('.txt').innerHTML = 'Restarting…';
+    setTimeout(() => { sh.remove(); showBoot(); }, 2500);
+  } else {
+    sh.addEventListener('click', () => { sh.remove(); showBoot(); });
+  }
+}
+
+/* ============ DISPLAY PROPERTIES ============ */
+function displayProps(){
+  const swatches = ['#008080','#000000','#808080','#000080','#008000','#800000','#800080','#008080','#c0c0c0','#808000','#ff00ff','#00ffff','#ffff00','#ff0000','#00ff00','#ffffff'];
+  showDialog({
+    title:'Display Properties', icon: I.smallscreen, w: 340,
+    msg: msg => {
+      msg.innerHTML = `<div class="dp">
+        <div><span class="dp-label">Background</span>
+          <div class="dp-grid" style="margin-top:4px">${swatches.map((c,i) => `<div class="swatch${i===0?' on':''}" data-c="${c}" style="background:${c}"></div>`).join('')}</div>
+        </div>
+        <div><span class="dp-label">Screen Saver:</span> <span class="field" style="display:inline-block;padding:2px 8px;margin-top:4px">None</span></div>
+        <div><span class="dp-label">Appearance</span><div style="margin-top:4px">Color scheme: <span class="field" style="display:inline-block;padding:2px 8px">Windows Standard</span></div></div>
+      </div>`;
+      msg.querySelectorAll('.swatch').forEach(s => s.addEventListener('click', () => {
+        msg.querySelectorAll('.swatch').forEach(x => x.classList.remove('on'));
+        s.classList.add('on');
+        desktop.style.background = s.dataset.c;
+      }));
+    },
+    buttons: [{ label:'OK', primary:true }, { label:'Cancel' }],
+  });
+}
+
+/* ============ CONTROL PANEL ============ */
+function openControlPanel(){
+  createWindow({
+    title:'Control Panel', icon: I.settings, w: 360, h: 260,
+    content: body => {
+      const mb = el('div','menubar',null,body);
+      menuRoot(mb,'File',[{label:'Close'}]);
+      menuRoot(mb,'Help',[{label:'Help Topics',action:()=>openHelp('control')}]);
+      const f = el('div','folder',null,body);
+      const items = [
+        { label:'Display', icon:'smallscreen', open: displayProps },
+        { label:'Mouse', icon:'progman', open: () => showDialog({ title:'Mouse Properties', icon:I.progman, msg:'Buttons: Left-handed / Right-handed<br>Speed: medium<br><br>(This is a simulation.)', buttons:[{label:'OK',primary:true}] }) },
+        { label:'Sound', icon:'writemon', open: () => showDialog({ title:'Sound', icon:I.writemon, msg:'Scheme: Windows Default<br><br>(This is a simulation.)', buttons:[{label:'OK',primary:true}] }) },
+        { label:'Date/Time', icon:'clock', open: () => showDialog({ title:'Date/Time Properties', icon:I.clock, msg: m => { m.innerHTML = new Date().toDateString() + '<br>' + new Date().toLocaleTimeString(); }, buttons:[{label:'OK',primary:true}] }) },
+        { label:'Printers', icon:'printers', open: () => openFolder('Printers','printers') },
+        { label:'Network', icon:'net', open: () => showDialog({ title:'Network', icon:I.net, msg:'Adapter: NE2000 Compatible<br>IP: 192.168.0.2<br><br>(This is a simulation.)', buttons:[{label:'OK',primary:true}] }) },
+      ];
+      items.forEach(fi => {
+        const ic = el('div','ficon',null,f);
+        ic.innerHTML = `<div class="img">${folderIcon(fi.icon)}</div><div class="lbl">${fi.label}</div>`;
+        ic.addEventListener('dblclick', () => fi.open && fi.open());
+      });
+    },
+    statusbar: ['6 object(s)'],
+  });
+}
+
+/* ============ HELP ============ */
+const HELP_TEXT = {
+  help: `<h2>Windows 95 Help</h2><p>Welcome to the Windows 95 Help system. This is a faithful web re-creation of the classic desktop.</p><p><b>Getting started:</b> Use the Start button to launch programs. Double-click icons on the desktop to open them. Drag windows to move them and use the corner handles to resize.</p><p><b>Shutting down:</b> Choose Start → Shut Down to power off the machine. Click the black screen to turn it back on.</p>`,
+  folder: `<h2>File Manager</h2><p>Browse folders by double-clicking items. Use the menus at the top to open, view, or print. Right-click an item for more options.</p>`,
+  notepad: `<h2>Notepad</h2><p>Notepad is a simple text editor for editing text files. Use Edit → Time/Date to insert the current date and time.</p>`,
+  calc: `<h2>Calculator</h2><p>The Calculator performs basic arithmetic. Click the number keys and operators, then press = to evaluate. C clears the display.</p>`,
+  dos: `<h2>MS-DOS Prompt</h2><p>Type <b>DIR</b> to list files, <b>VER</b> to show the version, <b>CLS</b> to clear the screen, and <b>WIN</b> to start Windows. Press ↑ to repeat previous commands.</p>`,
+  paint: `<h2>Paint</h2><p>Choose a tool on the left (pencil, brush, eraser, fill, text) and a color from the palette, then draw on the canvas. Right-click does nothing here — use the fill tool to paint regions.</p>`,
+  find: `<h2>Find</h2><p>Find lets you locate files or folders on your computer by name or part of a name. (Search is simulated in this version.)</p>`,
+  control: `<h2>Control Panel</h2><p>Use the Control Panel to change system settings: display, mouse, sound, date and time, and more. Double-click an item to open it.</p>`,
+};
+function openHelp(topic){
+  const key = HELP_TEXT[topic] ? topic : 'help';
+  createWindow({
+    title:'Windows 95 Help', icon: I.help, w: 420, h: 300,
+    menubar: [
+      { label:'File', items:[ { label:'Print…', disabled:true }, { label:'Exit', action: () => closeWin(winList.find(w => w.title === 'Windows 95 Help')) } ] },
+      { label:'Help', items:[ { label:'Help Topics', action: () => openHelp('help') } ] },
+    ],
+    content: body => {
+      const c = el('div',null,null,body);
+      c.style.cssText = 'flex:1;background:#fff;overflow:auto;padding:14px;user-select:text;-webkit-user-select:text;line-height:15px';
+      c.innerHTML = HELP_TEXT[key];
+    },
+  });
+}
+
+/* ============ FIND ============ */
+function openFind(){
+  showDialog({
+    title:'Find: New Find', icon: I.find, w: 360,
+    msg: msg => {
+      msg.innerHTML = `
+        <div class="findrow"><label>Name:</label><input id="findname" autocomplete="off" spellcheck="false" value="*.txt"></div>
+        <div class="findrow"><label>Look in:</label><input id="findin" value="C:\\"></div>
+        <div class="findrow"><label>Modified:</label><input id="findmod" value="Any time" readonly></div>`;
+    },
+    buttons: [{ label:'Find Now', primary:true, action: api => {
+      const name = (api.dialog.querySelector('#findname') || {}).value || '*';
+      showDialog({ title:'Find Results', icon: I.find, msg: `Searching C:\\ for <b>${name}</b>…<br><br>Found 1 item:<br>• README.TXT`, buttons:[{label:'OK',primary:true}] });
+    }}, { label:'Stop' }, { label:'Advanced…', disabled:true }],
+    onShow: (d) => { const i = d.querySelector('#findname'); if(i){ i.focus(); i.select(); } },
+  });
+}
+
+/* ============ WELCOME (first boot) ============ */
+function showWelcome(){
+  createWindow({
+    title:'Welcome to Windows 95', icon: I.pc, w: 340, h: 260,
+    content: body => {
+      const c = el('div','welcome-c',null,body);
+      c.innerHTML = `${LOGO}<h2>Welcome to Windows 95</h2><p>This is a faithful web re-creation.<br>Explore the desktop, open programs,<br>and play Minesweeper.</p>`;
+      const btns = el('div','dlg-btns',null,body);
+      const b = el('button','btn primary','OK',btns);
+      b.addEventListener('click', () => closeWin(winList.find(w => w.title === 'Welcome to Windows 95')));
+    },
+  });
+}
+
+/* ============ BOOT SEQUENCE ============ */
+const boot = document.getElementById('boot');
+function showBoot(){
+  boot.classList.remove('hidden');
+  boot.innerHTML = `
+    <div class="boot-logo">${LOGO}<div class="boot-tx"><div class="boot-ms">Microsoft</div><div class="boot-w">Windows 95</div></div></div>
+    <div class="boot-text">Starting Windows 95…</div>
+    <div class="boot-bar"><div class="boot-bar-inner"><i></i><i></i><i></i><i></i></div></div>`;
+  clearTimeout(showBoot._t);
+  showBoot._t = setTimeout(() => {
+    boot.classList.add('hidden');
+    showWelcome();
+  }, 3200);
+}
+
+/* ============ INIT ============ */
+showBoot();
+</script>
+</body>
+</html>
