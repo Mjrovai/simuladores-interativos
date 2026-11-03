@@ -261,8 +261,8 @@ const EVENTS = [
   ['1957-11-03','ussr','baikonur','Sputnik 2','Laika becomes the first animal to orbit. The flight was one-way: no re-entry was designed.','animal'],
   ['1958-01-31','usa','cape','Explorer 1',"America's first satellite. Its Geiger counter found the Van Allen radiation belts.",'us-satellite'],
   ['1959-01-02','ussr','baikonur','Luna 1',"First spacecraft to escape Earth's gravity and pass close to the Moon."],
-  ['1959-09-13','ussr','baikonur','Luna 2','First human-made object to reach another world: it impacted the Moon carrying Soviet pennants.','lunar-impact'],
-  ['1959-10-04','ussr','baikonur','Luna 3','First photographs of the far side. The images were developed on board and radioed home.','far-side'],
+  ['1959-09-13','ussr','baikonur','Luna 2','First human-made object to reach another world: it impacted the Moon carrying Soviet pennants. One-way — there was no return.', 'lunar-impact', null],
+  ['1959-10-04','ussr','baikonur','Luna 3','First photographs of the far side. The film was developed on board and the images radioed home — the probe itself never came back.','far-side',null],
   ['1961-04-12','ussr','baikonur','Vostok 1 · Gagarin','Vostok 3KA-3: one orbit, 108 minutes, first human in space. The flight was automatic; Gagarin had no manual control.','human'],
   ['1961-05-05','usa','cape','Freedom 7 · Shepard','Mercury-Redstone 3: a 15-minute suborbital hop, 187 km up. Shepard is the first American in space — but not yet in orbit.','us-human'],
   ['1961-08-06','ussr','baikonur','Vostok 2 · Titov','First flight longer than a day: 25 hours, 17 orbits. Titov also took the first sleep in space.','day'],
@@ -272,22 +272,22 @@ const EVENTS = [
   ['1965-03-18','ussr','baikonur','Voskhod 2 · Leonov','First spacewalk: 12 minutes outside, and a suit that stiffened so much he had to bleed air to get back in.','eva'],
   ['1965-06-03','usa','cape','Gemini 4 · White','First American spacewalk, 21 minutes on the end of a tether.','us-eva'],
   ['1965-12-15','usa','cape','Gemini 6A / 7','First rendezvous: two crewed spacecraft station-keeping 30 cm apart, flying in formation.','rendezvous'],
-  ['1966-02-03','ussr','baikonur','Luna 9','First soft landing on the Moon and the first pictures sent from its surface.','soft-landing'],
+  ['1966-02-03','ussr','baikonur','Luna 9','First soft landing on the Moon and the first pictures sent from its surface. One-way: the lander stayed there.','soft-landing',null],
   ['1966-03-16','usa','cape','Gemini 8 · Armstrong','First docking in orbit — followed by a stuck thruster spin that nearly ended the mission.','docking'],
   ['1967-01-27','usa','cape','Apollo 1','Grissom, White and Chaffee die in a cabin fire during a launch rehearsal. The programme stops for 20 months.'],
   ['1967-04-24','ussr','baikonur','Soyuz 1 · Komarov','First death during a spaceflight. The parachute failed after a day of systems failures.'],
-  ['1968-12-21','usa','cape','Apollo 8','First humans to leave Earth orbit. They circled the Moon on Christmas Eve and photographed Earthrise.','lunar-orbit'],
+  ['1968-12-21','usa','cape','Apollo 8','First humans to leave Earth orbit. They circled the Moon on Christmas Eve and photographed Earthrise. Splashdown in the Pacific on 27 December.','lunar-orbit',[8.1,-165.0,'Pacific splashdown']],
   ['1969-01-16','ussr','baikonur','Soyuz 4 / 5','First transfer of crew between two docked spacecraft, via a spacewalk.'],
-  ['1969-07-20','usa','cape','Apollo 11','Armstrong and Aldrin land in the Sea of Tranquility with 25 seconds of fuel left. Six hundred million people watch.','moon'],
-  ['1970-09-24','ussr','baikonur','Luna 16','First robotic sample return: 101 g of lunar soil, drilled and flown home automatically.','sample'],
-  ['1970-11-17','ussr','baikonur','Lunokhod 1','First rover on another world. It drove 10 km in ten months, powered by a solar lid and a polonium heater.','rover'],
+  ['1969-07-20','usa','cape','Apollo 11','Armstrong and Aldrin land in the Sea of Tranquility with 25 seconds of fuel left. Six hundred million people watch. Splashdown in the Pacific on 24 July.','moon',[13.3,-169.2,'Pacific splashdown']],
+  ['1970-09-24','ussr','baikonur','Luna 16','First robotic sample return: 101 g of lunar soil, drilled and flown home automatically. The capsule lands in Kazakhstan; the spacecraft itself stays on the Moon.','sample',[47.4,68.5,'Kazakhstan landing']],
+  ['1970-11-17','ussr','baikonur','Lunokhod 1','First rover on another world. It drove 10 km in ten months, powered by a solar lid and a polonium heater. It never came back.','rover',null],
   ['1971-04-19','ussr','baikonur','Salyut 1','First space station. Its first crew could not dock; the second died on the way home.','station'],
   ['1971-06-29','ussr','baikonur','Soyuz 11','First crew to live aboard a station — 23 days. All three suffocate when a valve opens during re-entry.'],
-  ['1971-07-26','usa','cape','Apollo 15','First lunar rover, first deep-space spacewalk on the way home, and a hammer-and-feather demonstration.'],
-  ['1972-12-07','usa','cape','Apollo 17','Last humans on the Moon — so far. Cernan and Schmitt leave after three days.'],
+  ['1971-07-26','usa','cape','Apollo 15','First lunar rover, first deep-space spacewalk on the way home, and a hammer-and-feather demonstration. Splashdown in the Pacific on 7 August.',null,[26.1,-158.1,'Pacific splashdown']],
+  ['1972-12-07','usa','cape','Apollo 17','Last humans on the Moon — so far. Cernan and Schmitt leave after three days. Splashdown in the Pacific on 19 December.',null,[-17.9,-166.1,'Pacific splashdown']],
   ['1973-05-14','usa','cape','Skylab',"America's first station, built from a surplus Saturn V upper stage and repaired in orbit by its first crew."],
   ['1975-07-17','usa','cape','Apollo–Soyuz','A Soyuz and an Apollo dock in orbit and two commanders shake hands through the hatch. The race ends as a joint mission.','joint']
-].map(([date,country,site,name,text,rec]) => ({date,country,site,name,text,rec}));
+].map(([date,country,site,name,text,rec,ret]) => ({date,country,site,name,text,rec,ret: ret || null}));
 
 const PHOTOS = {
   'Sputnik 1':['sputnik','Sputnik 1 replica · public domain'],
@@ -402,11 +402,11 @@ for (const key in SITES) {
 /* ---- arcos ---- */
 const arcGroup = new THREE.Group();
 globe.add(arcGroup);
-let arcLine = null, arcDot = null, moonMesh = null, moonLine = null, cislunarSite = null,
+let arcLine = null, arcDot = null, moonMesh = null, moonLine = null, cislunarSite = null, cislunarRet = null,
     cislunarUntil = 0, rotBoost = 0;
 
 function clearArcs() {
-  if (performance.now() >= cislunarUntil) cislunarSite = null;
+  if (performance.now() >= cislunarUntil) { cislunarSite = null; cislunarRet = null; }
   [arcLine, arcDot, moonLine].forEach(o => { if (o) { arcGroup.remove(o); o.geometry?.dispose?.(); } });
   arcLine = arcDot = moonLine = null;
   if (moonMesh) moonMesh.visible = false;
@@ -440,6 +440,7 @@ function buildArc(ev) {
     // missão translunar: desenhada em 2D sobre o canvas (ver drawSky) e mantida por 9 s
     arcLine = { userData: { moon: true, site: [lat, lon] } };
     cislunarSite = [lat, lon];
+    cislunarRet = ev.ret || null;
     cislunarUntil = performance.now() + 9000;
   }
 
@@ -486,47 +487,106 @@ function drawSky(now) {
   const [lat, lon] = cislunarSite;
   const remain = cislunarUntil - now;
   const fade = Math.max(0, Math.min(1, remain / 1400));
-  if (fade <= 0) { cislunarSite = null; return; }
+  if (fade <= 0) { cislunarSite = null; cislunarRet = null; return; }
+
+  const mx = w*0.80, my = h*0.20;                       // lua (ponto fixo da cena)
+  const q = (t,a,b,c) => (1-t)*(1-t)*a + 2*(1-t)*t*b + t*t*c;
+  const font = `600 ${Math.max(9, w*0.015)}px ${getComputedStyle(document.body).fontFamily}`;
+  const note = (txt, x, y, size) => {                       // texto que não vaza do cartão
+    skx.font = `600 ${Math.max(8, w*(size||0.0125))}px ${getComputedStyle(document.body).fontFamily}`;
+    const tw = skx.measureText(txt).width;
+    skx.fillText(txt, Math.max(6, Math.min(x, w - tw - 8)), Math.min(y, h - 8));
+  };
+
+  // lançamento na tela
   const v = ll2v(lat, lon, R*1.01).applyMatrix4(globe.matrixWorld).project(camera);
   const sx = (v.x*0.5+0.5)*w, sy = (-v.y*0.5+0.5)*h;
-  const mx = w*0.80, my = h*0.20;
-  const q = (t,a,b,c) => (1-t)*(1-t)*a + 2*(1-t)*t*b + t*t*c;
+  // centro do globo na tela (para prender o retorno no limbo)
+  const c0 = new THREE.Vector3(0,0,0).project(camera);
+  const gx = (c0.x*0.5+0.5)*w, gy = (-c0.y*0.5+0.5)*h;
 
-  // ida (curva por cima) e volta (curva por baixo)
+  // destino do retorno (splashdown ou cápsula de amostra) — null = one-way
+  let ex = null, ey = null, retVisible = false;
+  if (cislunarRet) {
+    const rv = ll2v(cislunarRet[0], cislunarRet[1], R*1.01).applyMatrix4(globe.matrixWorld);
+    const toCam = camera.position.clone().sub(rv).normalize();
+    retVisible = rv.clone().normalize().dot(toCam) > 0.04;
+    const rp = rv.clone().project(camera);
+    ex = (rp.x*0.5+0.5)*w; ey = (-rp.y*0.5+0.5)*h;
+    if (Math.hypot(ex-sx, ey-sy) < 70) { ex = null; ey = null; }   // volta ao mesmo ponto: só o rótulo
+    else if (!retVisible) {
+      const dx = ex-gx, dy = ey-gy, dd = Math.hypot(dx,dy) || 1;
+      const limb = Math.min(w,h)*0.43;
+      ex = gx + dx/dd*limb; ey = gy + dy/dd*limb;
+    }
+  }
+
+  // ---- ida: sítio -> lua
   const c1x = (sx+mx)/2, c1y = Math.min(sy,my) - h*0.16;
-  const c2x = (sx+mx)/2, c2y = Math.max(sy,my) + h*0.10;
+  const u = (now % 8000) / 8000;
+  const outPhase = u < 0.5;
+  const hasRet = !!cislunarRet;
+  const aOut = (outPhase || !hasRet) ? 0.85 : 0.2;
+  const aRet = outPhase ? 0.25 : 0.6;
 
-  skx.lineWidth = 1.6;
-  skx.setLineDash([5,5]);
-  skx.strokeStyle = `rgba(243,112,53,${0.85*fade})`;
+  skx.lineWidth = 1.6; skx.setLineDash([5,5]);
+  skx.strokeStyle = `rgba(243,112,53,${aOut*fade})`;
   skx.beginPath(); skx.moveTo(sx,sy); skx.quadraticCurveTo(c1x,c1y,mx,my); skx.stroke();
-  skx.strokeStyle = `rgba(127,178,224,${0.55*fade})`;
-  skx.beginPath(); skx.moveTo(mx,my); skx.quadraticCurveTo(c2x,c2y,sx,sy); skx.stroke();
+
+  // ---- volta: lua -> oceano (Apollo) ou cápsula (Luna 16); ausente nas one-way
+  let c2x, c2y;
+  if (ex !== null) {
+    c2x = (mx+ex)/2; c2y = Math.max(my,ey) + h*0.10;
+    skx.strokeStyle = `rgba(127,178,224,${aRet*fade})`;
+    skx.beginPath(); skx.moveTo(mx,my); skx.quadraticCurveTo(c2x,c2y,ex,ey); skx.stroke();
+  }
   skx.setLineDash([]);
 
-  // lua
+  // ---- lua
   const mr = Math.max(9, w*0.022);
   const g = skx.createRadialGradient(mx-mr*0.3, my-mr*0.3, mr*0.15, mx, my, mr);
   g.addColorStop(0,'#EDEFF2'); g.addColorStop(1,'#A9B0B9');
-  skx.globalAlpha = fade; skx.fillStyle = g; skx.beginPath(); skx.arc(mx,my,mr,0,7); skx.fill();
-
-  // etiquetas das pernas
-  skx.font = `600 ${Math.max(9, w*0.015)}px ${getComputedStyle(document.body).fontFamily}`;
-  const px1 = q(0.55, sx, c1x, mx), py1 = q(0.55, sy, c1y, my);
-  skx.fillStyle = `rgba(243,112,53,${0.95*fade})`;
-  skx.fillText('outbound', px1 + 6, py1 - 10);
-  const px2 = q(0.72, mx, c2x, sx), py2 = q(0.72, my, c2y, sy);
-  skx.fillStyle = `rgba(127,178,224,${0.9*fade})`;
-  skx.fillText('return', px2 + 6, py2 + 18);
-
-  // pontos: ida e volta em fases opostas
-  const u = (now % 8000) / 8000;
-  const ox = q(u, sx, c1x, mx), oy = q(u, sy, c1y, my);
-  skx.fillStyle = '#F37035'; skx.beginPath(); skx.arc(ox, oy, 3.6, 0, 7); skx.fill();
+  skx.globalAlpha = fade; skx.fillStyle = g;
+  skx.beginPath(); skx.arc(mx,my,mr,0,7); skx.fill();
   skx.globalAlpha = 1;
-  const ru = (u + 0.5) % 1;
-  const rx = q(ru, mx, c2x, sx), ry = q(ru, my, c2y, sy);
-  skx.fillStyle = '#7FB2E0'; skx.beginPath(); skx.arc(rx, ry, 3.2, 0, 7); skx.fill();
+
+  skx.font = font;
+  // etiqueta da ida
+  const px1 = q(0.55, sx, c1x, mx), py1 = q(0.55, sy, c1y, my);
+  if (outPhase || !hasRet) { skx.fillStyle = `rgba(243,112,53,${0.95*fade})`; skx.fillText('outbound', px1 + 6, py1 - 10); }
+
+  skx.font = font;
+  if (cislunarRet) {
+    if (ex !== null) {
+      // ponto de amerissagem/pouso + rótulo
+      skx.fillStyle = `rgba(127,178,224,${0.9*fade})`;
+      skx.beginPath(); skx.arc(ex, ey, 3.4, 0, 7); skx.fill();
+      if (!outPhase) {
+        const px2 = q(0.55, mx, c2x, ex), py2 = q(0.55, my, c2y, ey);
+        skx.fillText('return', px2 + 6, py2 - 8);
+      }
+      if (retVisible) {
+        skx.fillStyle = `rgba(110,132,155,${0.95*fade})`;
+        note(cislunarRet[2], ex + 8, ey + 20);
+      }
+    } else {
+      // volta ao mesmo ponto do mapa: só a nota
+      skx.fillStyle = `rgba(110,132,155,${0.95*fade})`;
+      note(cislunarRet[2] + ' · capsule return', mx - mr - 4, my + mr + 16);
+    }
+  } else {
+    skx.fillStyle = `rgba(110,132,155,${0.95*fade})`;
+    note('one-way · no return', mx - mr - 4, my + mr + 16);
+  }
+
+  // ---- pontos em movimento
+  skx.fillStyle = '#F37035';
+  skx.beginPath(); skx.arc(q(u, sx, c1x, mx), q(u, sy, c1y, my), 3.6, 0, 7); skx.fill();
+  if (ex !== null) {
+    const ru = (u + 0.5) % 1;
+    skx.fillStyle = '#7FB2E0';
+    skx.beginPath(); skx.arc(q(ru, mx, c2x, ex), q(ru, my, c2y, ey), 3.2, 0, 7); skx.fill();
+  }
 }
 
 /* ======================= linha do tempo ======================= */
@@ -639,7 +699,11 @@ function render(now = t, rebuildArc = false) {
     if (rebuildArc || arcKey !== null) { arcKey = null; clearArcs(); }
     focusLon = SITES[upcoming.site][1];
   }
-  if (cislunarSite && performance.now() < cislunarUntil) focusLon = cislunarSite[1];
+  if (cislunarSite && performance.now() < cislunarUntil) {
+    // ida: globo no sítio de lançamento · volta: globo no ponto de amerissagem
+    const u = (performance.now() % 8000) / 8000;
+    focusLon = (u >= 0.5 && cislunarRet) ? cislunarRet[1] : cislunarSite[1];
+  }
   drawTimeline();
   updateLabels();
 }
@@ -698,6 +762,7 @@ host.addEventListener('pointerup', (e) => {
 $('scrub').addEventListener('input', (e) => {
   playing = false; $('play').textContent = '▶ Play';
   selected = null; dwellUntil = 0;
+  cislunarUntil = 0; cislunarSite = null; cislunarRet = null;   // corta a vista lunar anterior
   render(START + SPAN * (+e.target.value / 1000), true);
   syncPtr();
 });
@@ -721,6 +786,7 @@ tlC.addEventListener('click', (e) => {
   const r = tlC.getBoundingClientRect();
   const frac = (e.clientX - r.left) / r.width;
   playing = false; $('play').textContent = '▶ Play'; selected = null; dwellUntil = 0;
+  cislunarUntil = 0; cislunarSite = null; cislunarRet = null;
   render(START + SPAN * Math.max(0, Math.min(1, frac)), true);
   syncPtr();
 });
@@ -763,7 +829,15 @@ function tick(now) {
     }
   }
 
+  sun.position.copy(camera.position).multiplyScalar(0.8).add(new THREE.Vector3(1.5, 2.5, 0));
+  sun.lookAt(0,0,0);
+
   if (!dragging) {
+    // viagem lunar em cena: globo acompanha a perna em curso (lançamento ↔ amerissagem)
+    if (cislunarSite && now < cislunarUntil) {
+      const lu = (now % 8000) / 8000;
+      focusLon = (lu >= 0.5 && cislunarRet) ? cislunarRet[1] : cislunarSite[1];
+    }
     const want = lonToRot(focusLon);
     let d = ((want - rotY + Math.PI) % (2*Math.PI) + 2*Math.PI) % (2*Math.PI) - Math.PI;
     rotY += d * (now < rotBoost ? 0.22 : (playing ? 0.075 : 0.06));
