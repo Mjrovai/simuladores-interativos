@@ -26,6 +26,9 @@ Sem instalação, sem build, sem dependências externas de CDN: cada app carrega
 | **Osciloscópio · Lissajous** | Modo X-Y com fósforo P1: frequências, fase, deriva e persistência; presets 1:1, 3:2 e 5:4 | [`apps/lissajous/`](apps/lissajous/) |
 | **Pêndulo duplo** | Bancada com RK4 e dissipação de Rayleigh: arrastar massas, atrito de mancal ou ar, gêmeo e regimes de caos | [`apps/double-pendulum/`](apps/double-pendulum/) |
 | **A História da IA · 1943–2026** | 53 marcos numa constelação em espiral: linha do tempo de 83 anos, grafo de linhagens que se acende, placar de “primeiros” por país e ficha com nota do marco | [`apps/ai-history/`](apps/ai-history/) |
+| **Philips EE 20 · kit de montagem** | O kit EE 20 de 1966 em 22 circuitos sem solda: amplificador, rádio, órgão, alarme e teste de falhas, com diagrama, manual e inspeção de cada peça. Repositório próprio | [EE20-Simulator ↗](https://mjrovai.github.io/EE20-Simulator/sim/) |
+| **Jules Verne Bot · RNN × Transformer** | GRU de 4,1 M contra transformer de 4,0 M, mesmo vocabulário e mesma base de texto: geração caractere por caractere e comparação de perda, rodando no navegador. Repositório próprio | [Jules_Verne ↗](https://mjrovai.github.io/Jules_Verne/) |
+| **Motor Fault Bench** | Oito canais sintéticos de uma bancada de motor de 2,2 kW em 22 condições de falha, com MLP 54→128→64→22 diagnosticando em tempo real, espectros com marcadores de ordem e orçamento de memória no microcontrolador. Repositório próprio | [motor-fault-bench ↗](https://mjrovai.github.io/motor-fault-bench/demo/) |
 
 A página inicial é uma galeria com busca e filtros por tema. Cada card abre o simulador **em nova aba**, então a galeria continua disponível para escolher outro.
 
