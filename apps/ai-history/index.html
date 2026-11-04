@@ -452,19 +452,19 @@ document.getElementById('hud-t').textContent = EVENTS.length;
 
 /* ---------------- fotos (Wikimedia Commons) ---------------- */
 const PHOTOS = {
-  turing:      ['turing.jpg',      'Alan Turing, 1951 · Elliott & Fry · public domain', 'cover', 'center 14%'],
-  perceptron:  ['perceptron.jpg',  'Mark I Perceptron, 1958 · US Navy manual · public domain'],
-  eliza:       ['eliza.jpg',       'ELIZA dialogue · public domain', 'contain'],
-  perceptrons: ['perceptrons.jpg', 'Marvin Minsky · Steamtalks · CC BY-SA 2.0'],
-  lenet:       ['lenet.jpg',       'MNIST samples · Josef Steppan · CC BY-SA 4.0', 'contain'],
-  shakey:      ['shakey.jpg',      'Shakey the robot, 1969 · The wub · CC BY-SA 4.0', 'cover', 'center 32%'],
-  deepblue:    ['deepblue.jpg',    'Deep Blue · James the photographer · CC BY 2.0', 'cover', 'center 22%'],
-  watson:      ['watson.jpg',      'Watson on Jeopardy! · Atomic Taco · CC BY-SA 2.0'],
-  imagenet:    ['imagenet.jpg',    'Fei-Fei Li · ITU Pictures · CC BY 2.0', 'cover', 'center 12%'],
-  alphago:     ['alphago.jpg',     'Lee Sedol vs AlphaGo, game 4 · Wesalius · CC BY-SA 4.0', 'contain'],
-  dalle2:      ['dalle2.jpg',      'DALL·E 2 output · public domain'],
-  nobel:       ['nobel.jpg',       'Geoffrey Hinton, Nobel 2024 · Arthur Petron · CC BY-SA 4.0', 'cover', 'center 6%'],
-  aiact:       ['aiact.jpg',       'EU flag · Marek Ślusarczyk · CC BY 3.0'],
+  turing:      ['turing.jpg',      'Alan Turing, 1951 · Elliott & Fry · public domain', 'cover', 'center 14%', 'Alan_Turing_(1951).jpg'],
+  perceptron:  ['perceptron.jpg',  'Mark I Perceptron · US Navy manual · public domain', 'cover', '', 'Mark_I_Perceptron,_Figure_2_of_operator\'s_manual.png'],
+  eliza:       ['eliza.jpg',       'ELIZA dialogue · public domain', 'contain', '', 'ELIZA_conversation.png'],
+  perceptrons: ['perceptrons.jpg', 'Marvin Minsky · Steamtalks · CC BY-SA 2.0', 'cover', '', 'Marvin_Minsky.jpg'],
+  lenet:       ['lenet.jpg',       'MNIST samples · Josef Steppan · CC BY-SA 4.0', 'contain', '', 'MnistExamples.png'],
+  shakey:      ['shakey.jpg',      'Shakey, 1969 · The wub · CC BY-SA 4.0', 'cover', 'center 32%', 'SRI_Shakey_robot,_1969,_Computer_History_Museum.jpg'],
+  deepblue:    ['deepblue.jpg',    'Deep Blue · James · CC BY 2.0', 'cover', 'center 22%', 'Deep_Blue.jpg'],
+  watson:      ['watson.jpg',      'Watson on Jeopardy! · Atomic Taco · CC BY-SA 2.0', 'cover', '', 'IBM_Watson_w_Jeopardy.jpg'],
+  imagenet:    ['imagenet.jpg',    'Fei-Fei Li · ITU Pictures · CC BY 2.0', 'cover', 'center 12%', 'Fei-Fei_Li_at_AI_for_Good_2017.jpg'],
+  alphago:     ['alphago.jpg',     'Lee Sedol vs AlphaGo · Wesalius · CC BY-SA 4.0', 'contain', '', 'Lee_Sedol_(B)_vs_AlphaGo_(W)_-_Game_4.jpg'],
+  dalle2:      ['dalle2.jpg',      'DALL·E 2 output · public domain', 'cover', '', 'DALL-E_2_artificial_intelligence_digital_image_generated_photo.jpg'],
+  nobel:       ['nobel.jpg',       'Hinton, Nobel 2024 · A. Petron · CC BY-SA 4.0', 'cover', 'center 6%', 'Geoffrey_E._Hinton,_2024_Nobel_Prize_Laureate_in_Physics.jpg'],
+  aiact:       ['aiact.jpg',       'EU flag · M. Ślusarczyk · CC BY 3.0', 'cover', '', '08_European_Union_EU_flag_in_Budapest_Parliament,_Hungary.jpg'],
 };
 
 /* ---------------- layout: espiral do tempo ---------------- */
@@ -532,8 +532,9 @@ function render(now = t) {
   $('meta').textContent = `${done.length} / ${EVENTS.length} milestones`;
   $('hud-n').textContent = done.length;
   const era = ERAS[ev.era];
-  $('hud-era').textContent = era.label;
-  $('hud-era').style.color = era.color;
+  const eraTime = ERAS[(latest || nextEv || ev).era];  // o relógio segue o tempo, não a seleção
+  $('hud-era').textContent = eraTime.label;
+  $('hud-era').style.color = eraTime.color;
 
   // cartão
   if (evIdx !== cardIdx) {
@@ -552,7 +553,9 @@ function render(now = t) {
       $('m-img').alt = ev.name;
       $('m-img').className = ph[2] || '';
       $('m-img').style.objectPosition = ph[3] || '';
-      $('m-credit').textContent = ph[1];
+      const cap = $('m-credit');
+      cap.textContent = ph[1];
+      cap.title = ph[4] ? 'Source: Wikimedia Commons — ' + ph[4].replace(/_/g,' ') : '';
       $('m-line').textContent = ev.note || '';
     } else {
       $('m-line').textContent = '';
@@ -562,9 +565,9 @@ function render(now = t) {
     focusIdx = evIdx;
   }
 
-  // chip da era no relógio
-  $('era-name').textContent = era.label;
-  $('era-chip').querySelector('i').style.background = era.color;
+  // chip da era no relógio (era do momento)
+  $('era-name').textContent = eraTime.label;
+  $('era-chip').querySelector('i').style.background = eraTime.color;
 
   // lista
   const recs = $('recs');
