@@ -325,6 +325,11 @@ main { padding-bottom: 20px; }
   .nav-links a.optional { display: none; }
   .grid { grid-template-columns: 1fr; }
 }
+@media (max-width: 560px) {
+  .nav-links > a { display: none; }        /* links do topo continuam no rodapé */
+  .nav { gap: 6px; }
+  .brand { font-size: .9rem; gap: 5px; }
+}
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
   html { scroll-behavior: auto; }
