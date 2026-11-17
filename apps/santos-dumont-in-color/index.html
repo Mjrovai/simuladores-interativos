@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="pt-BR" data-lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f3ead6">
+<title>Santos Dumont — In Color · a vida do Pai da Aviação</title>
+<meta name="description" content="A vida e as máquinas de Alberto Santos-Dumont (1873–1932) em fotografias da década de 1900 colorizadas por IA em 2019 — com o simulador de voo do 14-Bis como complemento interativo.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23241c12'/%3E%3Cpath d='M4 18 L16 12 L28 18' stroke='%23c9a227' stroke-width='1.6' fill='none'/%3E%3Cpath d='M4 14 L16 8 L28 14' stroke='%23c9a227' stroke-width='1.6' fill='none'/%3E%3Cline x1='16' y1='8' x2='16' y2='24' stroke='%23c9a227' stroke-width='1.4'/%3E%3Ccircle cx='16' cy='25' r='2' fill='none' stroke='%23c9a227'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --paper:#f3ead6; --paper2:#e9dcc2; --card:#faf4e6; --card2:#f1e7d0;
+    --ink:#241c12; --ink2:#5a4c38; --ink3:#8a7a60;
+    --brass:#9c7c2c; --brass2:#c9a227; --brass3:#e6c34a;
+    --line:#d9c9a6; --line2:#cbb88f; --sepia:#7c6034; --link:#7a5a17;
+    --shadow:rgba(60,40,10,.18); --shadow2:rgba(60,40,10,.30);
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+    --body:Georgia,"Times New Roman",serif;
+    --ui:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --maxw:1080px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:var(--body); font-size:17px; line-height:1.65;
+    background-image:
+      radial-gradient(circle at 12% 8%, rgba(201,162,39,.06), transparent 42%),
+      radial-gradient(circle at 88% 92%, rgba(124,96,52,.07), transparent 46%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .03 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  ::selection{background:var(--brass2);color:var(--ink)}
+  a{color:var(--link)}
+  img{max-width:100%;display:block}
+  h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.15;letter-spacing:.01em}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  /* ---------- top nav ---------- */
+  .nav{position:sticky;top:0;z-index:40;background:rgba(243,234,214,.92);
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .nav-in{max-width:var(--maxw);margin:0 auto;padding:10px 22px;display:flex;align-items:center;gap:14px}
+  .nav-brand{font-family:var(--serif);font-weight:600;font-size:16px;color:var(--ink);text-decoration:none;white-space:nowrap}
+  .nav-brand b{color:var(--brass)}
+  .nav-sp{flex:1}
+  .nav a.navlink{font-family:var(--ui);font-size:13px;color:var(--ink2);text-decoration:none;padding:6px 9px;border-radius:7px;white-space:nowrap}
+  .nav a.navlink:hover{background:var(--card2);color:var(--ink)}
+  .nav a.fly{background:var(--ink);color:var(--brass3);font-weight:600}
+  .nav a.fly:hover{background:#3a2e1d;color:var(--brass3)}
+  .langtoggle{display:inline-flex;border:1px solid var(--line2);border-radius:8px;overflow:hidden}
+  .langtoggle button{font-family:var(--ui);font-size:12px;font-weight:600;border:0;background:transparent;color:var(--ink2);padding:5px 9px;cursor:pointer}
+  .langtoggle button[aria-pressed="true"]{background:var(--brass);color:#fff}
+
+  /* ---------- hero ---------- */
+  .hero{position:relative;min-height:62vh;display:flex;align-items:flex-end;
+    border-bottom:3px solid var(--brass);overflow:hidden;background:#2a2118}
+  .hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%;filter:saturate(.92) contrast(1.02)}
+  .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(28,22,16,.34) 0%,rgba(28,22,16,.46) 45%,rgba(28,22,16,.88) 100%)}
+  .hero-in{position:relative;z-index:2;max-width:var(--maxw);margin:0 auto;padding:54px 22px 40px;width:100%;color:#f4ecd8}
+  .hero .eyebrow{font-family:var(--ui);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--brass3);margin:0 0 12px;text-shadow:0 1px 10px rgba(0,0,0,.7)}
+  .hero h1{font-size:clamp(38px,7vw,72px);margin:0 0 10px;color:#f7efdb;text-shadow:0 2px 18px rgba(0,0,0,.5)}
+  .hero h1 em{font-style:italic;color:var(--brass3)}
+  .hero .sub{font-size:clamp(16px,2.4vw,21px);max-width:640px;margin:0 0 18px;color:#e8dcc4}
+  .hero .dates{font-family:var(--ui);font-size:13px;letter-spacing:.12em;color:#d8ccb2;text-shadow:0 1px 8px rgba(0,0,0,.7)}
+  .hero .sig{margin-top:16px;height:46px;width:auto;filter:brightness(0) invert(1) opacity(.9) drop-shadow(0 1px 6px rgba(0,0,0,.7))}
+
+  /* ---------- sections ---------- */
+  section{padding:56px 0}
+  .sec-head{margin:0 0 8px}
+  .kicker{font-family:var(--ui);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--brass);font-weight:600;margin:0 0 8px}
+  h2.sec{font-size:clamp(27px,4vw,38px);margin:0 0 14px}
+  .lede{font-size:19px;color:var(--ink2);max-width:760px;margin:0 0 8px}
+  .rule{height:1px;background:linear-gradient(90deg,var(--brass),transparent);border:0;margin:18px 0 0}
+  .alt{background:var(--paper2)}
+
+  /* ---------- intro ---------- */
+  .intro-grid{display:grid;grid-template-columns:1.4fr .9fr;gap:34px;align-items:start;margin-top:26px}
+  .intro-grid p{margin:0 0 14px}
+  .factcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;box-shadow:0 8px 24px var(--shadow)}
+  .factcard h3{margin:0 0 12px;font-size:19px;color:var(--sepia)}
+  .factcard ul{margin:0;padding-left:18px}
+  .factcard li{margin:0 0 9px;font-size:15.5px;color:var(--ink2)}
+  .factcard li b{color:var(--ink)}
+
+  /* ---------- timeline ---------- */
+  .timeline{margin-top:34px;position:relative}
+  .timeline::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--line2);transform:translateX(-50%)}
+  .tl-item{position:relative;width:50%;padding:0 38px 40px 0}
+  .tl-item:nth-child(even){margin-left:50%;padding:0 0 40px 38px}
+  .tl-item::before{content:"";position:absolute;top:14px;width:13px;height:13px;border-radius:50%;background:var(--brass2);border:3px solid var(--paper);box-shadow:0 0 0 1px var(--line2)}
+  .tl-item:nth-child(odd)::before{right:-7px}
+  .tl-item:nth-child(even)::before{left:-7px}
+  .tl-card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 8px 22px var(--shadow);transition:transform .18s,box-shadow .18s}
+  .tl-card:hover{transform:translateY(-3px);box-shadow:0 14px 30px var(--shadow2)}
+  .tl-photo{aspect-ratio:4/3;background:var(--card2);overflow:hidden;cursor:zoom-in}
+  .tl-photo img{width:100%;height:100%;object-fit:contain;background:#efe5cf}
+  .tl-body{padding:15px 18px 18px}
+  .tl-year{display:inline-block;font-family:var(--ui);font-size:12px;font-weight:700;letter-spacing:.08em;color:#fff;background:var(--brass);padding:3px 10px;border-radius:20px;margin-bottom:9px}
+  .tl-body h3{margin:0 0 6px;font-size:19px}
+  .tl-body p{margin:0;font-size:15px;color:var(--ink2);line-height:1.55}
+
+  /* ---------- aircraft grid ---------- */
+  .craft-group{margin-top:30px}
+  .craft-group h3{font-size:22px;color:var(--sepia);margin:0 0 4px}
+  .craft-group .gnote{font-size:15px;color:var(--ink2);margin:0 0 16px;max-width:760px}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .photo-card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 6px 18px var(--shadow);transition:transform .18s,box-shadow .18s}
+  .photo-card:hover{transform:translateY(-3px);box-shadow:0 12px 26px var(--shadow2)}
+  .photo-card .ph{aspect-ratio:4/3;overflow:hidden;cursor:zoom-in;background:#efe5cf}
+  .photo-card .ph img{width:100%;height:100%;object-fit:contain}
+  .photo-card figcaption{padding:11px 14px;font-size:14px;color:var(--ink2);line-height:1.45}
+  .photo-card figcaption b{display:block;color:var(--ink);font-family:var(--serif);font-size:15.5px;margin-bottom:2px}
+
+  /* ---------- the man ---------- */
+  .man-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:28px}
+
+  /* ---------- video ---------- */
+  .video-frame{position:relative;padding-top:56.25%;border-radius:14px;overflow:hidden;border:1px solid var(--line2);box-shadow:0 12px 34px var(--shadow2);margin-top:26px;background:#000}
+  .video-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+  .video-cap{font-size:14.5px;color:var(--ink2);margin:14px 0 0;text-align:center}
+
+  /* ---------- method ---------- */
+  .method-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:34px;align-items:start;margin-top:26px}
+  .method-grid p{margin:0 0 14px;color:var(--ink2)}
+  .pipeline{display:flex;flex-direction:column;gap:0;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:0 8px 24px var(--shadow)}
+  .pstep{display:flex;align-items:center;gap:14px}
+  .pbox{flex:1;background:var(--card2);border:1px solid var(--line2);border-radius:10px;padding:12px 14px}
+  .pbox .pt{font-family:var(--ui);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--brass);font-weight:700}
+  .pbox .pd{font-size:14.5px;color:var(--ink);margin-top:3px}
+  .pbox .ps{font-size:12.5px;color:var(--ink3);margin-top:2px}
+  .parrow{align-self:center;color:var(--brass);font-size:20px;padding:6px 0;font-family:var(--ui)}
+  .cnn{background:var(--ink);border-color:var(--ink)}
+  .cnn .pt{color:var(--brass3)} .cnn .pd{color:#f4ecd8} .cnn .ps{color:#cdbf9f}
+  .links{margin:18px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:10px}
+  .links a{font-family:var(--ui);font-size:13.5px;text-decoration:none;background:var(--card);border:1px solid var(--line2);color:var(--link);padding:8px 13px;border-radius:9px}
+  .links a:hover{background:var(--card2);border-color:var(--brass)}
+  .honest{margin-top:18px;font-size:14.5px;color:var(--ink2);background:rgba(201,162,39,.10);border-left:3px solid var(--brass2);padding:12px 16px;border-radius:0 9px 9px 0}
+
+  /* ---------- CTA ---------- */
+  .cta{background:var(--ink);color:#f4ecd8;text-align:center;border-top:3px solid var(--brass);border-bottom:3px solid var(--brass)}
+  .cta h2{color:#f7efdb;font-size:clamp(28px,4.5vw,42px);margin:0 0 12px}
+  .cta p{color:#d8ccb2;max-width:620px;margin:0 auto 26px;font-size:18px}
+  .cta .btn{display:inline-block;font-family:var(--ui);font-weight:700;font-size:17px;text-decoration:none;
+    background:var(--brass2);color:var(--ink);padding:15px 34px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.35);transition:transform .15s,background .15s}
+  .cta .btn:hover{transform:translateY(-2px);background:var(--brass3)}
+  .cta .btn small{display:block;font-weight:500;font-size:12.5px;opacity:.8;margin-top:3px}
+
+  /* ---------- footer ---------- */
+  footer{padding:40px 0 56px;font-size:14px;color:var(--ink2)}
+  footer .cols{display:grid;grid-template-columns:1.3fr 1fr;gap:30px}
+  footer h4{font-family:var(--ui);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--brass);margin:0 0 10px}
+  footer p{margin:0 0 10px}
+  footer ul{margin:0;padding-left:18px}
+  footer li{margin:0 0 6px}
+  footer a{color:var(--link)}
+  .foot-base{margin-top:28px;padding-top:18px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;font-family:var(--ui);font-size:12.5px;color:var(--ink3)}
+
+  /* ---------- lightbox ---------- */
+  .lb{position:fixed;inset:0;z-index:90;background:rgba(20,15,9,.92);display:none;align-items:center;justify-content:center;padding:30px;cursor:zoom-out}
+  .lb.on{display:flex}
+  .lb figure{margin:0;max-width:92vw;max-height:90vh;text-align:center}
+  .lb img{max-width:92vw;max-height:80vh;object-fit:contain;border-radius:6px;box-shadow:0 20px 60px rgba(0,0,0,.6);margin:0 auto}
+  .lb figcaption{color:#e8dcc4;font-size:15px;margin-top:14px;font-family:var(--body)}
+  .lb .lb-x{position:absolute;top:18px;right:24px;color:#f4ecd8;font-size:34px;font-family:var(--ui);cursor:pointer;line-height:1;background:none;border:0}
+
+  /* ---------- reveal ---------- */
+  .rv{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease}
+  .rv.in{opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}html{scroll-behavior:auto}}
+
+  /* ---------- responsive ---------- */
+  @media (max-width:860px){
+    .intro-grid,.method-grid,.man-grid,footer .cols{grid-template-columns:1fr}
+    .grid{grid-template-columns:repeat(2,1fr)}
+    .timeline::before{left:18px}
+    .tl-item,.tl-item:nth-child(even){width:100%;margin-left:0;padding:0 0 30px 46px}
+    .tl-item:nth-child(odd)::before,.tl-item:nth-child(even)::before{left:12px;right:auto}
+    .nav a.navlink.hide-sm{display:none}
+  }
+  @media (max-width:520px){
+    body{font-size:16px}
+    .grid{grid-template-columns:1fr}
+    .hero{min-height:54vh}
+    section{padding:42px 0}
+  }
+</style>
+<noscript><style>.rv{opacity:1!important;transform:none!important}</style></noscript>
+</head>
+<body>
+
+<!-- ══════════ NAV ══════════ -->
+<nav class="nav">
+  <div class="nav-in">
+    <a class="nav-brand" href="#top">Santos Dumont <b>· In Color</b></a>
+    <span class="nav-sp"></span>
+    <a class="navlink hide-sm" href="../../" data-i18n="nav.gallery">← Galeria</a>
+    <a class="navlink hide-sm" href="#method" data-i18n="nav.method">Colorização</a>
+    <div class="langtoggle" role="group" aria-label="Idioma / Language">
+      <button data-lang="pt" aria-pressed="true">PT</button>
+      <button data-lang="en" aria-pressed="false">EN</button>
+    </div>
+    <a class="navlink fly" href="../14bis/" data-i18n="nav.fly">✈ Pilotar o 14-Bis</a>
+  </div>
+</nav>
+
+<!-- ══════════ HERO ══════════ -->
+<header class="hero" id="top">
+  <img src="photos/hero.jpg" alt="Composite portrait of Alberto Santos-Dumont with the 14-bis and the Eiffel Tower">
+  <div class="hero-in">
+    <p class="eyebrow" data-i18n="hero.eyebrow">1873 – 1932 · o Pai da Aviação</p>
+    <h1>Santos Dumont <em data-i18n="hero.title2">In Color</em></h1>
+    <p class="sub" data-i18n="hero.sub">A vida e as máquinas de Alberto Santos-Dumont, em fotografias da década de 1900 colorizadas por inteligência artificial — e um simulador para você pilotar o 14-Bis.</p>
+    <p class="dates" data-i18n="hero.dates">Fotografias originais · colorizadas por IA em 2019 · refeitas para a web em 2026</p>
+    <img class="sig" src="photos/signature.png" alt="Assinatura de Santos-Dumont">
+  </div>
+</header>
+
+<main>
+<!-- ══════════ INTRO ══════════ -->
+<section id="intro">
+  <div class="wrap">
+    <p class="kicker rv" data-i18n="intro.kicker">Quem foi</p>
+    <h2 class="sec rv" data-i18n="intro.title">O homem que voou antes de todos</h2>
+    <p class="lede rv" data-i18n="intro.lede">Mineiro de nascença, parisiano de coração, Santos-Dumont fez o que parecia impossível: dirigiu um balão, contornou a Torre Eiffel e, em 1906, levantou voo por conta própria num avião — diante de uma multidão e de cronômetros oficiais.</p>
+    <hr class="rule rv">
+    <div class="intro-grid">
+      <div class="rv">
+        <p data-i18n="intro.p1">Alberto Santos-Dumont (1873–1932) nasceu em Minas Gerais, filho de um rico engenheiro do café. Mudou-se para Paris ainda jovem e dedicou a vida e a fortuna a uma única obsessão: navegar pelo ar. Entre 1898 e 1905 construiu e pilotou dezoito dirigíveis, tornando-se a pessoa mais famosa do mundo da aviação.</p>
+        <p data-i18n="intro.p2">Em 19 de outubro de 1901, contornou a Torre Eiffel com o dirigível Nº 6 e voltou a Saint-Cloud dentro do prazo, vencendo o Prêmio Deutsch de la Meurthe — 100.000 francos. Mas foi com o <b>14-Bis</b>, em 1906, que ele entrou para a história: o primeiro voo de avião na Europa testemunhado publicamente, filmado e homologado, decolando pelas próprias rodas, sem catapulta nem trilho.</p>
+        <p data-i18n="intro.p3">Gentil, excêntrico e generoso, nunca patenteou seus projetos — queria que a aviação fosse de todos. Esta página reúne as fotografias que usei em 2019 para um vídeo em sua homenagem, todas colorizadas por um modelo de IA. Ao final, você pode <a href="../14bis/">pilotar o 14-Bis</a> num simulador 3D historicamente fiel.</p>
+      </div>
+      <aside class="factcard rv">
+        <h3 data-i18n="facts.title">Em poucas linhas</h3>
+        <ul>
+          <li data-i18n="facts.1"><b>Nascimento:</b> 20 jul 1873, Palmira (MG), Brasil.</li>
+          <li data-i18n="facts.2"><b>18 dirigíveis</b> construídos e pilotados (Nº 1 a Nº 18).</li>
+          <li data-i18n="facts.3"><b>1901:</b> Prêmio Deutsch — volta à Torre Eiffel no Nº 6.</li>
+          <li data-i18n="facts.4"><b>1906:</b> 14-Bis — primeiro voo homologado de avião na Europa.</li>
+          <li data-i18n="facts.5"><b>1909:</b> Demoiselle — avião ultraleve, planos de construção livres.</li>
+          <li data-i18n="facts.6"><b>Marca registrada:</b> chapéu Panamá de abas caídas e colarinho alto.</li>
+          <li data-i18n="facts.7"><b>Falecimento:</b> 23 jul 1932, Guarujá (SP).</li>
+        </ul>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ TIMELINE ══════════ -->
+<section id="life" class="alt">
+  <div class="wrap">
+    <p class="kicker rv" data-i18n="life.kicker">Uma vida em voo</p>
+    <h2 class="sec rv" data-i18n="life.title">A linha do tempo</h2>
+    <p class="lede rv" data-i18n="life.lede">Do primeiro dirigível ao último retrato — as imagens que contam a trajetória. Clique em qualquer foto para ampliá-la.</p>
+    <div class="timeline">
+
+      <div class="tl-item rv"><div class="tl-card">
+        <div class="tl-photo" data-full="photos/01-portrait.jpg" data-cap="cap.portrait"><img src="photos/01-portrait.jpg" alt="Young Santos-Dumont in his Panama hat" loading="lazy"></div>
+        <div class="tl-body"><span class="tl-year">c. 1900</span><h3 data-i18n="t1.title">O jovem em Paris</h3><p data-i18n="cap.portrait">Santos-Dumont jovem, já com o chapéu Panamá de abas caídas que se tornaria sua marca. Herdeiro do café, trocou a fortuna pela aviação.</p></div>
+      </div></div>
+
+      <div class="tl-item rv"><div class="tl-card">
+        <div class="tl-photo" data-full="photos/02-n1.jpg" data-cap="cap.n1"><img src="photos/02-n1.jpg" alt="Airship No. 1 in flight" loading="lazy"></div>
+        <div class="tl-body"><span class="tl-year">1898</span><h3 data-i18n="t2.title">Nº 1 — o primeiro dirigível</h3><p data-i18n="cap.n1">O dirigível Nº 1 em voo. Foi o primeiro de dezoito balões dirigíveis que Santos-Dumont construiu e pilotou sobre Paris.</p></div>
+      </div></div>
+
+      <div class="tl-item rv"><div class="tl-card">
+        <div class="tl-photo" data-full="photos/03-eiffel.jpg" data-cap="cap.eiffel"><img src="photos/03-eiffel.jpg" alt="Airship No. 6 rounding the Eiffel Tower" loading="lazy"></div>
+        <div class="tl-body"><span class="tl-year">1901</span><h3 data-i18n="t3.title">A volta à Torre Eiffel</h3><p data-i18n="cap.eiffel">19 out 1901: o Nº 6 contorna a Torre Eiffel e retorna a Saint-Cloud em menos de 30 minutos, vencendo o Prêmio Deutsch de la Meurthe (100.000 francos).</p></div>
+      </div></div>
+
+      <div class="tl-item rv"><div class="tl-card">
+        <div class="tl-photo" data-full="photos/04-n9.jpg" data-cap="cap.n9"><img src="photos/04-n9.jpg" alt="Airship No. 9" loading="lazy"></div>
+        <div class="tl-body"><span class="tl-year">1903</span><h3 data-i18n="t4.title">Nº 9 — o dirigível de passeio</h3><p data-i18n="cap.n9">O Nº 9, menor e mais manejável, que Santos-Dumont usava para passeios sobre Paris — chegando a pousar na rua e almoçar num café antes de voltar voando.</p></div>
+      </div></div>
+
+      <div class="tl-item rv"><div class="tl-card">
+        <div class="tl-photo" data-full="photos/05-14bis.jpg" data-cap="cap.bis14"><img src="photos/05-14bis.jpg" alt="The 14-bis at Bagatelle" loading="lazy"></div>
+        <div class="tl-body"><span class="tl-year">1906</span><h3 data-i18n="t5.title">14-Bis — o avião</h3><p data-i18n="cap.bis14">O 14-Bis em Bagatelle. Em 23 out voou ~60 m; em 12 nov, 220 m em 21,5 s — o primeiro recorde mundial homologado de avião. Decolou pelas próprias rodas.</p></div>
+      </div></div>
+
+      <div class="tl-item rv"><div class="tl-card">
+        <div class="tl-photo" data-full="photos/06-demoiselle.jpg" data-cap="cap.demoiselle"><img src="photos/06-demoiselle.jpg" alt="Santos-Dumont carrying the Demoiselle on his car" loading="lazy"></div>
+        <div class="tl-body"><span class="tl-year">1909</span><h3 data-i18n="t6.title">Demoiselle — leve e portátil</h3><p data-i18n="cap.demoiselle">Santos-Dumont ao volante, com a Demoiselle desmontada na traseira do carro, c. 1909. O avião ultraleve (≈110 kg) cujos planos ele distribuiu de graça.</p></div>
+      </div></div>
+
+      <div class="tl-item rv"><div class="tl-card">
+        <div class="tl-photo" data-full="photos/07-brasil.jpg" data-cap="cap.brasil"><img src="photos/07-brasil.jpg" alt="Santos-Dumont back in Brazil" loading="lazy"></div>
+        <div class="tl-body"><span class="tl-year">1910s–20s</span><h3 data-i18n="t7.title">De volta ao Brasil</h3><p data-i18n="cap.brasil">De volta ao Brasil, recebido como herói nacional. Continuou a inventar e a escrever, mas a saúde e o ânimo foram se fragilizando.</p></div>
+      </div></div>
+
+      <div class="tl-item rv"><div class="tl-card">
+        <div class="tl-photo" data-full="photos/08-last.jpg" data-cap="cap.last"><img src="photos/08-last.jpg" alt="Last known photograph of Santos-Dumont, 1932" loading="lazy"></div>
+        <div class="tl-body"><span class="tl-year">1932</span><h3 data-i18n="t8.title">A última fotografia</h3><p data-i18n="cap.last">À direita, de cabelos brancos e frágil, Santos-Dumont numa mesa ao ar livre com companheiros — tida como sua última foto, no ano de sua morte, no Guarujá.</p></div>
+      </div></div>
+
+      <div class="tl-item rv"><div class="tl-card">
+        <div class="tl-photo" data-full="photos/09-monument.jpg" data-cap="cap.monument"><img src="photos/09-monument.jpg" alt="Memorial to Santos-Dumont in Paris" loading="lazy"></div>
+        <div class="tl-body"><span class="tl-year">memória</span><h3 data-i18n="t9.title">O memorial</h3><p data-i18n="cap.monument">Monumento a Santos-Dumont em Paris. Para o Brasil e para a França, ele é o Pai da Aviação — o primeiro a voar publicamente por meios próprios.</p></div>
+      </div></div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ AIRCRAFT ══════════ -->
+<section id="machines">
+  <div class="wrap">
+    <p class="kicker rv" data-i18n="mach.kicker">As máquinas</p>
+    <h2 class="sec rv" data-i18n="mach.title">Dirigíveis, o 14-Bis e a Demoiselle</h2>
+    <p class="lede rv" data-i18n="mach.lede">Uma família de aeronaves que atravessa duas décadas — do balão dirigido ao avião leve. Cada foto abre em tamanho maior.</p>
+
+    <div class="craft-group rv">
+      <h3 data-i18n="mach.dir.title">Os dirigíveis (Nº 1 – Nº 18)</h3>
+      <p class="gnote" data-i18n="mach.dir.note">Balões alongados, movidos a motor de combustão, com o piloto suspenso numa cesta ou treliça sob o envelope. Santos-Dumont provou que o voo dirigido era possível.</p>
+      <div class="grid">
+        <figure class="photo-card"><div class="ph" data-full="photos/n5.jpg" data-cap="cap.n5"><img src="photos/n5.jpg" alt="Airship No. 5" loading="lazy"></div><figcaption data-i18n="cap.n5"><b>Nº 5</b>O dirigível das primeiras experiências e do acidente de 1901.</figcaption></figure>
+        <figure class="photo-card"><div class="ph" data-full="photos/n14.jpg" data-cap="cap.n14"><img src="photos/n14.jpg" alt="Airship No. 14" loading="lazy"></div><figcaption data-i18n="cap.n14"><b>Nº 14</b>Sob ele o 14-Bis foi suspenso nos primeiros ensaios — daí o nome “14-bis”.</figcaption></figure>
+        <figure class="photo-card"><div class="ph" data-full="photos/dirigible.jpg" data-cap="cap.dirigible"><img src="photos/dirigible.jpg" alt="A Santos-Dumont dirigible" loading="lazy"></div><figcaption data-i18n="cap.dirigible"><b>Em voo</b>A silhueta inconfundível: envelope fino e longa treliça com o piloto.</figcaption></figure>
+      </div>
+    </div>
+
+    <div class="craft-group rv">
+      <h3 data-i18n="mach.bis.title">O 14-Bis (1906)</h3>
+      <p class="gnote" data-i18n="mach.bis.note">Biplano canard de células Hargrave, bambu e seda, motor Antoinette V8 de 50 hp atrás do piloto. O primeiro avião a decolar por conta própria na Europa. <a href="../14bis/">Explore e pilote em 3D →</a></p>
+      <div class="grid">
+        <figure class="photo-card"><div class="ph" data-full="photos/14bis-ground.jpg" data-cap="cap.bisground"><img src="photos/14bis-ground.jpg" alt="The 14-bis on the ground" loading="lazy"></div><figcaption data-i18n="cap.bisground"><b>No solo</b>O 14-Bis em Bagatelle, com a estrutura de células e o cesto do piloto.</figcaption></figure>
+        <figure class="photo-card"><div class="ph" data-full="photos/14bis-tests.jpg" data-cap="cap.bistests"><img src="photos/14bis-tests.jpg" alt="14-bis trials" loading="lazy"></div><figcaption data-i18n="cap.bistests"><b>Ensaios</b>As experiências que levaram aos voos homologados de outubro e novembro.</figcaption></figure>
+        <figure class="photo-card"><div class="ph" data-full="photos/05-14bis.jpg" data-cap="cap.bis14b"><img src="photos/05-14bis.jpg" alt="The 14-bis" loading="lazy"></div><figcaption data-i18n="cap.bis14b"><b>O recordista</b>220 m em 21,5 s, 12 nov 1906 — o primeiro recorde mundial de avião.</figcaption></figure>
+      </div>
+    </div>
+
+    <div class="craft-group rv">
+      <h3 data-i18n="mach.demo.title">A Demoiselle (1907–1909)</h3>
+      <p class="gnote" data-i18n="mach.demo.note">Monoplano ultraleve de bambu e seda, tão pequeno que cabia na traseira de um carro. Santos-Dumont publicou os planos livremente — um gesto de generosidade raro na época.</p>
+      <div class="grid">
+        <figure class="photo-card"><div class="ph" data-full="photos/demoiselle-flight.jpg" data-cap="cap.demoflight"><img src="photos/demoiselle-flight.jpg" alt="Demoiselle in flight" loading="lazy"></div><figcaption data-i18n="cap.demoflight"><b>Em voo</b>A Demoiselle, ágil e leve — o oposto do pesado 14-Bis.</figcaption></figure>
+        <figure class="photo-card"><div class="ph" data-full="photos/06-demoiselle.jpg" data-cap="cap.democar"><img src="photos/06-demoiselle.jpg" alt="Demoiselle on the car" loading="lazy"></div><figcaption data-i18n="cap.democar"><b>Portátil</b>Desmontada no carro de Santos-Dumont, c. 1909.</figcaption></figure>
+        <figure class="photo-card"><div class="ph" data-full="photos/04-n9.jpg" data-cap="cap.n9b"><img src="photos/04-n9.jpg" alt="Airship No. 9" loading="lazy"></div><figcaption data-i18n="cap.n9b"><b>Do balão ao avião</b>A transição: dos dirigíveis aos aviões leves.</figcaption></figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ THE MAN ══════════ -->
+<section id="man" class="alt">
+  <div class="wrap">
+    <p class="kicker rv" data-i18n="man.kicker">O homem</p>
+    <h2 class="sec rv" data-i18n="man.title">Além das máquinas</h2>
+    <p class="lede rv" data-i18n="man.lede">Pequeno, elegante e adorado pelo público — Santos-Dumont era uma celebridade muito antes de a palavra existir para aviadores.</p>
+    <div class="man-grid">
+      <figure class="photo-card rv"><div class="ph" data-full="photos/personal.jpg" data-cap="cap.personal"><img src="photos/personal.jpg" alt="Santos-Dumont in personal life" loading="lazy"></div><figcaption data-i18n="cap.personal"><b>Vida pessoal</b>Entre amigos e admiradores — uma figura querida na Paris da Belle Époque.</figcaption></figure>
+      <figure class="photo-card rv"><div class="ph" data-full="photos/dog.jpg" data-cap="cap.dog"><img src="photos/dog.jpg" alt="Santos-Dumont with his dog, c. 1930" loading="lazy"></div><figcaption data-i18n="cap.dog"><b>Com seu cão</b>c. 1930 — os anos finais, mais recolhido, mas sempre inventando.</figcaption></figure>
+    </div>
+    <div class="intro-grid" style="margin-top:26px">
+      <div class="rv">
+        <p data-i18n="man.p1">Ele popularizou o <b>relógio de pulso</b> — pediu a Cartier um relógio que pudesse ler sem soltar os comandos do dirigível. Usava colarinho alto e o chapéu Panamá de abas caídas, que aparece no piloto do nosso simulador como homenagem.</p>
+        <p data-i18n="man.p2">Falava português, francês e inglês, escrevia sobre o futuro da aviação e sonhava com um mundo em que as máquinas encurtassem distâncias entre os povos. Desiludido com o uso militar dos aviões e com a saúde frágil, morreu no Brasil em 1932, durante a Revolução Constitucionalista.</p>
+      </div>
+      <aside class="factcard rv">
+        <h3 data-i18n="man.legacy.title">O legado</h3>
+        <ul>
+          <li data-i18n="man.legacy.1"><b>Nunca patenteou</b> seus projetos — a aviação deveria ser de todos.</li>
+          <li data-i18n="man.legacy.2"><b>Primeiro voo público homologado</b> de avião na Europa (1906).</li>
+          <li data-i18n="man.legacy.3"><b>Planos da Demoiselle</b> distribuídos gratuitamente.</li>
+          <li data-i18n="man.legacy.4"><b>Pai da Aviação</b> para o Brasil; herói nacional.</li>
+        </ul>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ VIDEO ══════════ -->
+<section id="video">
+  <div class="wrap">
+    <p class="kicker rv" data-i18n="vid.kicker">A homenagem de 2019</p>
+    <h2 class="sec rv" data-i18n="vid.title">Santos Dumont In Colour</h2>
+    <p class="lede rv" data-i18n="vid.lede">O vídeo que publiquei em 2019 reunindo estas fotografias e clipes — todos colorizados por IA. Uma colagem em homenagem ao Pai da Aviação.</p>
+    <div class="video-frame rv">
+      <iframe src="https://www.youtube-nocookie.com/embed/CneKRDwZDK0" title="Santos Dumont In Colour — tribute video (2019)" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+    <p class="video-cap rv" data-i18n="vid.cap">“Santos Dumont In Colour” · Marcelo Rovai (MJRoBot), 2019 · fotogramas colorizados com OpenCV + CNN.</p>
+  </div>
+</section>
+
+<!-- ══════════ METHOD ══════════ -->
+<section id="method" class="alt">
+  <div class="wrap">
+    <p class="kicker rv" data-i18n="met.kicker">Como foram colorizadas</p>
+    <h2 class="sec rv" data-i18n="met.title">Colorização por IA (2019)</h2>
+    <div class="method-grid">
+      <div class="rv">
+        <p data-i18n="met.p1">Todas as imagens desta página são fotografias originais da primeira década do século XX, colorizadas por computador em 2019. O método é uma <b>rede neural convolucional (CNN)</b> feed-forward, treinada em mais de 1,3 milhão de imagens coloridas do ImageNet, proposta por Richard Zhang, Phillip Isola e Alexei A. Efros (UC Berkeley) no artigo <i>Colorful Image Colorization</i>.</p>
+        <p data-i18n="met.p2">A ideia: uma foto em preto e branco é convertida para o espaço de cor <b>Lab</b>. O canal <b>L</b> (luminância) é a entrada da rede; a CNN prevê os canais <b>a</b> e <b>b</b> (crominância). Reunidos L + a + b e convertidos de volta para RGB, devolvem a foto “colorida”. O processo é totalmente automático, implementado com OpenCV (<code>cv2.dnn</code>), e aplicado quadro a quadro nos clipes de vídeo.</p>
+        <p data-i18n="met.p3">Publiquei o passo a passo completo no Hackster.io, em março de 2019, sob licença CC0 — com o código para fotos e vídeos.</p>
+        <ul class="links">
+          <li><a href="https://www.hackster.io/mjrobot/colorizing-old-b-w-photos-and-videos-with-the-help-of-ai-761a85" target="_blank" rel="noopener" data-i18n="met.link1">Tutorial no Hackster ↗</a></li>
+          <li><a href="https://arxiv.org/pdf/1603.08511.pdf" target="_blank" rel="noopener" data-i18n="met.link2">Artigo original (arXiv) ↗</a></li>
+          <li><a href="https://www.pyimagesearch.com/2019/02/25/black-and-white-image-colorization-with-opencv-and-deep-learning/" target="_blank" rel="noopener" data-i18n="met.link3">Guia PyImageSearch ↗</a></li>
+        </ul>
+        <p class="honest" data-i18n="met.honest"><b>Nota honesta:</b> as cores são a “aposta” estatística do modelo, não uma reconstrução histórica documentada. Halos nas bordas, saturação irregular e tons por vezes imprecisos são artefatos esperados da colorização automática de 2019 — e fazem parte do charme desta homenagem.</p>
+      </div>
+      <div class="pipeline rv" aria-label="Colorization pipeline">
+        <div class="pstep"><div class="pbox"><div class="pt" data-i18n="pipe.1t">Entrada</div><div class="pd" data-i18n="pipe.1d">Foto P&amp;B → espaço Lab</div><div class="ps" data-i18n="pipe.1s">canal L (luminância), 224×224</div></div></div>
+        <div class="parrow">↓</div>
+        <div class="pstep"><div class="pbox cnn"><div class="pt" data-i18n="pipe.2t">CNN</div><div class="pd" data-i18n="pipe.2d">Rede convolucional</div><div class="ps" data-i18n="pipe.2s">treinada em 1,3 M imagens · prevê a, b</div></div></div>
+        <div class="parrow">↓</div>
+        <div class="pstep"><div class="pbox"><div class="pt" data-i18n="pipe.3t">Saída</div><div class="pd" data-i18n="pipe.3d">L + a + b → RGB</div><div class="ps" data-i18n="pipe.3s">cv2.cvtColor · clip 0–1 · uint8</div></div></div>
+        <div class="parrow">↓</div>
+        <div class="pstep"><div class="pbox"><div class="pt" data-i18n="pipe.4t">Resultado</div><div class="pd" data-i18n="pipe.4d">Foto colorizada</div><div class="ps" data-i18n="pipe.4s">vídeo: aplicado quadro a quadro</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ CTA ══════════ -->
+<section class="cta" id="fly">
+  <div class="wrap rv">
+    <h2 data-i18n="cta.title">Agora, pilote você mesmo</h2>
+    <p data-i18n="cta.text">As fotos mostram a máquina; o simulador deixa você senti-la. Explore o 14-Bis em 3D, decole da grama de Bagatelle e tente reproduzir os recordes de 1906 — com o próprio Santos-Dumont, de chapéu Panamá, no cesto.</p>
+    <a class="btn" href="../14bis/" data-i18n="cta.btn">✈ Abrir o simulador do 14-Bis<small data-i18n="cta.sub">modelo 3D · voo livre · replays históricos</small></a>
+  </div>
+</section>
+</main>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer>
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <h4 data-i18n="foot.about.t">Sobre esta página</h4>
+        <p data-i18n="foot.about.p">Companheira do <a href="../14bis/">simulador do 14-Bis</a>. Reúne o acervo do vídeo “Santos Dumont In Colour” (2019), com fotografias de domínio público da década de 1900 colorizadas por IA. Página refeita para a web em 2026 por Marcelo Rovai (MJRoBot).</p>
+        <p data-i18n="foot.credit.p">Colorização: CNN de Zhang, Isola &amp; Efros (Berkeley), via OpenCV. Tutorial © 2019 MJRoBot, licença <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener">CC0</a>. Fotografias históricas: domínio público.</p>
+      </div>
+      <div>
+        <h4 data-i18n="foot.links.t">Navegar</h4>
+        <ul>
+          <li><a href="../14bis/" data-i18n="foot.links.sim">Simulador do 14-Bis (3D + voo)</a></li>
+          <li><a href="../../" data-i18n="foot.links.gallery">Galeria de simuladores</a></li>
+          <li><a href="https://www.hackster.io/mjrobot/colorizing-old-b-w-photos-and-videos-with-the-help-of-ai-761a85" target="_blank" rel="noopener" data-i18n="foot.links.tut">Tutorial de colorização (Hackster)</a></li>
+          <li><a href="https://youtu.be/CneKRDwZDK0" target="_blank" rel="noopener" data-i18n="foot.links.vid">Vídeo tribute (YouTube)</a></li>
+          <li><a href="https://github.com/Mjrovai/simuladores-interativos" target="_blank" rel="noopener" data-i18n="foot.links.code">Código no GitHub</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-base">
+      <span data-i18n="foot.base1">Feito para aula e memória · reconstrução histórica ilustrativa.</span>
+      <span>Santos Dumont · In Color · 1873–1932</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════ LIGHTBOX ══════════ -->
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Foto ampliada">
+  <button class="lb-x" id="lbX" aria-label="Fechar">×</button>
+  <figure><img id="lbImg" src="" alt=""><figcaption id="lbCap"></figcaption></figure>
+</div>
+
+<script>
+(() => {
+  /* ---------------- EN dictionary ---------------- */
+  const EN = {
+    'nav.gallery':'← Gallery','nav.method':'Colorization','nav.fly':'✈ Fly the 14-Bis',
+    'hero.eyebrow':'1873 – 1932 · the Father of Aviation',
+    'hero.title2':'In Color',
+    'hero.sub':'The life and machines of Alberto Santos-Dumont, in 1900s photographs colorized by artificial intelligence — plus a simulator to fly the 14-Bis yourself.',
+    'hero.dates':'Original photographs · AI-colorized in 2019 · rebuilt for the web in 2026',
+    'intro.kicker':'Who he was','intro.title':'The man who flew before everyone',
+    'intro.lede':'Born in Minas Gerais, Parisian at heart, Santos-Dumont did what seemed impossible: he steered a balloon, rounded the Eiffel Tower and, in 1906, took off under his own power in an aeroplane — before a crowd and official timekeepers.',
+    'intro.p1':'Alberto Santos-Dumont (1873–1932) was born in Minas Gerais, Brazil, son of a wealthy coffee engineer. He moved to Paris young and devoted his life and fortune to a single obsession: navigating the air. Between 1898 and 1905 he built and flew eighteen airships, becoming the most famous person in aviation.',
+    'intro.p2':'On 19 October 1901 he rounded the Eiffel Tower in airship No. 6 and returned to Saint-Cloud within the time limit, winning the Deutsch de la Meurthe Prize — 100,000 francs. But it was with the <b>14-bis</b>, in 1906, that he made history: the first aeroplane flight in Europe publicly witnessed, filmed and homologated, taking off on its own wheels, with no catapult or rail.',
+    'intro.p3':'Kind, eccentric and generous, he never patented his designs — he wanted aviation to belong to everyone. This page gathers the photographs I used in 2019 for a tribute video, all colorized by an AI model. At the end, you can <a href="../14bis/">fly the 14-bis</a> in a historically faithful 3D simulator.',
+    'facts.title':'In brief',
+    'facts.1':'<b>Born:</b> 20 Jul 1873, Palmira (MG), Brazil.',
+    'facts.2':'<b>18 airships</b> built and flown (No. 1 to No. 18).',
+    'facts.3':'<b>1901:</b> Deutsch Prize — rounding the Eiffel Tower in No. 6.',
+    'facts.4':'<b>1906:</b> 14-bis — first homologated aeroplane flight in Europe.',
+    'facts.5':'<b>1909:</b> Demoiselle — ultralight aircraft, free construction plans.',
+    'facts.6':'<b>Signature look:</b> drooping-brim Panama hat and high collar.',
+    'facts.7':'<b>Died:</b> 23 Jul 1932, Guarujá (SP), Brazil.',
+    'life.kicker':'A life in flight','life.title':'The timeline',
+    'life.lede':'From the first airship to the last portrait — the images that tell the story. Click any photo to enlarge it.',
+    't1.title':'The young man in Paris',
+    'cap.portrait':'Santos-Dumont young, already wearing the drooping-brim Panama hat that became his trademark. A coffee heir, he traded fortune for aviation.',
+    't2.title':'No. 1 — the first airship',
+    'cap.n1':'Airship No. 1 in flight. The first of eighteen steerable balloons Santos-Dumont built and flew over Paris.',
+    't3.title':'Rounding the Eiffel Tower',
+    'cap.eiffel':'19 Oct 1901: No. 6 rounds the Eiffel Tower and returns to Saint-Cloud in under 30 minutes, winning the Deutsch de la Meurthe Prize (100,000 francs).',
+    't4.title':'No. 9 — the runabout airship',
+    'cap.n9':'No. 9, smaller and more manageable, which Santos-Dumont used for outings over Paris — even landing in the street and lunching at a café before flying home.',
+    't5.title':'14-bis — the aeroplane',
+    'cap.bis14':'The 14-bis at Bagatelle. On 23 Oct it flew ~60 m; on 12 Nov, 220 m in 21.5 s — the first homologated aeroplane world record. It took off on its own wheels.',
+    't6.title':'Demoiselle — light and portable',
+    'cap.demoiselle':'Santos-Dumont at the wheel, with the dismounted Demoiselle on the back of his car, c. 1909. The ultralight aircraft (≈110 kg) whose plans he gave away for free.',
+    't7.title':'Back in Brazil',
+    'cap.brasil':'Back in Brazil, received as a national hero. He kept inventing and writing, but his health and spirits were fading.',
+    't8.title':'The last photograph',
+    'cap.last':'On the right, white-haired and frail, Santos-Dumont at an outdoor table with companions — said to be his last photo, in the year of his death, in Guarujá.',
+    't9.title':'The memorial',
+    'cap.monument':'Memorial to Santos-Dumont in Paris. For Brazil and France alike, he is the Father of Aviation — the first to fly publicly under his own power.',
+    'mach.kicker':'The machines','mach.title':'Airships, the 14-bis and the Demoiselle',
+    'mach.lede':'A family of aircraft spanning two decades — from the steerable balloon to the light aeroplane. Each photo opens larger.',
+    'mach.dir.title':'The airships (No. 1 – No. 18)',
+    'mach.dir.note':'Elongated balloons powered by combustion engines, the pilot suspended in a basket or truss beneath the envelope. Santos-Dumont proved that directed flight was possible.',
+    'cap.n5':'<b>No. 5</b>The airship of the early experiments and the 1901 accident.',
+    'cap.n14':'<b>No. 14</b>The 14-bis was suspended beneath it for the first trials — hence the name “14-bis”.',
+    'cap.dirigible':'<b>In flight</b>The unmistakable silhouette: slender envelope and long truss with the pilot.',
+    'mach.bis.title':'The 14-bis (1906)',
+    'mach.bis.note':'A canard biplane of Hargrave cells, bamboo and silk, with a 50 hp Antoinette V8 behind the pilot. The first aeroplane to take off under its own power in Europe. <a href="../14bis/">Explore and fly it in 3D →</a>',
+    'cap.bisground':'<b>On the ground</b>The 14-bis at Bagatelle, with its cell structure and the pilot’s basket.',
+    'cap.bistests':'<b>Trials</b>The experiments that led to the homologated flights of October and November.',
+    'cap.bis14b':'<b>The record-setter</b>220 m in 21.5 s, 12 Nov 1906 — the first aeroplane world record.',
+    'mach.demo.title':'The Demoiselle (1907–1909)',
+    'mach.demo.note':'An ultralight bamboo-and-silk monoplane, so small it fit on the back of a car. Santos-Dumont published the plans freely — a rare act of generosity at the time.',
+    'cap.demoflight':'<b>In flight</b>The Demoiselle, agile and light — the opposite of the heavy 14-bis.',
+    'cap.democar':'<b>Portable</b>Dismounted on Santos-Dumont’s car, c. 1909.',
+    'cap.n9b':'<b>From balloon to plane</b>The transition: from airships to light aeroplanes.',
+    'man.kicker':'The man','man.title':'Beyond the machines',
+    'man.lede':'Small, elegant and adored by the public — Santos-Dumont was a celebrity long before the word existed for aviators.',
+    'cap.personal':'<b>Personal life</b>Among friends and admirers — a beloved figure of Belle Époque Paris.',
+    'cap.dog':'<b>With his dog</b>c. 1930 — the final years, more withdrawn, but always inventing.',
+    'man.p1':'He popularized the <b>wristwatch</b> — asking Cartier for a watch he could read without letting go of the airship controls. He wore a high collar and the drooping-brim Panama hat, which appears on our simulator’s pilot as a tribute.',
+    'man.p2':'He spoke Portuguese, French and English, wrote about the future of aviation and dreamed of a world where machines shortened the distances between peoples. Disillusioned by the military use of aircraft and in fragile health, he died in Brazil in 1932, during the Constitutionalist Revolution.',
+    'man.legacy.title':'The legacy',
+    'man.legacy.1':'<b>Never patented</b> his designs — aviation should belong to everyone.',
+    'man.legacy.2':'<b>First public homologated flight</b> of an aeroplane in Europe (1906).',
+    'man.legacy.3':'<b>Demoiselle plans</b> distributed for free.',
+    'man.legacy.4':'<b>Father of Aviation</b> for Brazil; a national hero.',
+    'vid.kicker':'The 2019 tribute','vid.title':'Santos Dumont In Colour',
+    'vid.lede':'The video I published in 2019 gathering these photographs and clips — all colorized by AI. A collage in homage to the Father of Aviation.',
+    'vid.cap':'“Santos Dumont In Colour” · Marcelo Rovai (MJRoBot), 2019 · frames colorized with OpenCV + CNN.',
+    'met.kicker':'How they were colorized','met.title':'AI colorization (2019)',
+    'met.p1':'Every image on this page is an original photograph from the first decade of the 20th century, colorized by computer in 2019. The method is a feed-forward <b>convolutional neural network (CNN)</b>, trained on over 1.3 million color images from ImageNet, proposed by Richard Zhang, Phillip Isola and Alexei A. Efros (UC Berkeley) in the paper <i>Colorful Image Colorization</i>.',
+    'met.p2':'The idea: a black-and-white photo is converted to the <b>Lab</b> color space. The <b>L</b> channel (luminance) is the network input; the CNN predicts the <b>a</b> and <b>b</b> channels (chrominance). Recombined L + a + b and converted back to RGB, they return the “color” photo. The process is fully automatic, implemented with OpenCV (<code>cv2.dnn</code>), and applied frame by frame to the video clips.',
+    'met.p3':'I published the full step-by-step on Hackster.io in March 2019, under a CC0 license — with the code for photos and videos.',
+    'met.link1':'Tutorial on Hackster ↗','met.link2':'Original paper (arXiv) ↗','met.link3':'PyImageSearch guide ↗',
+    'met.honest':'<b>Honest note:</b> the colors are the model’s statistical “guess”, not a documented historical reconstruction. Edge halos, uneven saturation and sometimes imprecise tones are expected artifacts of 2019 automatic colorization — and part of the charm of this tribute.',
+    'pipe.1t':'Input','pipe.1d':'B&amp;W photo → Lab space','pipe.1s':'L channel (luminance), 224×224',
+    'pipe.2t':'CNN','pipe.2d':'Convolutional network','pipe.2s':'trained on 1.3M images · predicts a, b',
+    'pipe.3t':'Output','pipe.3d':'L + a + b → RGB','pipe.3s':'cv2.cvtColor · clip 0–1 · uint8',
+    'pipe.4t':'Result','pipe.4d':'Colorized photo','pipe.4s':'video: applied frame by frame',
+    'cta.title':'Now, fly it yourself',
+    'cta.text':'The photos show the machine; the simulator lets you feel it. Explore the 14-bis in 3D, take off from the grass of Bagatelle and try to reproduce the 1906 records — with Santos-Dumont himself, in his Panama hat, in the basket.',
+    'cta.btn':'✈ Open the 14-Bis simulator',
+    'cta.sub':'3D model · free flight · historical replays',
+    'foot.about.t':'About this page',
+    'foot.about.p':'Companion to the <a href="../14bis/">14-bis simulator</a>. It gathers the archive of the “Santos Dumont In Colour” video (2019), with public-domain 1900s photographs colorized by AI. Page rebuilt for the web in 2026 by Marcelo Rovai (MJRoBot).',
+    'foot.credit.p':'Colorization: CNN by Zhang, Isola &amp; Efros (Berkeley), via OpenCV. Tutorial © 2019 MJRoBot, <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener">CC0</a> license. Historical photographs: public domain.',
+    'foot.links.t':'Navigate',
+    'foot.links.sim':'14-Bis simulator (3D + flight)',
+    'foot.links.gallery':'Simulator gallery',
+    'foot.links.tut':'Colorization tutorial (Hackster)',
+    'foot.links.vid':'Tribute video (YouTube)',
+    'foot.links.code':'Source on GitHub',
+    'foot.base1':'Made for class and memory · illustrative historical reconstruction.'
+  };
+
+  const root = document.documentElement;
+  const TITLES = { pt:'Santos Dumont — In Color · a vida do Pai da Aviação', en:'Santos Dumont — In Color · the life of the Father of Aviation' };
+  const PT = {};
+  document.querySelectorAll('[data-i18n]').forEach(el => { PT[el.dataset.i18n] = el.innerHTML; });
+  const DICTS = { pt:PT, en:EN };
+  let lang = 'pt';
+
+  function applyLang(next){
+    lang = (next === 'en') ? 'en' : 'pt';
+    const d = DICTS[lang];
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const k = el.dataset.i18n; if (k in d) el.innerHTML = d[k];
+    });
+    document.title = TITLES[lang];
+    root.setAttribute('lang', lang === 'en' ? 'en' : 'pt-BR');
+    root.setAttribute('data-lang', lang);
+    document.querySelectorAll('.langtoggle button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
+    try { localStorage.setItem('sd-lang', lang); } catch(e){}
+  }
+  document.querySelectorAll('.langtoggle button').forEach(b => b.addEventListener('click', () => applyLang(b.dataset.lang)));
+  let saved = null; try { saved = localStorage.getItem('sd-lang'); } catch(e){}
+  if (saved === 'en') applyLang('en');
+
+  /* ---------------- lightbox ---------------- */
+  const lb = document.getElementById('lb'), lbImg = document.getElementById('lbImg'), lbCap = document.getElementById('lbCap');
+  function openLb(full, capKey){
+    lbImg.src = full;
+    const d = DICTS[lang];
+    lbCap.innerHTML = (capKey && d[capKey]) ? d[capKey] : '';
+    lb.classList.add('on'); document.body.style.overflow = 'hidden';
+  }
+  function closeLb(){ lb.classList.remove('on'); document.body.style.overflow = ''; lbImg.src = ''; }
+  document.querySelectorAll('[data-full]').forEach(el => {
+    el.addEventListener('click', () => openLb(el.dataset.full, el.dataset.cap));
+  });
+  lb.addEventListener('click', e => { if (e.target === lb || e.target === lbImg) closeLb(); });
+  document.getElementById('lbX').addEventListener('click', closeLb);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLb(); });
+
+  /* ---------------- scroll reveal ---------------- */
+  const rvs = document.querySelectorAll('.rv');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold:.12, rootMargin:'0px 0px -6% 0px' });
+    rvs.forEach(el => io.observe(el));
+  } else { rvs.forEach(el => el.classList.add('in')); }
+})();
+</script>
+</body>
+</html>

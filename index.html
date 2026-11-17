@@ -360,9 +360,9 @@ main { padding-bottom: 20px; }
   <section class="hero wrap">
     <p class="eyebrow" data-i18n="hero.eyebrow">laboratório aberto · uso livre em aula</p>
     <h1><span data-i18n="hero.title1">Simuladores</span><br><em data-i18n="hero.title2">Interativos</em></h1>
-    <p class="lede" data-i18n-html="hero.lede">Vinte <b>laboratórios que rodam no navegador</b>: assinatura de mísseis em 3D, CPU Z80 e Apple&nbsp;1, redes neurais treinando XOR na sua frente, ponto de operação de transistores, jogos e pequenas aulas visuais. Sem instalação, sem build, sem servidor.</p>
+    <p class="lede" data-i18n-html="hero.lede">Vinte e dois <b>laboratórios que rodam no navegador</b>: assinatura de mísseis em 3D, CPU Z80 e Apple&nbsp;1, redes neurais treinando XOR na sua frente, ponto de operação de transistores, jogos e pequenas aulas visuais. Sem instalação, sem build, sem servidor.</p>
     <div class="stats">
-      <div class="stat"><b>20</b><span data-i18n="stat.apps">simuladores</span></div>
+      <div class="stat"><b>22</b><span data-i18n="stat.apps">simuladores</span></div>
       <div class="stat"><b>0</b><span data-i18n="stat.setup">instalação</span></div>
       <div class="stat"><b>PT·EN</b><span data-i18n="stat.lang">idiomas</span></div>
       <div class="stat"><b>3D·CPU·IA</b><span data-i18n="stat.topics">temas</span></div>
@@ -535,6 +535,20 @@ main { padding-bottom: 20px; }
         <div class="tags"><span class="tag hot" data-i18n="tag.electronics">Eletrônica</span><span class="tag hot" data-i18n="tag.ai">IA</span><span class="tag" data-i18n="tag.en">EN</span></div>
       </a>
 
+      <a class="card" href="apps/14bis/" target="_blank" rel="noopener" data-tags="3d history physics" data-keywords="14-bis 14bis Santos Dumont Santos-Dumont 1906 Bagatelle avião airplane aviation biplano biplane simulador simulator flight voo three.js 3d física physics ailerons Panamá panama">
+        <span class="num">21</span>
+        <h2><span data-i18n="c24.title">14-Bis · Simulador de voo</span><span class="arrow">↗</span></h2>
+        <p data-i18n="c24.desc">O primeiro voo homologado da Europa (1906) em modelo 3D fiel: explore a anatomia da máquina, pilote com física real ou repita os recordes de 23 de outubro e 12 de novembro em Bagatelle. Chapéu Panamá e sombra de decolagem incluídos.</p>
+        <div class="tags"><span class="tag hot">3D</span><span class="tag" data-i18n="tag.history">História</span><span class="tag" data-i18n="tag.en">EN</span></div>
+      </a>
+
+      <a class="card" href="apps/santos-dumont-in-color/" target="_blank" rel="noopener" data-tags="history ai" data-keywords="Santos Dumont Santos-Dumont In Color colorizado colorized IA AI CNN fotos photos história history biography biografia 14-bis Demoiselle dirigível airship Eiffel 1906 1901 vídeo video tribute">
+        <span class="num">22</span>
+        <h2><span data-i18n="c25.title">Santos Dumont · In Color</span><span class="arrow">↗</span></h2>
+        <p data-i18n="c25.desc">A vida do Pai da Aviação em fotos colorizadas por IA: linha do tempo, a família de aeronaves (do Nº 1 ao Demoiselle), o vídeo-tributo de 2019 e o método de colorização com CNN — com link direto para o simulador do 14-Bis.</p>
+        <div class="tags"><span class="tag hot" data-i18n="tag.history">História</span><span class="tag" data-i18n="tag.ai">IA</span><span class="tag" data-i18n="tag.bilingual">PT / EN</span></div>
+      </a>
+
 
     </div>
     <div class="empty" id="empty" data-i18n="empty">Nenhum simulador encontrado com esse filtro.</div>
@@ -559,7 +573,7 @@ main { padding-bottom: 20px; }
     'hero.eyebrow': 'open lab · free to use in class',
     'hero.title1': 'Interactive',
     'hero.title2': 'Simulators',
-    'hero.lede': 'Twenty <b>labs that run in the browser</b>: missile signatures in 3D, Z80 and Apple&nbsp;1 CPUs, neural networks training XOR in front of you, transistor bias points, games and small visual lessons. No install, no build, no server.',
+    'hero.lede': 'Twenty-two <b>labs that run in the browser</b>: missile signatures in 3D, Z80 and Apple&nbsp;1 CPUs, neural networks training XOR in front of you, transistor bias points, games and small visual lessons. No install, no build, no server.',
     'stat.apps': 'simulators',
     'stat.setup': 'install',
     'stat.lang': 'languages',
@@ -632,6 +646,10 @@ main { padding-bottom: 20px; }
     'c22.desc': 'Two models trained on ten Jules Verne novels with the same vocabulary and parameter count: a 4.1M GRU and a 4.0M transformer. Generate text character by character and compare the loss of both — all in the browser.',
     'c23.title': 'Motor Fault Bench · diagnosis',
     'c23.desc': 'Synthesises the eight channels of a 2.2 kW motor rig across 22 fault conditions, at any speed and load, and shows a 54→128→64→22 MLP diagnosing each window in real time — with spectra, fault orders and the microcontroller memory budget.',
+    'c24.title': '14-Bis · Flight Simulator',
+    'c24.desc': "Europe's first certified powered flight (1906) as a faithful 3D model: explore the machine's anatomy, fly it with real physics, or replay the record flights of 23 October and 12 November at Bagatelle. Panama hat and liftoff shadow included.",
+    'c25.title': 'Santos Dumont · In Color',
+    'c25.desc': "The Father of Aviation's life in AI-colorized photographs: a timeline, the family of aircraft (from No. 1 to the Demoiselle), the 2019 tribute video and the CNN colorization method — with a direct link to the 14-Bis simulator.",
     'empty': 'No simulator matches this filter.',
     'footer.note': 'Made for class and study · 3D models and numbers are schematic reconstructions, not official documentation.',
     'footer.code': 'Source on GitHub ↗',
@@ -741,7 +759,7 @@ main { padding-bottom: 20px; }
     const note = document.createElement('div');
     note.className = 'filenote';
     note.innerHTML = 'Você abriu a galeria direto do disco. Os apps de arquivo único funcionam assim; ' +
-      '<b>FOG-MPM, V-2, Color Palette e a Corrida Espacial precisam de servidor</b> — rode <code>start.command</code> e acesse ' +
+      '<b>FOG-MPM, V-2, 14-Bis, Color Palette e a Corrida Espacial precisam de servidor</b> — rode <code>start.command</code> e acesse ' +
       '<code>http://127.0.0.1:8099/</code>.';
     document.body.prepend(note);
   }

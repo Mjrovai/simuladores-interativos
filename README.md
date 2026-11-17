@@ -29,6 +29,8 @@ Sem instalação, sem build, sem dependências externas de CDN: cada app carrega
 | **Philips EE 20 · kit de montagem** | O kit EE 20 de 1966 em 22 circuitos sem solda: amplificador, rádio, órgão, alarme e teste de falhas, com diagrama, manual e inspeção de cada peça. Repositório próprio | [EE20-Simulator ↗](https://mjrovai.github.io/EE20-Simulator/sim/) |
 | **Jules Verne Bot · RNN × Transformer** | GRU de 4,1 M contra transformer de 4,0 M, mesmo vocabulário e mesma base de texto: geração caractere por caractere e comparação de perda, rodando no navegador. Repositório próprio | [Jules_Verne ↗](https://mjrovai.github.io/Jules_Verne/) |
 | **Motor Fault Bench** | Oito canais sintéticos de uma bancada de motor de 2,2 kW em 22 condições de falha, com MLP 54→128→64→22 diagnosticando em tempo real, espectros com marcadores de ordem e orçamento de memória no microcontrolador. Repositório próprio | [motor-fault-bench ↗](https://mjrovai.github.io/motor-fault-bench/demo/) |
+| **14-Bis · Simulador de voo** | O primeiro voo homologado da Europa (1906) em modelo 3D fiel: anatomia da máquina, pilotagem com física real e replay dos recordes de 23/10 e 12/11 em Bagatelle. Em inglês | [`apps/14bis/`](apps/14bis/) |
+| **Santos Dumont · In Color** | A vida do Pai da Aviação em fotos colorizadas por IA (2019): linha do tempo, família de aeronaves, vídeo-tributo e o método de colorização com CNN. Companheira do 14-Bis, bilíngue PT/EN | [`apps/santos-dumont-in-color/`](apps/santos-dumont-in-color/) |
 
 A página inicial é uma galeria com busca e filtros por tema. Cada card abre o simulador **em nova aba**, então a galeria continua disponível para escolher outro.
 
@@ -36,11 +38,12 @@ A página inicial é uma galeria com busca e filtros por tema. Cada card abre o 
 
 ## Rodar localmente
 
-A maioria dos apps é um único arquivo HTML e abre com duplo clique. **Quatro deles usam módulos ES e precisam de um servidor HTTP** (o navegador bloqueia `import` em `file://`):
+A maioria dos apps é um único arquivo HTML e abre com duplo clique. **Cinco deles usam módulos ES e precisam de um servidor HTTP** (o navegador bloqueia `import` em `file://`):
 
 ```bash
 cd apps/fog-mpm-3d && python3 -m http.server 8765   # ou: ./start.command
 cd apps/v2-a4      && python3 -m http.server 8787   # ou: ./start.command
+cd apps/14bis      && python3 -m http.server 8766   # ou: ./start.command
 ```
 
 O mesmo vale para a galeria: `python3 -m http.server 8000` na raiz e acesse <http://127.0.0.1:8000/>.
@@ -52,8 +55,8 @@ Vários simuladores existem em mais de uma versão, feitas por modelos diferente
 ## Stack
 
 - **HTML + CSS + JavaScript sem framework.** Nenhum passo de build.
-- **Three.js r169** vendorizado (MIT) nos dois apps 3D, com OrbitControls, RoomEnvironment e GLTFExporter.
-- Fontes incluídas localmente nos apps 3D (Barlow Condensed, Inter, IBM Plex Mono).
+- **Three.js r169** vendorizado (MIT) nos três apps 3D, com OrbitControls, RoomEnvironment e GLTFExporter.
+- Fontes incluídas localmente nos apps 3D (Barlow Condensed, Inter, IBM Plex Mono); o 14-Bis usa fontes de sistema e texturas procedurais.
 - Gráficos 2D em `<canvas>`: simulador de deep learning, labs de CPU, jogos.
 - Tudo estático — funciona em GitHub Pages, em pendrive ou offline.
 
@@ -67,7 +70,7 @@ src/color-palette/    código-fonte do app Next.js + build.sh que gera apps/colo
 ```
 
 Abrir a galeria por `file://` (duplo clique) funciona para os apps de arquivo único; ela mesma
-detecta o protocolo, aponta os links para os `index.html` e avisa quais três precisam de servidor.
+detecta o protocolo, aponta os links para os `index.html` e avisa quais apps precisam de servidor.
 
 ### Adicionar um simulador novo
 
@@ -82,6 +85,7 @@ detecta o protocolo, aponta os links para os `index.html` e avisa quais três pr
 - Números de telemetria, trajetórias e distâncias nas cenas são esquemáticos e comprimidos para leitura.
 - O material sobre a V-2 é estudo técnico e histórico; o projeto não celebra o regime nazista nem o emprego do artefato como arma.
 - Os laboratórios de assembly (Z80, 6502) são emuladores didáticos: ensinam o conjunto de instruções, não reproduzem o hardware ciclo a ciclo.
+- As fotos e o clipe de voo em **Santos Dumont · In Color** e no **14-Bis** foram colorizados por IA em 2019 (CNN de Zhang–Isola–Efros, via OpenCV): as cores são uma interpretação do modelo, não um registro histórico. O vídeo-tributo completo está no [YouTube](https://youtu.be/CneKRDwZDK0) e o método no [tutorial do Hackster](https://www.hackster.io/mjrobot/colorizing-old-b-w-photos-and-videos-with-the-help-of-ai-761a85).
 
 ## Licença e créditos
 
