@@ -30,7 +30,7 @@ Sem instalação, sem build, sem dependências externas de CDN: cada app carrega
 | **Jules Verne Bot · RNN × Transformer** | GRU de 4,1 M contra transformer de 4,0 M, mesmo vocabulário e mesma base de texto: geração caractere por caractere e comparação de perda, rodando no navegador. Repositório próprio | [Jules_Verne ↗](https://mjrovai.github.io/Jules_Verne/) |
 | **Motor Fault Bench** | Oito canais sintéticos de uma bancada de motor de 2,2 kW em 22 condições de falha, com MLP 54→128→64→22 diagnosticando em tempo real, espectros com marcadores de ordem e orçamento de memória no microcontrolador. Repositório próprio | [motor-fault-bench ↗](https://mjrovai.github.io/motor-fault-bench/demo/) |
 | **14-Bis · Simulador de voo** | O primeiro voo homologado da Europa (1906) em modelo 3D fiel: anatomia da máquina, pilotagem com física real e replay dos recordes de 23/10 e 12/11 em Bagatelle. Em inglês | [`apps/14bis/`](apps/14bis/) |
-| **Santos Dumont · In Color** | A vida do Pai da Aviação em fotos colorizadas por IA (2019): linha do tempo, família de aeronaves, vídeo-tributo e o método de colorização com CNN. Companheira do 14-Bis, bilíngue PT/EN | [`apps/santos-dumont-in-color/`](apps/santos-dumont-in-color/) |
+| **Santos Dumont · In Color** | A vida do Pai da Aviação em fotos colorizadas por IA (2019): linha do tempo, família de aeronaves, a ciência aberta da Demoiselle (páginas da *Popular Mechanics*, 1909), vídeo-tributo e o método de colorização com CNN. Companheira do 14-Bis, bilíngue PT/EN | [`apps/santos-dumont-in-color/`](apps/santos-dumont-in-color/) |
 
 A página inicial é uma galeria com busca e filtros por tema. Cada card abre o simulador **em nova aba**, então a galeria continua disponível para escolher outro.
 
@@ -86,6 +86,7 @@ detecta o protocolo, aponta os links para os `index.html` e avisa quais apps pre
 - O material sobre a V-2 é estudo técnico e histórico; o projeto não celebra o regime nazista nem o emprego do artefato como arma.
 - Os laboratórios de assembly (Z80, 6502) são emuladores didáticos: ensinam o conjunto de instruções, não reproduzem o hardware ciclo a ciclo.
 - As fotos e o clipe de voo em **Santos Dumont · In Color** e no **14-Bis** foram colorizados por IA em 2019 (CNN de Zhang–Isola–Efros, via OpenCV): as cores são uma interpretação do modelo, não um registro histórico. O vídeo-tributo completo está no [YouTube](https://youtu.be/CneKRDwZDK0) e o método no [tutorial do Hackster](https://www.hackster.io/mjrobot/colorizing-old-b-w-photos-and-videos-with-the-help-of-ai-761a85).
+- A seção **Ciência aberta** da companheira reproduz páginas da *Popular Mechanics* (dez/1909, p. 842 — “Santos-Dumont Gives Aeroplane Patents to World”), documentando a doação das patentes da Demoiselle ao público — um gesto de ciência aberta que impulsionou a aviação. Fonte: [Internet Archive](https://archive.org/details/PopularMechanics1909).
 
 ## Licença e créditos
 

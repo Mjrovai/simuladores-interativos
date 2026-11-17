@@ -135,6 +135,24 @@
   .links a:hover{background:var(--card2);border-color:var(--brass)}
   .honest{margin-top:18px;font-size:14.5px;color:var(--ink2);background:rgba(201,162,39,.10);border-left:3px solid var(--brass2);padding:12px 16px;border-radius:0 9px 9px 0}
 
+  /* ---------- open science ---------- */
+  .open-quote{margin:26px 0 0;background:var(--card);border:1px solid var(--line);border-left:5px solid var(--brass);border-radius:0 14px 14px 0;padding:26px 30px;box-shadow:0 8px 24px var(--shadow)}
+  .open-quote .qmark{font-family:var(--serif);font-size:56px;line-height:.4;color:var(--brass2);display:block;height:26px}
+  .open-quote blockquote{margin:0;font-family:var(--serif);font-size:clamp(19px,2.4vw,25px);line-height:1.5;color:var(--ink);font-style:italic}
+  .open-quote .qtrans{margin:14px 0 0;font-size:15.5px;color:var(--ink2);line-height:1.55}
+  .open-quote .qtrans:empty{display:none;margin:0}
+  .open-quote cite{display:block;margin-top:16px;font-family:var(--ui);font-style:normal;font-size:13px;letter-spacing:.03em;color:var(--brass);font-weight:700}
+  .open-quote cite a{color:var(--link)}
+  .pm-specs{display:flex;flex-wrap:wrap;gap:12px;margin:24px 0 0;padding:0;list-style:none}
+  .pm-specs li{flex:1 1 150px;background:var(--card2);border:1px solid var(--line2);border-radius:11px;padding:14px 16px;text-align:center}
+  .pm-specs .v{display:block;font-family:var(--serif);font-size:23px;color:var(--sepia);font-weight:700}
+  .pm-specs .l{display:block;font-family:var(--ui);font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink3);margin-top:4px}
+  .pm-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-top:26px}
+  .pm-grid .photo-card .ph{aspect-ratio:auto;height:300px;background:#efe5cf}
+  .pm-note{margin-top:20px;font-size:14.5px;color:var(--ink2);background:rgba(201,162,39,.10);border-left:3px solid var(--brass2);padding:12px 16px;border-radius:0 9px 9px 0}
+  .pm-note a{color:var(--link)}
+  @media (max-width:860px){.pm-grid{grid-template-columns:1fr}}
+
   /* ---------- CTA ---------- */
   .cta{background:var(--ink);color:#f4ecd8;text-align:center;border-top:3px solid var(--brass);border-bottom:3px solid var(--brass)}
   .cta h2{color:#f7efdb;font-size:clamp(28px,4.5vw,42px);margin:0 0 12px}
@@ -194,6 +212,7 @@
     <span class="nav-sp"></span>
     <a class="navlink hide-sm" href="../../" data-i18n="nav.gallery">← Galeria</a>
     <a class="navlink hide-sm" href="#method" data-i18n="nav.method">Colorização</a>
+    <a class="navlink hide-sm" href="#open" data-i18n="nav.open">Ciência aberta</a>
     <div class="langtoggle" role="group" aria-label="Idioma / Language">
       <button data-lang="pt" aria-pressed="true">PT</button>
       <button data-lang="en" aria-pressed="false">EN</button>
@@ -330,13 +349,46 @@
 
     <div class="craft-group rv">
       <h3 data-i18n="mach.demo.title">A Demoiselle (1907–1909)</h3>
-      <p class="gnote" data-i18n="mach.demo.note">Monoplano ultraleve de bambu e seda, tão pequeno que cabia na traseira de um carro. Santos-Dumont publicou os planos livremente — um gesto de generosidade raro na época.</p>
+      <p class="gnote" data-i18n="mach.demo.note">Monoplano ultraleve de bambu e seda, tão pequeno que cabia na traseira de um carro. Santos-Dumont publicou os planos livremente — um gesto de generosidade raro na época. <a href="#open">Os planos abertos ao mundo →</a></p>
       <div class="grid">
         <figure class="photo-card"><div class="ph" data-full="photos/demoiselle-flight.jpg" data-cap="cap.demoflight"><img src="photos/demoiselle-flight.jpg" alt="Demoiselle in flight" loading="lazy"></div><figcaption data-i18n="cap.demoflight"><b>Em voo</b>A Demoiselle, ágil e leve — o oposto do pesado 14-Bis.</figcaption></figure>
         <figure class="photo-card"><div class="ph" data-full="photos/06-demoiselle.jpg" data-cap="cap.democar"><img src="photos/06-demoiselle.jpg" alt="Demoiselle on the car" loading="lazy"></div><figcaption data-i18n="cap.democar"><b>Portátil</b>Desmontada no carro de Santos-Dumont, c. 1909.</figcaption></figure>
         <figure class="photo-card"><div class="ph" data-full="photos/04-n9.jpg" data-cap="cap.n9b"><img src="photos/04-n9.jpg" alt="Airship No. 9" loading="lazy"></div><figcaption data-i18n="cap.n9b"><b>Do balão ao avião</b>A transição: dos dirigíveis aos aviões leves.</figcaption></figure>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- ══════════ OPEN SCIENCE ══════════ -->
+<section id="open">
+  <div class="wrap">
+    <p class="kicker rv" data-i18n="open.kicker">1909 · o presente ao mundo</p>
+    <h2 class="sec rv" data-i18n="open.title">Ciência aberta, antes de o termo existir</h2>
+    <p class="lede rv" data-i18n="open.lede">Santos-Dumont recusou-se a patentear suas invenções. Acreditava que a aviação só traria paz e prosperidade se fosse de todos — e por isso publicou livremente os planos da Demoiselle, para que qualquer pessoa, em qualquer país, pudesse construí-la. Um gesto altruísta que ajudou a impulsionar a indústria aeronáutica: o espírito do código aberto e da ciência aberta, décadas antes de esses nomes existirem.</p>
+
+    <div class="open-quote rv">
+      <span class="qmark" aria-hidden="true">“</span>
+      <blockquote data-i18n="open.quote">The patent rights of the machine have been turned over to the public by Santos-Dumont in order to encourage aviation, and anyone may use his plans to construct a similar machine.</blockquote>
+      <p class="qtrans" data-i18n="open.qtrans">“Os direitos de patente da máquina foram entregues ao público por Santos-Dumont, para encorajar a aviação; e qualquer um pode usar seus planos para construir uma máquina semelhante.”</p>
+      <cite data-i18n="open.cite">— <i>Popular Mechanics</i>, dezembro de 1909, p. 842 · “Santos-Dumont Gives Aeroplane Patents to World” · <a href="https://archive.org/details/PopularMechanics1909" target="_blank" rel="noopener">ler na fonte ↗</a></cite>
+    </div>
+
+    <ul class="pm-specs rv">
+      <li><span class="v">259 lb</span><span class="l" data-i18n="open.s1">peso total c/ piloto</span></li>
+      <li><span class="v">96 ft²</span><span class="l" data-i18n="open.s2">superfície alar</span></li>
+      <li><span class="v">30 hp</span><span class="l" data-i18n="open.s3">motor</span></li>
+      <li><span class="v">&lt; $1.000</span><span class="l" data-i18n="open.s4">custo total</span></li>
+      <li><span class="v">5 mi / 5 min</span><span class="l" data-i18n="open.s5">St Cyr → Buc, 1909</span></li>
+    </ul>
+
+    <div class="pm-grid">
+      <figure class="photo-card rv"><div class="ph" data-full="photos/pm-cover.jpg" data-cap="cap.pmcover"><img src="photos/pm-cover.jpg" alt="Popular Mechanics cover, December 1909" loading="lazy"></div><figcaption data-i18n="cap.pmcover"><b>A capa</b><i>Popular Mechanics</i>, dezembro de 1909 — “Written so you can understand it”, 15 cents, tiragem de 240.000.</figcaption></figure>
+      <figure class="photo-card rv"><div class="ph" data-full="photos/pm-page842.jpg" data-cap="cap.pmpage"><img src="photos/pm-page842.jpg" alt="Popular Mechanics page 842, Santos-Dumont Gives Aeroplane Patents to World" loading="lazy"></div><figcaption data-i18n="cap.pmpage"><b>A página 842</b>“Santos-Dumont Gives Aeroplane Patents to World” — o anúncio da doação das patentes, com dois diagramas da Demoiselle.</figcaption></figure>
+      <figure class="photo-card rv"><div class="ph" data-full="photos/pm-blueprint.jpg" data-cap="cap.pmblueprint"><img src="photos/pm-blueprint.jpg" alt="Demoiselle general arrangement blueprint" loading="lazy"></div><figcaption data-i18n="cap.pmblueprint"><b>O plano geral</b>Vistas frontal e lateral da Demoiselle, com peças numeradas — o tipo de desenho que ele entregou ao público.</figcaption></figure>
+      <figure class="photo-card rv"><div class="ph" data-full="photos/pm-plate5.jpg" data-cap="cap.pmplate"><img src="photos/pm-plate5.jpg" alt="Plate V, left hand wing of the Demoiselle" loading="lazy"></div><figcaption data-i18n="cap.pmplate"><b>Plate V — a asa</b>“Left hand Wing of the ‘Demoiselle’”: nervuras e longarinas de bambu, cotas e detalhes de amarração com arame de latão.</figcaption></figure>
+    </div>
+
+    <p class="pm-note rv" data-i18n="open.note"><b>Nota de precisão:</b> a edição de dezembro de 1909 (p. 842) anuncia a doação das patentes e traz os diagramas gerais; os planos de construção detalhados, peça por peça, saíram na edição de junho de 1910 (“How to Build the Famous ‘Demoiselle’”). As imagens acima são reproduções das páginas originais. <b>Este simulador e esta página seguem esse legado:</b> código e conhecimento abertos, no <a href="https://github.com/Mjrovai/simuladores-interativos" target="_blank" rel="noopener">GitHub</a> e no <a href="https://www.hackster.io/mjrobot/colorizing-old-b-w-photos-and-videos-with-the-help-of-ai-761a85" target="_blank" rel="noopener">tutorial CC0</a>.</p>
   </div>
 </section>
 
@@ -509,7 +561,7 @@
     'cap.bistests':'<b>Trials</b>The experiments that led to the homologated flights of October and November.',
     'cap.bis14b':'<b>The record-setter</b>220 m in 21.5 s, 12 Nov 1906 — the first aeroplane world record.',
     'mach.demo.title':'The Demoiselle (1907–1909)',
-    'mach.demo.note':'An ultralight bamboo-and-silk monoplane, so small it fit on the back of a car. Santos-Dumont published the plans freely — a rare act of generosity at the time.',
+    'mach.demo.note':'An ultralight bamboo-and-silk monoplane, so small it fit on the back of a car. Santos-Dumont published the plans freely — a rare act of generosity at the time. <a href="#open">The plans, open to the world →</a>',
     'cap.demoflight':'<b>In flight</b>The Demoiselle, agile and light — the opposite of the heavy 14-bis.',
     'cap.democar':'<b>Portable</b>Dismounted on Santos-Dumont’s car, c. 1909.',
     'cap.n9b':'<b>From balloon to plane</b>The transition: from airships to light aeroplanes.',
@@ -550,7 +602,19 @@
     'foot.links.tut':'Colorization tutorial (Hackster)',
     'foot.links.vid':'Tribute video (YouTube)',
     'foot.links.code':'Source on GitHub',
-    'foot.base1':'Made for class and memory · illustrative historical reconstruction.'
+    'foot.base1':'Made for class and memory · illustrative historical reconstruction.',
+    'nav.open':'Open science',
+    'open.kicker':'1909 · a gift to the world','open.title':'Open science, before the term existed',
+    'open.lede':'Santos-Dumont refused to patent his inventions. He believed aviation would bring peace and prosperity only if it belonged to everyone — so he freely published the plans of the Demoiselle, so that anyone, in any country, could build it. An altruistic gesture that helped propel the aeronautical industry: the spirit of open source and open science, decades before those names existed.',
+    'open.quote':'The patent rights of the machine have been turned over to the public by Santos-Dumont in order to encourage aviation, and anyone may use his plans to construct a similar machine.',
+    'open.qtrans':'',
+    'open.cite':'— <i>Popular Mechanics</i>, December 1909, p. 842 · “Santos-Dumont Gives Aeroplane Patents to World” · <a href="https://archive.org/details/PopularMechanics1909" target="_blank" rel="noopener">read the source ↗</a>',
+    'open.s1':'total weight w/ pilot','open.s2':'wing area','open.s3':'engine','open.s4':'total cost','open.s5':'St Cyr → Buc, 1909',
+    'cap.pmcover':'<b>The cover</b><i>Popular Mechanics</i>, December 1909 — “Written so you can understand it”, 15 cents, circulation 240,000.',
+    'cap.pmpage':'<b>Page 842</b>“Santos-Dumont Gives Aeroplane Patents to World” — the announcement of the patent gift, with two diagrams of the Demoiselle.',
+    'cap.pmblueprint':'<b>The general plan</b>Front and side views of the Demoiselle with numbered parts — the kind of drawing he handed to the public.',
+    'cap.pmplate':'<b>Plate V — the wing</b>“Left hand Wing of the ‘Demoiselle’”: bamboo ribs and spars, dimensions and brass-wire lashing details.',
+    'open.note':'<b>A note on precision:</b> the December 1909 issue (p. 842) announces the patent gift and carries the general diagrams; the detailed, part-by-part construction plans appeared in the June 1910 issue (“How to Build the Famous ‘Demoiselle’”). The images above are reproductions of the original pages. <b>This simulator and this page follow that legacy:</b> open code and open knowledge, on <a href="https://github.com/Mjrovai/simuladores-interativos" target="_blank" rel="noopener">GitHub</a> and in the <a href="https://www.hackster.io/mjrobot/colorizing-old-b-w-photos-and-videos-with-the-help-of-ai-761a85" target="_blank" rel="noopener">CC0 tutorial</a>.'
   };
 
   const root = document.documentElement;
