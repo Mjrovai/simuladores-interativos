@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f3ead6">
-<title>Santos Dumont — In Color · a vida do Pai da Aviação</title>
+<title>Santos-Dumont — In Color · a vida do Pai da Aviação</title>
 <meta name="description" content="A vida e as máquinas de Alberto Santos-Dumont (1873–1932) em fotografias da década de 1900 colorizadas por IA em 2019 — com o simulador de voo do 14-Bis como complemento interativo.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23241c12'/%3E%3Cpath d='M4 18 L16 12 L28 18' stroke='%23c9a227' stroke-width='1.6' fill='none'/%3E%3Cpath d='M4 14 L16 8 L28 14' stroke='%23c9a227' stroke-width='1.6' fill='none'/%3E%3Cline x1='16' y1='8' x2='16' y2='24' stroke='%23c9a227' stroke-width='1.4'/%3E%3Ccircle cx='16' cy='25' r='2' fill='none' stroke='%23c9a227'/%3E%3C/svg%3E">
 <style>
@@ -103,6 +103,10 @@
   .craft-group h3{font-size:22px;color:var(--sepia);margin:0 0 4px}
   .craft-group .gnote{font-size:15px;color:var(--ink2);margin:0 0 16px;max-width:760px}
   .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .grid.grid-4{grid-template-columns:repeat(4,1fr)}
+  .intro-fig{margin:0 0 18px}
+  .intro-fig .ph{aspect-ratio:3/2}
+  .sig-note{margin-top:14px;padding:14px 18px;background:var(--card);border-left:4px solid var(--brass);border-radius:0 10px 10px 0;font-size:15.5px;color:var(--ink2)}
   .photo-card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 6px 18px var(--shadow);transition:transform .18s,box-shadow .18s}
   .photo-card:hover{transform:translateY(-3px);box-shadow:0 12px 26px var(--shadow2)}
   .photo-card .ph{aspect-ratio:4/3;overflow:hidden;cursor:zoom-in;background:#efe5cf}
@@ -189,6 +193,7 @@
   @media (max-width:860px){
     .intro-grid,.method-grid,.man-grid,footer .cols{grid-template-columns:1fr}
     .grid{grid-template-columns:repeat(2,1fr)}
+    .grid.grid-4{grid-template-columns:repeat(2,1fr)}
     .timeline::before{left:18px}
     .tl-item,.tl-item:nth-child(even){width:100%;margin-left:0;padding:0 0 30px 46px}
     .tl-item:nth-child(odd)::before,.tl-item:nth-child(even)::before{left:12px;right:auto}
@@ -197,6 +202,7 @@
   @media (max-width:520px){
     body{font-size:16px}
     .grid{grid-template-columns:1fr}
+    .grid.grid-4{grid-template-columns:1fr}
     .hero{min-height:54vh}
     section{padding:42px 0}
   }
@@ -208,7 +214,7 @@
 <!-- ══════════ NAV ══════════ -->
 <nav class="nav">
   <div class="nav-in">
-    <a class="nav-brand" href="#top">Santos Dumont <b>· In Color</b></a>
+    <a class="nav-brand" href="#top">Santos-Dumont <b>· In Color</b></a>
     <span class="nav-sp"></span>
     <a class="navlink hide-sm" href="../../" data-i18n="nav.gallery">← Galeria</a>
     <a class="navlink hide-sm" href="#method" data-i18n="nav.method">Colorização</a>
@@ -226,7 +232,7 @@
   <img src="photos/hero.jpg" alt="Composite portrait of Alberto Santos-Dumont with the 14-bis and the Eiffel Tower">
   <div class="hero-in">
     <p class="eyebrow" data-i18n="hero.eyebrow">1873 – 1932 · o Pai da Aviação</p>
-    <h1>Santos Dumont <em data-i18n="hero.title2">In Color</em></h1>
+    <h1>Santos-Dumont <em data-i18n="hero.title2">In Color</em></h1>
     <p class="sub" data-i18n="hero.sub">A vida e as máquinas de Alberto Santos-Dumont, em fotografias da década de 1900 colorizadas por inteligência artificial — e um simulador para você pilotar o 14-Bis.</p>
     <p class="dates" data-i18n="hero.dates">Fotografias originais · colorizadas por IA em 2019 · refeitas para a web em 2026</p>
     <img class="sig" src="photos/signature.png" alt="Assinatura de Santos-Dumont">
@@ -243,15 +249,16 @@
     <hr class="rule rv">
     <div class="intro-grid">
       <div class="rv">
-        <p data-i18n="intro.p1">Alberto Santos-Dumont (1873–1932) nasceu em Minas Gerais, filho de um rico engenheiro do café. Mudou-se para Paris ainda jovem e dedicou a vida e a fortuna a uma única obsessão: navegar pelo ar. Entre 1898 e 1905 construiu e pilotou dezoito dirigíveis, tornando-se a pessoa mais famosa do mundo da aviação.</p>
+        <figure class="photo-card intro-fig"><div class="ph" data-full="photos/apartamento.jpg" data-cap="cap.apartamento"><img src="photos/apartamento.jpg" alt="Santos-Dumont working in his Paris apartment" loading="lazy"></div><figcaption data-i18n="cap.apartamento">No seu apartamento-ateliê em Paris, Santos-Dumont projetava e montava suas máquinas — um inventor no trabalho, cercado de diagramas e modelos.</figcaption></figure>
+        <p data-i18n="intro.p1">Alberto Santos-Dumont (1873–1932) nasceu em Minas Gerais, filho de um rico engenheiro do café. Mudou-se para Paris ainda jovem e dedicou a vida e a fortuna a uma única obsessão: navegar pelo ar. Entre 1898 e 1905 construiu e pilotou uma série de aeronaves — cerca de 11 dirigíveis, além de balões, um planador e os primeiros aviões na numeração Nº 1–18 — tornando-se a pessoa mais famosa do mundo da aviação.</p>
         <p data-i18n="intro.p2">Em 19 de outubro de 1901, contornou a Torre Eiffel com o dirigível Nº 6 e voltou a Saint-Cloud dentro do prazo, vencendo o Prêmio Deutsch de la Meurthe — 100.000 francos. Mas foi com o <b>14-Bis</b>, em 1906, que ele entrou para a história: o primeiro voo de avião na Europa testemunhado publicamente, filmado e homologado, decolando pelas próprias rodas, sem catapulta nem trilho.</p>
-        <p data-i18n="intro.p3">Gentil, excêntrico e generoso, nunca patenteou seus projetos — queria que a aviação fosse de todos. Esta página reúne as fotografias que usei em 2019 para um vídeo em sua homenagem, todas colorizadas por um modelo de IA. Ao final, você pode <a href="../14bis/">pilotar o 14-Bis</a> num simulador 3D historicamente fiel.</p>
+        <p data-i18n="intro.p3">Gentil, excêntrico e generoso, nunca patenteou seus projetos — queria que a aviação fosse de todos. Esta página reúne as fotografias que usei em 2019 para um vídeo em sua homenagem, todas colorizadas por um modelo de IA. Ao final, você pode <a href="../14bis/">pilotar o 14-Bis</a> numa reconstrução 3D ilustrativa.</p>
       </div>
       <aside class="factcard rv">
         <h3 data-i18n="facts.title">Em poucas linhas</h3>
         <ul>
           <li data-i18n="facts.1"><b>Nascimento:</b> 20 jul 1873, Palmira (MG), Brasil.</li>
-          <li data-i18n="facts.2"><b>18 dirigíveis</b> construídos e pilotados (Nº 1 a Nº 18).</li>
+          <li data-i18n="facts.2"><b>~11 dirigíveis</b> construídos e pilotados; a série Nº 1–18 inclui também planador, balão e aviões.</li>
           <li data-i18n="facts.3"><b>1901:</b> Prêmio Deutsch — volta à Torre Eiffel no Nº 6.</li>
           <li data-i18n="facts.4"><b>1906:</b> 14-Bis — primeiro voo homologado de avião na Europa.</li>
           <li data-i18n="facts.5"><b>1909:</b> Demoiselle — avião ultraleve, planos de construção livres.</li>
@@ -277,33 +284,38 @@
       </div></div>
 
       <div class="tl-item rv"><div class="tl-card">
+        <div class="tl-photo" data-full="photos/brasil-balloon.jpg" data-cap="cap.brasilballoon"><img src="photos/brasil-balloon.jpg" alt="The Brasil balloon, 1898" loading="lazy"></div>
+        <div class="tl-body"><span class="tl-year">1898</span><h3 data-i18n="t1b.title">O balão Brasil</h3><p data-i18n="cap.brasilballoon">O balão Brasil, seguro por auxiliares antes de uma ascensão (1898). Com 6 m de diâmetro, 113 m³ e apenas 27,5 kg, foi o menor balão de hidrogênio já construído — o próprio Santos-Dumont dizia que, vazio, cabia numa maleta. Um passo pioneiro rumo à mobilidade aérea pessoal.</p></div>
+      </div></div>
+
+      <div class="tl-item rv"><div class="tl-card">
         <div class="tl-photo" data-full="photos/02-n1.jpg" data-cap="cap.n1"><img src="photos/02-n1.jpg" alt="Airship No. 1 in flight" loading="lazy"></div>
-        <div class="tl-body"><span class="tl-year">1898</span><h3 data-i18n="t2.title">Nº 1 — o primeiro dirigível</h3><p data-i18n="cap.n1">O dirigível Nº 1 em voo. Foi o primeiro de dezoito balões dirigíveis que Santos-Dumont construiu e pilotou sobre Paris.</p></div>
+        <div class="tl-body"><span class="tl-year">1898</span><h3 data-i18n="t2.title">Nº 1 — o primeiro dirigível</h3><p data-i18n="cap.n1">O dirigível Nº 1 em voo (set/1898). Usava um motor leve de triciclo De Dion-Bouton, adaptado por ele, com o escapamento voltado para baixo para afastar as fagulhas do hidrogênio — um risco real: em 1897, Wölfert morreu quando o motor a gasolina incendiou seu dirigível Deutschland.</p></div>
       </div></div>
 
       <div class="tl-item rv"><div class="tl-card">
         <div class="tl-photo" data-full="photos/03-eiffel.jpg" data-cap="cap.eiffel"><img src="photos/03-eiffel.jpg" alt="Airship No. 6 rounding the Eiffel Tower" loading="lazy"></div>
-        <div class="tl-body"><span class="tl-year">1901</span><h3 data-i18n="t3.title">A volta à Torre Eiffel</h3><p data-i18n="cap.eiffel">19 out 1901: o Nº 6 contorna a Torre Eiffel e retorna a Saint-Cloud em menos de 30 minutos, vencendo o Prêmio Deutsch de la Meurthe (100.000 francos).</p></div>
+        <div class="tl-body"><span class="tl-year">1901</span><h3 data-i18n="t3.title">A volta à Torre Eiffel</h3><p data-i18n="cap.eiffel">19 out 1901: o Nº 6 contorna a Torre Eiffel e retorna a Saint-Cloud em menos de 30 minutos, vencendo o Prêmio Deutsch de la Meurthe (100.000 francos). Doou todo o prêmio: metade aos seus mecânicos, metade aos pobres de Paris.</p></div>
       </div></div>
 
       <div class="tl-item rv"><div class="tl-card">
-        <div class="tl-photo" data-full="photos/04-n9.jpg" data-cap="cap.n9"><img src="photos/04-n9.jpg" alt="Airship No. 9" loading="lazy"></div>
-        <div class="tl-body"><span class="tl-year">1903</span><h3 data-i18n="t4.title">Nº 9 — o dirigível de passeio</h3><p data-i18n="cap.n9">O Nº 9, menor e mais manejável, que Santos-Dumont usava para passeios sobre Paris — chegando a pousar na rua e almoçar num café antes de voltar voando.</p></div>
+        <div class="tl-photo" data-full="photos/n9-flight.jpg" data-cap="cap.n9"><img src="photos/n9-flight.jpg" alt="Airship No. 9 in flight over Paris" loading="lazy"></div>
+        <div class="tl-body"><span class="tl-year">1903</span><h3 data-i18n="t4.title">Nº 9 — o dirigível de passeio</h3><p data-i18n="cap.n9">O Nº 9 “Baladeuse”, menor e manejável, que Santos-Dumont usava para se deslocar por Paris — pousando na rua e almoçando num café antes de voltar voando. Em jun/1903, Aída de Acosta o pilotou sozinha: a primeira mulher a voar numa aeronave motorizada, e a única pessoa a quem ele permitiu pilotar.</p></div>
       </div></div>
 
       <div class="tl-item rv"><div class="tl-card">
         <div class="tl-photo" data-full="photos/05-14bis.jpg" data-cap="cap.bis14"><img src="photos/05-14bis.jpg" alt="The 14-bis at Bagatelle" loading="lazy"></div>
-        <div class="tl-body"><span class="tl-year">1906</span><h3 data-i18n="t5.title">14-Bis — o avião</h3><p data-i18n="cap.bis14">O 14-Bis em Bagatelle. Em 23 out voou ~60 m; em 12 nov, 220 m em 21,5 s — o primeiro recorde mundial homologado de avião. Decolou pelas próprias rodas.</p></div>
+        <div class="tl-body"><span class="tl-year">1906</span><h3 data-i18n="t5.title">14-Bis — o avião</h3><p data-i18n="cap.bis14">O 14-Bis em Bagatelle. Em 23 out voou ~60 m e ganhou o Prêmio Archdeacon; em 12 nov, 220 m em 21,5 s — o primeiro recorde mundial de avião homologado pelo Aéro-Club de France. Decolou pelas próprias rodas, sem catapulta, diante do público e da imprensa.</p></div>
       </div></div>
 
       <div class="tl-item rv"><div class="tl-card">
         <div class="tl-photo" data-full="photos/06-demoiselle.jpg" data-cap="cap.demoiselle"><img src="photos/06-demoiselle.jpg" alt="Santos-Dumont carrying the Demoiselle on his car" loading="lazy"></div>
-        <div class="tl-body"><span class="tl-year">1909</span><h3 data-i18n="t6.title">Demoiselle — leve e portátil</h3><p data-i18n="cap.demoiselle">Santos-Dumont ao volante, com a Demoiselle desmontada na traseira do carro, c. 1909. O avião ultraleve (≈110 kg) cujos planos ele distribuiu de graça.</p></div>
+        <div class="tl-body"><span class="tl-year">1909</span><h3 data-i18n="t6.title">Demoiselle — leve e portátil</h3><p data-i18n="cap.demoiselle">Santos-Dumont ao volante, com a Demoiselle desmontada na traseira do carro, c. 1909. O ultraleve Nº 20 pesava 110 kg vazio (242 lb); seus planos ele distribuiu de graça.</p></div>
       </div></div>
 
       <div class="tl-item rv"><div class="tl-card">
         <div class="tl-photo" data-full="photos/07-brasil.jpg" data-cap="cap.brasil"><img src="photos/07-brasil.jpg" alt="Santos-Dumont back in Brazil" loading="lazy"></div>
-        <div class="tl-body"><span class="tl-year">1910s–20s</span><h3 data-i18n="t7.title">De volta ao Brasil</h3><p data-i18n="cap.brasil">De volta ao Brasil, recebido como herói nacional. Continuou a inventar e a escrever, mas a saúde e o ânimo foram se fragilizando.</p></div>
+        <div class="tl-body"><span class="tl-year">1910s–20s</span><h3 data-i18n="t7.title">De volta ao Brasil</h3><p data-i18n="cap.brasil">De volta ao Brasil, recebido como herói nacional. Em 1916 visitou as Cataratas do Iguaçu e, indignado por pertencerem a um particular, convenceu o governo do Paraná a desapropriá-las — passo decisivo para a criação do Parque Nacional do Iguaçu (1939). Continuou a inventar e a escrever, mas a saúde foi se fragilizando.</p></div>
       </div></div>
 
       <div class="tl-item rv"><div class="tl-card">
@@ -313,7 +325,7 @@
 
       <div class="tl-item rv"><div class="tl-card">
         <div class="tl-photo" data-full="photos/09-monument.jpg" data-cap="cap.monument"><img src="photos/09-monument.jpg" alt="Memorial to Santos-Dumont in Paris" loading="lazy"></div>
-        <div class="tl-body"><span class="tl-year">memória</span><h3 data-i18n="t9.title">O memorial</h3><p data-i18n="cap.monument">Monumento a Santos-Dumont em Paris. Para o Brasil e para a França, ele é o Pai da Aviação — o primeiro a voar publicamente por meios próprios.</p></div>
+        <div class="tl-body"><span class="tl-year">memória</span><h3 data-i18n="t9.title">O memorial</h3><p data-i18n="cap.monument">Monumento em Saint-Cloud (Paris), obra de Georges Colin inaugurada em 1913 pelo Aéro-Club de France: uma figura alada ergue o aviador. O bronze original foi fundido sob o regime de Vichy; uma réplica, paga por subscrição brasileira, foi inaugurada em 4/7/1952 e hoje é lida como Ícaro e seu sonho de voar — tema do vídeo de 2019, com música de Biafra.</p></div>
       </div></div>
 
     </div>
@@ -328,8 +340,8 @@
     <p class="lede rv" data-i18n="mach.lede">Uma família de aeronaves que atravessa duas décadas — do balão dirigido ao avião leve. Cada foto abre em tamanho maior.</p>
 
     <div class="craft-group rv">
-      <h3 data-i18n="mach.dir.title">Os dirigíveis (Nº 1 – Nº 18)</h3>
-      <p class="gnote" data-i18n="mach.dir.note">Balões alongados, movidos a motor de combustão, com o piloto suspenso numa cesta ou treliça sob o envelope. Santos-Dumont provou que o voo dirigido era possível.</p>
+      <h3 data-i18n="mach.dir.title">Os dirigíveis (a série Nº 1–18)</h3>
+      <p class="gnote" data-i18n="mach.dir.note">Balões alongados, movidos a motor de combustão, com o piloto suspenso numa cesta ou treliça sob o envelope. A numeração Nº 1–18 não era só de dirigíveis: o Nº 11 foi um planador, o Nº 12 um helicóptero inconcluso, o Nº 13 um balão e os Nº 15–18 aviões e um hidroplano; o Nº 8 nunca existiu. Dirigíveis construídos de fato: cerca de 11 (Nº 1–7, 9, 10 e 14).</p>
       <div class="grid">
         <figure class="photo-card"><div class="ph" data-full="photos/n5.jpg" data-cap="cap.n5"><img src="photos/n5.jpg" alt="Airship No. 5" loading="lazy"></div><figcaption data-i18n="cap.n5"><b>Nº 5</b>O dirigível das primeiras experiências e do acidente de 1901.</figcaption></figure>
         <figure class="photo-card"><div class="ph" data-full="photos/n14.jpg" data-cap="cap.n14"><img src="photos/n14.jpg" alt="Airship No. 14" loading="lazy"></div><figcaption data-i18n="cap.n14"><b>Nº 14</b>Sob ele o 14-Bis foi suspenso nos primeiros ensaios — daí o nome “14-bis”.</figcaption></figure>
@@ -340,20 +352,21 @@
     <div class="craft-group rv">
       <h3 data-i18n="mach.bis.title">O 14-Bis (1906)</h3>
       <p class="gnote" data-i18n="mach.bis.note">Biplano canard de células Hargrave, bambu e seda, motor Antoinette V8 de 50 hp atrás do piloto. O primeiro avião a decolar por conta própria na Europa. <a href="../14bis/">Explore e pilote em 3D →</a></p>
-      <div class="grid">
-        <figure class="photo-card"><div class="ph" data-full="photos/14bis-ground.jpg" data-cap="cap.bisground"><img src="photos/14bis-ground.jpg" alt="The 14-bis on the ground" loading="lazy"></div><figcaption data-i18n="cap.bisground"><b>No solo</b>O 14-Bis em Bagatelle, com a estrutura de células e o cesto do piloto.</figcaption></figure>
+      <div class="grid grid-4">
+        <figure class="photo-card"><div class="ph" data-full="photos/14bis-static.jpg" data-cap="cap.bisground"><img src="photos/14bis-static.jpg" alt="The 14-bis on the ground" loading="lazy"></div><figcaption data-i18n="cap.bisground"><b>No solo</b>O 14-Bis em Bagatelle, com a estrutura de células e o cesto do piloto.</figcaption></figure>
         <figure class="photo-card"><div class="ph" data-full="photos/14bis-tests.jpg" data-cap="cap.bistests"><img src="photos/14bis-tests.jpg" alt="14-bis trials" loading="lazy"></div><figcaption data-i18n="cap.bistests"><b>Ensaios</b>As experiências que levaram aos voos homologados de outubro e novembro.</figcaption></figure>
-        <figure class="photo-card"><div class="ph" data-full="photos/05-14bis.jpg" data-cap="cap.bis14b"><img src="photos/05-14bis.jpg" alt="The 14-bis" loading="lazy"></div><figcaption data-i18n="cap.bis14b"><b>O recordista</b>220 m em 21,5 s, 12 nov 1906 — o primeiro recorde mundial de avião.</figcaption></figure>
+        <figure class="photo-card"><div class="ph" data-full="photos/14bis-engine.jpg" data-cap="cap.bisengine"><img src="photos/14bis-engine.jpg" alt="The 14-bis Antoinette engine and propeller" loading="lazy"></div><figcaption data-i18n="cap.bisengine"><b>O motor</b>Santos-Dumont junto ao motor Antoinette V8 (50 hp) e à hélice do 14-Bis, montados atrás do piloto.</figcaption></figure>
+        <figure class="photo-card"><div class="ph" data-full="photos/14bis-flight.jpg" data-cap="cap.bis14b"><img src="photos/14bis-flight.jpg" alt="The 14-bis in flight" loading="lazy"></div><figcaption data-i18n="cap.bis14b"><b>O recordista</b>220 m em 21,5 s, 12 nov 1906 — o primeiro recorde mundial de avião.</figcaption></figure>
       </div>
     </div>
 
     <div class="craft-group rv">
       <h3 data-i18n="mach.demo.title">A Demoiselle (1907–1909)</h3>
-      <p class="gnote" data-i18n="mach.demo.note">Monoplano ultraleve de bambu e seda, tão pequeno que cabia na traseira de um carro. Santos-Dumont publicou os planos livremente — um gesto de generosidade raro na época. <a href="#open">Os planos abertos ao mundo →</a></p>
+      <p class="gnote" data-i18n="mach.demo.note">Monoplano ultraleve de bambu e seda, tão pequeno que cabia na traseira de um carro — frequentemente chamado de o primeiro ultraleve. Santos-Dumont publicou os planos livremente: a Clément-Bayard chegou a construir 50 exemplares (15 vendidos) e amadores o montaram em vários países. <a href="#open">Os planos abertos ao mundo →</a></p>
       <div class="grid">
         <figure class="photo-card"><div class="ph" data-full="photos/demoiselle-flight.jpg" data-cap="cap.demoflight"><img src="photos/demoiselle-flight.jpg" alt="Demoiselle in flight" loading="lazy"></div><figcaption data-i18n="cap.demoflight"><b>Em voo</b>A Demoiselle, ágil e leve — o oposto do pesado 14-Bis.</figcaption></figure>
-        <figure class="photo-card"><div class="ph" data-full="photos/06-demoiselle.jpg" data-cap="cap.democar"><img src="photos/06-demoiselle.jpg" alt="Demoiselle on the car" loading="lazy"></div><figcaption data-i18n="cap.democar"><b>Portátil</b>Desmontada no carro de Santos-Dumont, c. 1909.</figcaption></figure>
-        <figure class="photo-card"><div class="ph" data-full="photos/04-n9.jpg" data-cap="cap.n9b"><img src="photos/04-n9.jpg" alt="Airship No. 9" loading="lazy"></div><figcaption data-i18n="cap.n9b"><b>Do balão ao avião</b>A transição: dos dirigíveis aos aviões leves.</figcaption></figure>
+        <figure class="photo-card"><div class="ph" data-full="photos/demoiselle-ground.jpg" data-cap="cap.demoground"><img src="photos/demoiselle-ground.jpg" alt="Demoiselle on the ground" loading="lazy"></div><figcaption data-i18n="cap.demoground"><b>No solo</b>A Demoiselle em repouso: estrutura de bambu, trem de pouso triciclo e o piloto sentado na treliça.</figcaption></figure>
+        <figure class="photo-card"><div class="ph" data-full="photos/demoiselle-signed.jpg" data-cap="cap.demosigned"><img src="photos/demoiselle-signed.jpg" alt="Demoiselle period print with signature" loading="lazy"></div><figcaption data-i18n="cap.demosigned"><b>A Demoiselle</b>Print da época com auxiliares e a assinatura de Santos-Dumont — o ultraleve que ele entregou ao mundo.</figcaption></figure>
       </div>
     </div>
   </div>
@@ -374,11 +387,11 @@
     </div>
 
     <ul class="pm-specs rv">
-      <li><span class="v">259 lb</span><span class="l" data-i18n="open.s1">peso total c/ piloto</span></li>
-      <li><span class="v">96 ft²</span><span class="l" data-i18n="open.s2">superfície alar</span></li>
+      <li><span class="v">≈117 kg</span><span class="l" data-i18n="open.s1">peso c/ piloto (259 lb) · PM dez/1909</span></li>
+      <li><span class="v">≈8,9 m²</span><span class="l" data-i18n="open.s2">superfície alar (96 ft²) · PM</span></li>
       <li><span class="v">30 hp</span><span class="l" data-i18n="open.s3">motor</span></li>
-      <li><span class="v">&lt; $1.000</span><span class="l" data-i18n="open.s4">custo total</span></li>
-      <li><span class="v">5 mi / 5 min</span><span class="l" data-i18n="open.s5">St Cyr → Buc, 1909</span></li>
+      <li><span class="v">&lt; US$ 1.000</span><span class="l" data-i18n="open.s4">custo total</span></li>
+      <li><span class="v">≈8 km</span><span class="l" data-i18n="open.s5">St Cyr → Buc (5 mi) · 5 min</span></li>
     </ul>
 
     <div class="pm-grid">
@@ -388,7 +401,7 @@
       <figure class="photo-card rv"><div class="ph" data-full="photos/pm-plate5.jpg" data-cap="cap.pmplate"><img src="photos/pm-plate5.jpg" alt="Plate V, left hand wing of the Demoiselle" loading="lazy"></div><figcaption data-i18n="cap.pmplate"><b>Plate V — a asa</b>“Left hand Wing of the ‘Demoiselle’”: nervuras e longarinas de bambu, cotas e detalhes de amarração com arame de latão.</figcaption></figure>
     </div>
 
-    <p class="pm-note rv" data-i18n="open.note"><b>Nota de precisão:</b> a edição de dezembro de 1909 (p. 842) anuncia a doação das patentes e traz os diagramas gerais; os planos de construção detalhados, peça por peça, saíram na edição de junho de 1910 (“How to Build the Famous ‘Demoiselle’”). As imagens acima são reproduções das páginas originais. <b>Este simulador e esta página seguem esse legado:</b> código e conhecimento abertos, no <a href="https://github.com/Mjrovai/simuladores-interativos" target="_blank" rel="noopener">GitHub</a> e no <a href="https://www.hackster.io/mjrobot/colorizing-old-b-w-photos-and-videos-with-the-help-of-ai-761a85" target="_blank" rel="noopener">tutorial CC0</a>.</p>
+    <p class="pm-note rv" data-i18n="open.note"><b>Nota de precisão:</b> a edição de dezembro de 1909 (p. 842) anuncia a doação das patentes e traz os diagramas gerais; os planos de construção detalhados, peça por peça, saíram na edição de junho de 1910 (“How to Build the Famous ‘Demoiselle’”). O Nº 20, conforme a revista <i>Flight</i> (2/out/1909), pesava 110 kg vazio (242 lb), com 10,68 m² de asa e motor de 30 hp — números de outra versão e fonte, que não se comparam diretamente aos da PM. As imagens acima são reproduções das páginas originais. <b>Este simulador e esta página seguem esse legado:</b> código e conhecimento abertos, no <a href="https://github.com/Mjrovai/simuladores-interativos" target="_blank" rel="noopener">GitHub</a> e no <a href="https://www.hackster.io/mjrobot/colorizing-old-b-w-photos-and-videos-with-the-help-of-ai-761a85" target="_blank" rel="noopener">tutorial CC0</a>.</p>
   </div>
 </section>
 
@@ -404,8 +417,9 @@
     </div>
     <div class="intro-grid" style="margin-top:26px">
       <div class="rv">
-        <p data-i18n="man.p1">Ele popularizou o <b>relógio de pulso</b> — pediu a Cartier um relógio que pudesse ler sem soltar os comandos do dirigível. Usava colarinho alto e o chapéu Panamá de abas caídas, que aparece no piloto do nosso simulador como homenagem.</p>
+        <p data-i18n="man.p1">Ele popularizou o <b>relógio de pulso</b>: Louis Cartier criou para ele o “Santos” (1904), um dos primeiros relógios de pulso masculinos, para que pudesse ler as horas sem soltar os comandos do dirigível. Usava colarinho alto e o chapéu Panamá de abas caídas, que aparece no piloto do nosso simulador como homenagem.</p>
         <p data-i18n="man.p2">Falava português, francês e inglês, escrevia sobre o futuro da aviação e sonhava com um mundo em que as máquinas encurtassem distâncias entre os povos. Desiludido com o uso militar dos aviões e com a saúde frágil, morreu no Brasil em 1932, durante a Revolução Constitucionalista.</p>
+        <p class="sig-note" data-i18n="man.sig">A assinatura <b>Santos=Dumont</b> (no topo da página) reunia as duas origens: <b>Santos</b>, da mãe brasileira, e <b>Dumont</b>, do pai francês. O sinal de igualdade era um manifesto — para ele, o Brasil valia tanto quanto a França.</p>
       </div>
       <aside class="factcard rv">
         <h3 data-i18n="man.legacy.title">O legado</h3>
@@ -414,6 +428,9 @@
           <li data-i18n="man.legacy.2"><b>Primeiro voo público homologado</b> de avião na Europa (1906).</li>
           <li data-i18n="man.legacy.3"><b>Planos da Demoiselle</b> distribuídos gratuitamente.</li>
           <li data-i18n="man.legacy.4"><b>Pai da Aviação</b> para o Brasil; herói nacional.</li>
+          <li data-i18n="man.legacy.5"><b>Patrono da Aeronáutica Brasileira</b> (Lei 7.243/1984).</li>
+          <li data-i18n="man.legacy.6"><b>Marechal-do-Ar honorário</b> (Lei 3.636/1959).</li>
+          <li data-i18n="man.legacy.7"><b>Livro dos Heróis e Heroínas da Pátria</b> (2006).</li>
         </ul>
       </aside>
     </div>
@@ -424,12 +441,12 @@
 <section id="video">
   <div class="wrap">
     <p class="kicker rv" data-i18n="vid.kicker">A homenagem de 2019</p>
-    <h2 class="sec rv" data-i18n="vid.title">Santos Dumont In Colour</h2>
-    <p class="lede rv" data-i18n="vid.lede">O vídeo que publiquei em 2019 reunindo estas fotografias e clipes — todos colorizados por IA. Uma colagem em homenagem ao Pai da Aviação.</p>
+    <h2 class="sec rv" data-i18n="vid.title">Santos-Dumont In Color</h2>
+    <p class="lede rv" data-i18n="vid.lede">O vídeo que publiquei em 2019 reunindo estas fotografias e clipes — todos colorizados por IA. Uma colagem em homenagem ao Pai da Aviação, ao som de Biafra.</p>
     <div class="video-frame rv">
-      <iframe src="https://www.youtube-nocookie.com/embed/CneKRDwZDK0" title="Santos Dumont In Colour — tribute video (2019)" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      <iframe src="https://www.youtube-nocookie.com/embed/CneKRDwZDK0" title="Santos-Dumont In Color — tribute video (2019)" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     </div>
-    <p class="video-cap rv" data-i18n="vid.cap">“Santos Dumont In Colour” · Marcelo Rovai (MJRoBot), 2019 · fotogramas colorizados com OpenCV + CNN.</p>
+    <p class="video-cap rv" data-i18n="vid.cap">“Santos-Dumont In Color” · Marcelo Rovai (MJRoBot), 2019 · fotogramas colorizados com OpenCV + CNN.</p>
   </div>
 </section>
 
@@ -479,7 +496,7 @@
     <div class="cols">
       <div>
         <h4 data-i18n="foot.about.t">Sobre esta página</h4>
-        <p data-i18n="foot.about.p">Companheira do <a href="../14bis/">simulador do 14-Bis</a>. Reúne o acervo do vídeo “Santos Dumont In Colour” (2019), com fotografias de domínio público da década de 1900 colorizadas por IA. Página refeita para a web em 2026 por Marcelo Rovai (MJRoBot).</p>
+        <p data-i18n="foot.about.p">Companheira do <a href="../14bis/">simulador do 14-Bis</a>. Reúne o acervo do vídeo “Santos-Dumont In Color” (2019), com fotografias de domínio público da década de 1900 colorizadas por IA. Página refeita para a web em 2026 por Marcelo Rovai (MJRoBot).</p>
         <p data-i18n="foot.credit.p">Colorização: CNN de Zhang, Isola &amp; Efros (Berkeley), via OpenCV. Tutorial © 2019 MJRoBot, licença <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener">CC0</a>. Fotografias históricas: domínio público.</p>
       </div>
       <div>
@@ -495,7 +512,7 @@
     </div>
     <div class="foot-base">
       <span data-i18n="foot.base1">Feito para aula e memória · reconstrução histórica ilustrativa.</span>
-      <span>Santos Dumont · In Color · 1873–1932</span>
+      <span>Santos-Dumont · In Color · 1873–1932</span>
     </div>
   </div>
 </footer>
@@ -517,12 +534,12 @@
     'hero.dates':'Original photographs · AI-colorized in 2019 · rebuilt for the web in 2026',
     'intro.kicker':'Who he was','intro.title':'The man who flew before everyone',
     'intro.lede':'Born in Minas Gerais, Parisian at heart, Santos-Dumont did what seemed impossible: he steered a balloon, rounded the Eiffel Tower and, in 1906, took off under his own power in an aeroplane — before a crowd and official timekeepers.',
-    'intro.p1':'Alberto Santos-Dumont (1873–1932) was born in Minas Gerais, Brazil, son of a wealthy coffee engineer. He moved to Paris young and devoted his life and fortune to a single obsession: navigating the air. Between 1898 and 1905 he built and flew eighteen airships, becoming the most famous person in aviation.',
+    'intro.p1':'Alberto Santos-Dumont (1873–1932) was born in Minas Gerais, Brazil, son of a wealthy coffee engineer. He moved to Paris young and devoted his life and fortune to a single obsession: navigating the air. Between 1898 and 1905 he built and flew a series of aircraft — about eleven dirigibles, plus balloons, a glider and early aeroplanes in the No. 1–18 numbering — becoming the most famous person in aviation.',
     'intro.p2':'On 19 October 1901 he rounded the Eiffel Tower in airship No. 6 and returned to Saint-Cloud within the time limit, winning the Deutsch de la Meurthe Prize — 100,000 francs. But it was with the <b>14-bis</b>, in 1906, that he made history: the first aeroplane flight in Europe publicly witnessed, filmed and homologated, taking off on its own wheels, with no catapult or rail.',
-    'intro.p3':'Kind, eccentric and generous, he never patented his designs — he wanted aviation to belong to everyone. This page gathers the photographs I used in 2019 for a tribute video, all colorized by an AI model. At the end, you can <a href="../14bis/">fly the 14-bis</a> in a historically faithful 3D simulator.',
+    'intro.p3':'Kind, eccentric and generous, he never patented his designs — he wanted aviation to belong to everyone. This page gathers the photographs I used in 2019 for a tribute video, all colorized by an AI model. At the end, you can <a href="../14bis/">fly the 14-bis</a> in an illustrative 3D reconstruction.',
     'facts.title':'In brief',
     'facts.1':'<b>Born:</b> 20 Jul 1873, Palmira (MG), Brazil.',
-    'facts.2':'<b>18 airships</b> built and flown (No. 1 to No. 18).',
+    'facts.2':'<b>~11 airships</b> built and flown; the No. 1–18 series also includes a glider, a balloon and aeroplanes.',
     'facts.3':'<b>1901:</b> Deutsch Prize — rounding the Eiffel Tower in No. 6.',
     'facts.4':'<b>1906:</b> 14-bis — first homologated aeroplane flight in Europe.',
     'facts.5':'<b>1909:</b> Demoiselle — ultralight aircraft, free construction plans.',
@@ -533,25 +550,25 @@
     't1.title':'The young man in Paris',
     'cap.portrait':'Santos-Dumont young, already wearing the drooping-brim Panama hat that became his trademark. A coffee heir, he traded fortune for aviation.',
     't2.title':'No. 1 — the first airship',
-    'cap.n1':'Airship No. 1 in flight. The first of eighteen steerable balloons Santos-Dumont built and flew over Paris.',
+    'cap.n1':'Airship No. 1 in flight (Sep 1898). It used a light De Dion-Bouton tricycle engine he adapted, with the exhaust pointed downward to keep sparks away from the hydrogen — a real risk: in 1897 Wölfert died when his petrol engine set fire to his airship Deutschland.',
     't3.title':'Rounding the Eiffel Tower',
-    'cap.eiffel':'19 Oct 1901: No. 6 rounds the Eiffel Tower and returns to Saint-Cloud in under 30 minutes, winning the Deutsch de la Meurthe Prize (100,000 francs).',
+    'cap.eiffel':'19 Oct 1901: No. 6 rounds the Eiffel Tower and returns to Saint-Cloud in under 30 minutes, winning the Deutsch de la Meurthe Prize (100,000 francs). He gave the entire prize away: half to his mechanics, half to the poor of Paris.',
     't4.title':'No. 9 — the runabout airship',
-    'cap.n9':'No. 9, smaller and more manageable, which Santos-Dumont used for outings over Paris — even landing in the street and lunching at a café before flying home.',
+    'cap.n9':'No. 9 “Baladeuse”, smaller and manageable, which Santos-Dumont used to get around Paris — landing in the street and lunching at a café before flying home. In Jun 1903 Aída de Acosta flew it solo: the first woman to pilot a powered aircraft, and the only person he ever let fly.',
     't5.title':'14-bis — the aeroplane',
-    'cap.bis14':'The 14-bis at Bagatelle. On 23 Oct it flew ~60 m; on 12 Nov, 220 m in 21.5 s — the first homologated aeroplane world record. It took off on its own wheels.',
+    'cap.bis14':'The 14-bis at Bagatelle. On 23 Oct it flew ~60 m and won the Archdeacon Prize; on 12 Nov, 220 m in 21.5 s — the first aeroplane world record homologated by the Aéro-Club de France. It took off on its own wheels, no catapult, before a crowd and the press.',
     't6.title':'Demoiselle — light and portable',
-    'cap.demoiselle':'Santos-Dumont at the wheel, with the dismounted Demoiselle on the back of his car, c. 1909. The ultralight aircraft (≈110 kg) whose plans he gave away for free.',
+    'cap.demoiselle':'Santos-Dumont at the wheel, with the dismounted Demoiselle on the back of his car, c. 1909. The No. 20 ultralight weighed 110 kg empty (242 lb); he gave its plans away for free.',
     't7.title':'Back in Brazil',
-    'cap.brasil':'Back in Brazil, received as a national hero. He kept inventing and writing, but his health and spirits were fading.',
+    'cap.brasil':'Back in Brazil, received as a national hero. In 1916 he visited the Iguaçu Falls and, indignant that they were private property, persuaded the government of Paraná to expropriate them — a decisive step toward the creation of Iguaçu National Park (1939). He kept inventing and writing, but his health was fading.',
     't8.title':'The last photograph',
     'cap.last':'On the right, white-haired and frail, Santos-Dumont at an outdoor table with companions — said to be his last photo, in the year of his death, in Guarujá.',
     't9.title':'The memorial',
-    'cap.monument':'Memorial to Santos-Dumont in Paris. For Brazil and France alike, he is the Father of Aviation — the first to fly publicly under his own power.',
+    'cap.monument':'Monument at Saint-Cloud (Paris), by Georges Colin, unveiled in 1913 by the Aéro-Club de France: a winged figure lifts the aviator. The original bronze was melted down under the Vichy regime; a replica, funded by Brazilian subscription, was unveiled on 4 Jul 1952 and is now read as Icarus and his dream of flight — the theme of the 2019 video, with music by Biafra.',
     'mach.kicker':'The machines','mach.title':'Airships, the 14-bis and the Demoiselle',
     'mach.lede':'A family of aircraft spanning two decades — from the steerable balloon to the light aeroplane. Each photo opens larger.',
-    'mach.dir.title':'The airships (No. 1 – No. 18)',
-    'mach.dir.note':'Elongated balloons powered by combustion engines, the pilot suspended in a basket or truss beneath the envelope. Santos-Dumont proved that directed flight was possible.',
+    'mach.dir.title':'The airships (the No. 1–18 series)',
+    'mach.dir.note':'Elongated balloons powered by combustion engines, the pilot suspended in a basket or truss beneath the envelope. The No. 1–18 numbering was not only airships: No. 11 was a glider, No. 12 an unfinished helicopter, No. 13 a balloon, and No. 15–18 aeroplanes and a hydroplane; No. 8 never existed. Actual dirigibles built: about eleven (No. 1–7, 9, 10 and 14).',
     'cap.n5':'<b>No. 5</b>The airship of the early experiments and the 1901 accident.',
     'cap.n14':'<b>No. 14</b>The 14-bis was suspended beneath it for the first trials — hence the name “14-bis”.',
     'cap.dirigible':'<b>In flight</b>The unmistakable silhouette: slender envelope and long truss with the pilot.',
@@ -561,7 +578,7 @@
     'cap.bistests':'<b>Trials</b>The experiments that led to the homologated flights of October and November.',
     'cap.bis14b':'<b>The record-setter</b>220 m in 21.5 s, 12 Nov 1906 — the first aeroplane world record.',
     'mach.demo.title':'The Demoiselle (1907–1909)',
-    'mach.demo.note':'An ultralight bamboo-and-silk monoplane, so small it fit on the back of a car. Santos-Dumont published the plans freely — a rare act of generosity at the time. <a href="#open">The plans, open to the world →</a>',
+    'mach.demo.note':'An ultralight bamboo-and-silk monoplane, so small it fit on the back of a car — often called the first ultralight. Santos-Dumont published the plans freely: Clément-Bayard built 50 (15 sold) and amateurs assembled it in many countries. <a href="#open">The plans, open to the world →</a>',
     'cap.demoflight':'<b>In flight</b>The Demoiselle, agile and light — the opposite of the heavy 14-bis.',
     'cap.democar':'<b>Portable</b>Dismounted on Santos-Dumont’s car, c. 1909.',
     'cap.n9b':'<b>From balloon to plane</b>The transition: from airships to light aeroplanes.',
@@ -569,16 +586,16 @@
     'man.lede':'Small, elegant and adored by the public — Santos-Dumont was a celebrity long before the word existed for aviators.',
     'cap.personal':'<b>Personal life</b>Among friends and admirers — a beloved figure of Belle Époque Paris.',
     'cap.dog':'<b>With his dog</b>c. 1930 — the final years, more withdrawn, but always inventing.',
-    'man.p1':'He popularized the <b>wristwatch</b> — asking Cartier for a watch he could read without letting go of the airship controls. He wore a high collar and the drooping-brim Panama hat, which appears on our simulator’s pilot as a tribute.',
+    'man.p1':'He popularized the <b>wristwatch</b>: Louis Cartier created the “Santos” (1904) for him, one of the first men’s wristwatches, so he could read the time without letting go of the airship controls. He wore a high collar and the drooping-brim Panama hat, which appears on our simulator’s pilot as a tribute.',
     'man.p2':'He spoke Portuguese, French and English, wrote about the future of aviation and dreamed of a world where machines shortened the distances between peoples. Disillusioned by the military use of aircraft and in fragile health, he died in Brazil in 1932, during the Constitutionalist Revolution.',
     'man.legacy.title':'The legacy',
     'man.legacy.1':'<b>Never patented</b> his designs — aviation should belong to everyone.',
     'man.legacy.2':'<b>First public homologated flight</b> of an aeroplane in Europe (1906).',
     'man.legacy.3':'<b>Demoiselle plans</b> distributed for free.',
     'man.legacy.4':'<b>Father of Aviation</b> for Brazil; a national hero.',
-    'vid.kicker':'The 2019 tribute','vid.title':'Santos Dumont In Colour',
-    'vid.lede':'The video I published in 2019 gathering these photographs and clips — all colorized by AI. A collage in homage to the Father of Aviation.',
-    'vid.cap':'“Santos Dumont In Colour” · Marcelo Rovai (MJRoBot), 2019 · frames colorized with OpenCV + CNN.',
+    'vid.kicker':'The 2019 tribute','vid.title':'Santos-Dumont In Color',
+    'vid.lede':'The video I published in 2019 gathering these photographs and clips — all colorized by AI. A collage in homage to the Father of Aviation, set to music by Biafra.',
+    'vid.cap':'“Santos-Dumont In Color” · Marcelo Rovai (MJRoBot), 2019 · frames colorized with OpenCV + CNN.',
     'met.kicker':'How they were colorized','met.title':'AI colorization (2019)',
     'met.p1':'Every image on this page is an original photograph from the first decade of the 20th century, colorized by computer in 2019. The method is a feed-forward <b>convolutional neural network (CNN)</b>, trained on over 1.3 million color images from ImageNet, proposed by Richard Zhang, Phillip Isola and Alexei A. Efros (UC Berkeley) in the paper <i>Colorful Image Colorization</i>.',
     'met.p2':'The idea: a black-and-white photo is converted to the <b>Lab</b> color space. The <b>L</b> channel (luminance) is the network input; the CNN predicts the <b>a</b> and <b>b</b> channels (chrominance). Recombined L + a + b and converted back to RGB, they return the “color” photo. The process is fully automatic, implemented with OpenCV (<code>cv2.dnn</code>), and applied frame by frame to the video clips.',
@@ -594,7 +611,7 @@
     'cta.btn':'✈ Open the 14-Bis simulator',
     'cta.sub':'3D model · free flight · historical replays',
     'foot.about.t':'About this page',
-    'foot.about.p':'Companion to the <a href="../14bis/">14-bis simulator</a>. It gathers the archive of the “Santos Dumont In Colour” video (2019), with public-domain 1900s photographs colorized by AI. Page rebuilt for the web in 2026 by Marcelo Rovai (MJRoBot).',
+    'foot.about.p':'Companion to the <a href="../14bis/">14-bis simulator</a>. It gathers the archive of the “Santos-Dumont In Color” video (2019), with public-domain 1900s photographs colorized by AI. Page rebuilt for the web in 2026 by Marcelo Rovai (MJRoBot).',
     'foot.credit.p':'Colorization: CNN by Zhang, Isola &amp; Efros (Berkeley), via OpenCV. Tutorial © 2019 MJRoBot, <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener">CC0</a> license. Historical photographs: public domain.',
     'foot.links.t':'Navigate',
     'foot.links.sim':'14-Bis simulator (3D + flight)',
@@ -609,16 +626,26 @@
     'open.quote':'The patent rights of the machine have been turned over to the public by Santos-Dumont in order to encourage aviation, and anyone may use his plans to construct a similar machine.',
     'open.qtrans':'',
     'open.cite':'— <i>Popular Mechanics</i>, December 1909, p. 842 · “Santos-Dumont Gives Aeroplane Patents to World” · <a href="https://archive.org/details/PopularMechanics1909" target="_blank" rel="noopener">read the source ↗</a>',
-    'open.s1':'total weight w/ pilot','open.s2':'wing area','open.s3':'engine','open.s4':'total cost','open.s5':'St Cyr → Buc, 1909',
+    'open.s1':'weight w/ pilot (259 lb) · PM Dec 1909','open.s2':'wing area (96 ft²) · PM','open.s3':'engine','open.s4':'total cost','open.s5':'St Cyr → Buc (5 mi) · 5 min',
     'cap.pmcover':'<b>The cover</b><i>Popular Mechanics</i>, December 1909 — “Written so you can understand it”, 15 cents, circulation 240,000.',
     'cap.pmpage':'<b>Page 842</b>“Santos-Dumont Gives Aeroplane Patents to World” — the announcement of the patent gift, with two diagrams of the Demoiselle.',
     'cap.pmblueprint':'<b>The general plan</b>Front and side views of the Demoiselle with numbered parts — the kind of drawing he handed to the public.',
     'cap.pmplate':'<b>Plate V — the wing</b>“Left hand Wing of the ‘Demoiselle’”: bamboo ribs and spars, dimensions and brass-wire lashing details.',
-    'open.note':'<b>A note on precision:</b> the December 1909 issue (p. 842) announces the patent gift and carries the general diagrams; the detailed, part-by-part construction plans appeared in the June 1910 issue (“How to Build the Famous ‘Demoiselle’”). The images above are reproductions of the original pages. <b>This simulator and this page follow that legacy:</b> open code and open knowledge, on <a href="https://github.com/Mjrovai/simuladores-interativos" target="_blank" rel="noopener">GitHub</a> and in the <a href="https://www.hackster.io/mjrobot/colorizing-old-b-w-photos-and-videos-with-the-help-of-ai-761a85" target="_blank" rel="noopener">CC0 tutorial</a>.'
+    'open.note':'<b>A note on precision:</b> the December 1909 issue (p. 842) announces the patent gift and carries the general diagrams; the detailed, part-by-part construction plans appeared in the June 1910 issue (“How to Build the Famous ‘Demoiselle’”). The No. 20, per <i>Flight</i> magazine (2 Oct 1909), weighed 110 kg empty (242 lb) with 10.68 m² of wing and a 30 hp engine — figures from a different version and source, not directly comparable to the PM’s. The images above are reproductions of the original pages. <b>This simulator and this page follow that legacy:</b> open code and open knowledge, on <a href="https://github.com/Mjrovai/simuladores-interativos" target="_blank" rel="noopener">GitHub</a> and in the <a href="https://www.hackster.io/mjrobot/colorizing-old-b-w-photos-and-videos-with-the-help-of-ai-761a85" target="_blank" rel="noopener">CC0 tutorial</a>.',
+    't1b.title':'The Brasil balloon',
+    'cap.brasilballoon':'The Brasil balloon, held by handlers before an ascent (1898). At 6 m across, 113 m³ and just 27.5 kg, it was the smallest hydrogen balloon ever built — Santos-Dumont himself said that, deflated, it fit in a briefcase. A pioneering step toward personal air mobility.',
+    'cap.apartamento':'In his Paris apartment-workshop, Santos-Dumont designed and built his machines — an inventor at work, surrounded by diagrams and models.',
+    'cap.bisengine':'<b>The engine</b>Santos-Dumont beside the 14-bis’s Antoinette V8 (50 hp) and propeller, mounted behind the pilot.',
+    'cap.demoground':'<b>On the ground</b>The Demoiselle at rest: bamboo frame, tricycle undercarriage and the pilot seated in the truss.',
+    'cap.demosigned':'<b>The Demoiselle</b>A period print with handlers and Santos-Dumont’s signature — the ultralight he gave to the world.',
+    'man.sig':'The signature <b>Santos=Dumont</b> (at the top of this page) joined his two origins: <b>Santos</b>, from his Brazilian mother, and <b>Dumont</b>, from his French father. The equals sign was a manifesto — for him, Brazil was worth as much as France.',
+    'man.legacy.5':'<b>Patron of the Brazilian Air Force</b> (Law 7,243/1984).',
+    'man.legacy.6':'<b>Honorary Air Marshal</b> (Law 3,636/1959).',
+    'man.legacy.7':'<b>Book of Heroes and Heroines of the Fatherland</b> (2006).',
   };
 
   const root = document.documentElement;
-  const TITLES = { pt:'Santos Dumont — In Color · a vida do Pai da Aviação', en:'Santos Dumont — In Color · the life of the Father of Aviation' };
+  const TITLES = { pt:'Santos-Dumont — In Color · a vida do Pai da Aviação', en:'Santos-Dumont — In Color · the life of the Father of Aviation' };
   const PT = {};
   document.querySelectorAll('[data-i18n]').forEach(el => { PT[el.dataset.i18n] = el.innerHTML; });
   const DICTS = { pt:PT, en:EN };

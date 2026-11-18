@@ -495,7 +495,7 @@ function buildAbout() {
     `<figure><img src="photos/05-14bis.jpg" alt="The 14-bis at Bagatelle" loading="lazy"><figcaption>The 14-bis, 1906</figcaption></figure>` +
     `<figure><img src="photos/03-eiffel.jpg" alt="Airship No. 6 rounding the Eiffel Tower" loading="lazy"><figcaption>No. 6 at the Eiffel Tower, 1901</figcaption></figure>` +
     `</div>` +
-    `<p class="about-credit">Photographs colorized by AI in 2019 (CNN, Zhang–Isola–Efros, via OpenCV) for the tribute <a href="https://youtu.be/CneKRDwZDK0" target="_blank" rel="noopener">Santos Dumont In Colour</a>. <a href="../santos-dumont-in-color/">Explore the full colorized archive →</a> · <a href="https://www.hackster.io/mjrobot/colorizing-old-b-w-photos-and-videos-with-the-help-of-ai-761a85" target="_blank" rel="noopener">How it was done</a>.</p>`;
+    `<p class="about-credit">Photographs colorized by AI in 2019 (CNN, Zhang–Isola–Efros, via OpenCV) for the tribute <a href="https://youtu.be/CneKRDwZDK0" target="_blank" rel="noopener">Santos-Dumont In Color</a>. <a href="../santos-dumont-in-color/">Explore the full colorized archive →</a> · <a href="https://www.hackster.io/mjrobot/colorizing-old-b-w-photos-and-videos-with-the-help-of-ai-761a85" target="_blank" rel="noopener">How it was done</a>.</p>`;
   const specs = `<h3>Specifications</h3><table class="spec-table">` +
     SPECS.map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join('') + `</table>`;
   const hist = `<h3>Timeline</h3><ul class="timeline">` +
