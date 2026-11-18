@@ -514,6 +514,130 @@ $('fullBtn').addEventListener('click', () => {
 $('controlsClose').addEventListener('click', () => { $('controlsCard').style.display = 'none'; $('controlsReopen').hidden = false; $('controlsReopen').style.display = 'block'; });
 $('controlsReopen').addEventListener('click', () => { $('controlsCard').style.display = ''; $('controlsReopen').hidden = true; $('controlsReopen').style.display = ''; });
 
+// ---------------------------------------------------------------- 1906 cinema --
+// flight.mp4 is 854×480. Native <video> fullscreen stretches it ~3× on a desktop
+// monitor and looks soft. "Fullscreen" instead opens a vintage movie palace and
+// projects the SAME element near native size on a small screen, so the grain
+// reads as authentic 1906 footage rather than a defect.
+const histVideo = $('histVideo');
+const cinema = $('cinema');
+const cinemaScreen = $('cinemaScreen');
+const replayScreen = histVideo.closest('.replay-screen');
+let cinemaOpen = false;
+
+(function buildAudience() {
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 1200 170');
+  svg.setAttribute('preserveAspectRatio', 'xMidYMax slice');
+  const row = (n, baseY, r, fill, hatEvery) => {
+    const g = document.createElementNS(NS, 'g'); g.setAttribute('fill', fill);
+    for (let i = 0; i < n; i++) {
+      const x = 30 + i * (1140 / (n - 1)) + ((i % 3) - 1) * 9;
+      const y = baseY + ((i * 7) % 5) * 3;
+      const hr = r + ((i * 5) % 4);
+      const sh = document.createElementNS(NS, 'path');
+      sh.setAttribute('d', `M ${x - hr * 2.1} 170 Q ${x - hr * 1.5} ${y + hr * 0.9} ${x} ${y + hr * 0.7} Q ${x + hr * 1.5} ${y + hr * 0.9} ${x + hr * 2.1} 170 Z`);
+      g.appendChild(sh);
+      const h = document.createElementNS(NS, 'ellipse');
+      h.setAttribute('cx', x); h.setAttribute('cy', y); h.setAttribute('rx', hr * 0.82); h.setAttribute('ry', hr);
+      g.appendChild(h);
+      if (hatEvery && i % hatEvery === 1) {            // a few panama hats — homage to SD
+        const brim = document.createElementNS(NS, 'ellipse');
+        brim.setAttribute('cx', x); brim.setAttribute('cy', y - hr * 0.72); brim.setAttribute('rx', hr * 1.5); brim.setAttribute('ry', hr * 0.26);
+        g.appendChild(brim);
+        const crown = document.createElementNS(NS, 'path');
+        crown.setAttribute('d', `M ${x - hr * 0.7} ${y - hr * 0.72} Q ${x} ${y - hr * 1.75} ${x + hr * 0.7} ${y - hr * 0.72} Z`);
+        g.appendChild(crown);
+      }
+    }
+    return g;
+  };
+  svg.appendChild(row(13, 68, 17, '#1a130b', 0));
+  svg.appendChild(row(11, 96, 24, '#0e0b06', 4));
+  $('cinemaAudience').appendChild(svg);
+})();
+
+const ICON_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+const ICON_PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>';
+const ICON_SOUND = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor" stroke="none"/><path d="M16 8.5a4 4 0 010 7"/></svg>';
+const ICON_MUTE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor" stroke="none"/><path d="M16 9l5 6M21 9l-5 6"/></svg>';
+
+(function buildValance() {
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 1200 64'); svg.setAttribute('preserveAspectRatio', 'none');
+  const defs = document.createElementNS(NS, 'defs');
+  const lg = document.createElementNS(NS, 'linearGradient');
+  lg.id = 'velvet'; lg.setAttribute('x1', '0'); lg.setAttribute('y1', '0'); lg.setAttribute('x2', '0'); lg.setAttribute('y2', '1');
+  [['0', '#7a2230'], ['0.5', '#4a1016'], ['1', '#2c080d']].forEach(([o, c]) => {
+    const s = document.createElementNS(NS, 'stop'); s.setAttribute('offset', o); s.setAttribute('stop-color', c); lg.appendChild(s);
+  });
+  defs.appendChild(lg); svg.appendChild(defs);
+  const n = 6, w = 1200 / n; let d = 'M0 0 H1200 V20 ';
+  for (let i = n; i > 0; i--) { const x1 = (i - 1) * w, cx = (i - 0.5) * w; d += `Q ${cx} 62 ${x1} 20 `; }
+  d += 'Z';
+  const p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); p.setAttribute('fill', 'url(#velvet)'); svg.appendChild(p);
+  for (let i = 0; i < n; i++) { const c = document.createElementNS(NS, 'circle'); c.setAttribute('cx', (i + 0.5) * w); c.setAttribute('cy', 53); c.setAttribute('r', 3.2); c.setAttribute('fill', '#c9a227'); svg.appendChild(c); }
+  let fd = 'M1200 20 '; for (let i = n; i > 0; i--) { const x1 = (i - 1) * w, cx = (i - 0.5) * w; fd += `Q ${cx} 62 ${x1} 20 `; }
+  const fr = document.createElementNS(NS, 'path'); fr.setAttribute('d', fd); fr.setAttribute('fill', 'none'); fr.setAttribute('stroke', '#c9a227'); fr.setAttribute('stroke-width', '2'); svg.appendChild(fr);
+  const t = document.createElementNS(NS, 'rect'); t.setAttribute('x', 0); t.setAttribute('y', 0); t.setAttribute('width', 1200); t.setAttribute('height', 3); t.setAttribute('fill', '#c9a227'); svg.appendChild(t);
+  document.querySelector('.valance').appendChild(svg);
+})();
+
+const cdPlay = $('cdPlay'), cdSeek = $('cdSeek'), cdFill = $('cdFill'), cdTime = $('cdTime'), cdMute = $('cdMute');
+const fmt = (t) => { t = Math.max(0, t | 0); return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); };
+function cdSync() {
+  const d = histVideo.duration || 59.7;
+  cdFill.style.width = (100 * (histVideo.currentTime / d)) + '%';
+  cdTime.textContent = fmt(histVideo.currentTime) + ' / ' + fmt(d);
+  cdPlay.innerHTML = histVideo.paused ? ICON_PLAY : ICON_PAUSE;
+}
+cdMute.innerHTML = ICON_SOUND;
+histVideo.addEventListener('timeupdate', cdSync);
+histVideo.addEventListener('loadedmetadata', cdSync);
+histVideo.addEventListener('play', cdSync);
+histVideo.addEventListener('pause', cdSync);
+cdPlay.addEventListener('click', () => { histVideo.paused ? histVideo.play().catch(() => {}) : histVideo.pause(); });
+cdMute.addEventListener('click', () => { histVideo.muted = !histVideo.muted; cdMute.innerHTML = histVideo.muted ? ICON_MUTE : ICON_SOUND; });
+cdSeek.addEventListener('click', (e) => { const r = cdSeek.getBoundingClientRect(); const d = isFinite(histVideo.duration) ? histVideo.duration : 59.7; histVideo.currentTime = ((e.clientX - r.left) / r.width) * d; cdSync(); });
+histVideo.addEventListener('click', () => { if (cinemaOpen) { histVideo.paused ? histVideo.play().catch(() => {}) : histVideo.pause(); } });
+cdSync();
+
+function openCinema() {
+  if (cinemaOpen) return;
+  cinemaOpen = true;
+  cinemaScreen.prepend(histVideo);                 // move the SAME node → keeps time/state
+  cinema.hidden = false;
+  histVideo.removeAttribute('controls');           // hide modern chrome; use the vintage deck
+  cdSync();
+  histVideo.play().catch(() => {});
+  if (cinema.requestFullscreen) cinema.requestFullscreen().catch(() => {});
+}
+function closeCinema() {
+  if (!cinemaOpen) return;
+  cinemaOpen = false;
+  histVideo.pause();
+  histVideo.setAttribute('controls','');           // restore native controls inline
+  replayScreen.insertBefore(histVideo, replayScreen.firstChild);   // back inline
+  cinema.hidden = true;
+  if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+}
+$('cinemaOpen').addEventListener('click', openCinema);
+$('cinemaClose').addEventListener('click', closeCinema);
+cinema.addEventListener('click', (e) => { if (e.target === cinema || e.target.classList.contains('cinema-house')) closeCinema(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && cinemaOpen) closeCinema(); });
+document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && cinemaOpen) closeCinema(); });
+// Route any native attempt to fullscreen the clip into the cinema instead.
+histVideo.addEventListener('webkitbeginfullscreen', (e) => { e.preventDefault(); openCinema(); });
+histVideo.addEventListener('fullscreenchange', () => {
+  if (document.fullscreenElement === histVideo) { document.exitFullscreen().catch(() => {}); openCinema(); }
+});
+// While the cinema is open, don't let flight keys leak to the simulator.
+document.addEventListener('keydown', (e) => {
+  if (cinemaOpen && [' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) e.stopPropagation();
+}, true);
+
 // ---------------------------------------------------------------- loop -------
 const FIXED = 1 / 120;
 let acc = 0, last = performance.now();

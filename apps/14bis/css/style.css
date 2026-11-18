@@ -276,6 +276,72 @@ a.icon-btn{text-decoration:none}
 .replay-media video{width:100%;display:block;aspect-ratio:16/9;object-fit:cover;background:#000}
 .replay-media figcaption{font-size:11px;line-height:1.4;color:var(--cream-faint);padding:8px 10px;font-style:italic}
 .replay-media figcaption a{color:var(--brass-bright)}
+
+/* ── 1906 cinema (archival clip is 854×480; native fullscreen upscales ~3× on a
+   desktop monitor. Instead we project it near native size inside a vintage
+   movie palace, so the softness reads as authentic 1906 film.) ── */
+.replay-screen{position:relative}
+.cinema-open{position:absolute;top:8px;right:8px;z-index:3;display:flex;align-items:center;gap:6px;
+  padding:6px 11px;border:1px solid rgba(201,162,39,.5);border-radius:7px;background:rgba(20,14,8,.78);
+  color:var(--brass-bright);font-size:11.5px;letter-spacing:.05em;transition:background .18s,color .18s,border-color .18s}
+.cinema-open:hover{background:rgba(201,162,39,.22);color:var(--cream);border-color:var(--brass-bright)}
+.cinema-open svg{width:15px;height:15px}
+
+.cinema{position:fixed;inset:0;z-index:200;overflow:hidden;
+  background:radial-gradient(ellipse at 50% 36%,#1b130b 0%,#0a0705 56%,#040201 100%)}
+.cinema-house{position:relative;width:100%;height:100%;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:clamp(8px,2vh,20px);padding:clamp(48px,7vh,72px) 16px clamp(70px,13vh,120px)}
+.cinema-beam{position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:6;pointer-events:none;
+  width:min(700px,78vw);height:70vh;opacity:.55;filter:blur(2px);mix-blend-mode:screen;
+  background:linear-gradient(180deg,rgba(247,240,225,.34),rgba(242,232,213,.17) 42%,rgba(242,232,213,.08) 72%,rgba(242,232,213,.02) 92%,transparent);
+  clip-path:polygon(48% 0,52% 0,86% 100%,14% 100%)}
+.cinema-marquee{position:relative;z-index:4;text-align:center;line-height:1.25}
+.cinema-marquee .cq{display:block;font-family:var(--serif);font-style:italic;font-size:clamp(12px,1.8vw,17px);
+  letter-spacing:.34em;text-transform:uppercase;color:var(--brass)}
+.cinema-marquee strong{display:block;font-family:var(--serif);font-size:clamp(20px,3.4vw,34px);
+  letter-spacing:.2em;color:var(--cream);text-shadow:0 0 20px rgba(230,195,74,.4)}
+.cinema-marquee .cq-sub{display:block;margin-top:5px;font-size:clamp(9px,1.2vw,11.5px);
+  letter-spacing:.16em;text-transform:uppercase;color:var(--cream-faint)}
+.cinema-proscenium{position:relative;z-index:3;padding:clamp(16px,2.6vw,32px) clamp(30px,5.2vw,76px);
+  background:linear-gradient(180deg,#2b1d11,#19110a);border:2px solid rgba(201,162,39,.5);border-radius:6px;
+  box-shadow:0 0 0 6px rgba(18,12,7,.6),0 30px 80px rgba(0,0,0,.7),inset 0 0 44px rgba(0,0,0,.6)}
+.valance{position:absolute;left:-2px;right:-2px;top:-2px;height:clamp(28px,4.6vw,58px);z-index:4;pointer-events:none;
+  filter:drop-shadow(0 5px 8px rgba(0,0,0,.55))}
+.valance svg{width:100%;height:100%;display:block}
+.curtain{position:absolute;top:-2px;bottom:-2px;width:clamp(24px,4.6vw,66px);z-index:3;pointer-events:none;
+  background:linear-gradient(90deg,#28070b 0%,#5a1620 12%,#3a0d12 27%,#6a1c26 43%,#360b10 58%,#5a1620 74%,#2c080d 88%,#4a1016 100%);
+  box-shadow:inset 0 0 30px rgba(0,0,0,.75)}
+.curtain-l{left:-2px;border-radius:6px 0 0 6px}
+.curtain-r{right:-2px;border-radius:0 6px 6px 0}
+.cinema-screen{position:relative;width:min(640px,74vw);aspect-ratio:4/3;background:#000;overflow:hidden;
+  border:3px solid #d9caa9;border-radius:2px;box-shadow:0 0 60px rgba(242,232,213,.18),0 0 130px rgba(230,195,74,.12)}
+.cinema-screen video{position:relative;z-index:1;width:100%;height:100%;object-fit:cover;object-position:center;display:block;background:#000;cursor:pointer}
+.cinema-deck{display:flex;align-items:center;gap:12px;width:min(640px,74vw);margin-top:0;
+  padding:9px 14px;border:1px solid rgba(201,162,39,.4);border-top:none;border-radius:0 0 4px 4px;
+  background:linear-gradient(180deg,rgba(201,162,39,.18),rgba(20,14,8,.62));
+  box-shadow:0 -2px 20px rgba(230,195,74,.2),inset 0 1px 0 rgba(230,195,74,.32)}
+.cd-btn{display:flex;align-items:center;justify-content:center;width:30px;height:30px;flex-shrink:0;border-radius:50%;
+  border:1px solid rgba(201,162,39,.5);color:var(--brass-bright);background:rgba(20,14,8,.5);transition:.15s}
+.cd-btn:hover{background:rgba(201,162,39,.24);color:var(--cream)}
+.cd-btn svg{width:14px;height:14px}
+.cd-seek{flex:1;height:7px;border-radius:4px;background:rgba(0,0,0,.5);border:1px solid rgba(201,162,39,.3);cursor:pointer;position:relative;overflow:hidden}
+.cd-seek i{position:absolute;left:0;top:0;bottom:0;width:0;display:block;background:linear-gradient(90deg,var(--brass),var(--brass-bright))}
+.cd-time{font-family:var(--serif);font-size:12px;letter-spacing:.05em;color:var(--cream-dim);min-width:80px;text-align:right}
+.film-fx{position:absolute;inset:0;z-index:2;pointer-events:none;mix-blend-mode:multiply;animation:flicker 6s infinite;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.05) 0 1px,transparent 1px 3px),
+    radial-gradient(ellipse at center,transparent 68%,rgba(0,0,0,.26) 100%)}
+@keyframes flicker{0%,90%,100%{opacity:.9}92%{opacity:.62}94%{opacity:.95}96%{opacity:.72}}
+.cinema-audience{position:absolute;left:0;right:0;bottom:0;z-index:5;pointer-events:none;height:clamp(92px,17vh,180px);
+  background:radial-gradient(ellipse at 50% -10%,rgba(230,195,74,.08),transparent 68%)}
+.cinema-audience svg{width:100%;height:100%;display:block}
+.cinema-close{position:absolute;top:14px;right:16px;z-index:6;display:flex;align-items:center;gap:7px;
+  padding:8px 14px;border:1px solid var(--line);border-radius:8px;background:rgba(20,14,8,.72);
+  color:var(--cream-dim);font-size:12.5px;letter-spacing:.05em;transition:.18s}
+.cinema-close:hover{color:var(--cream);border-color:var(--brass);background:rgba(201,162,39,.16)}
+.cinema-hint{position:absolute;top:18px;left:18px;z-index:6;margin:0;font-size:10px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--cream-faint);opacity:.75}
+@media (prefers-reduced-motion:reduce){.film-fx{animation:none}}
+@media (max-width:640px){.cinema-hint{display:none}.cinema-close span{display:none}}
 @media (max-width:640px){.about-photos{grid-template-columns:1fr 1fr}.about-photos img{height:100px}}
 
 /* ── toast ── */

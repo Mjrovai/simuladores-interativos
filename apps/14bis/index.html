@@ -155,7 +155,13 @@
       <h2>Bagatelle, autumn 1906</h2>
       <p class="lead">Replay the two flights that made history, flown by the same physics you can fly yourself. Watch from the chase camera.</p>
       <figure class="replay-media">
-        <video controls preload="metadata" playsinline poster="media/flight-poster.jpg" src="media/flight.mp4"></video>
+        <div class="replay-screen">
+          <video id="histVideo" controls controlslist="nofullscreen" disablepictureinpicture preload="metadata" playsinline poster="media/flight-poster.jpg" src="media/flight.mp4"></video>
+          <button class="cinema-open" id="cinemaOpen" aria-label="Watch in the 1906 cinema (fullscreen)" title="Watch in the 1906 cinema">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><path d="M10 9.5l5 2.5-5 2.5z" fill="currentColor" stroke="none"/></svg>
+            <span>1906 Cinema</span>
+          </button>
+        </div>
         <figcaption>Original 1906 footage, colorized by AI in 2019. <a href="../santos-dumont-in-color/">The full archive →</a></figcaption>
       </figure>
       <div class="flight-list" id="flightList"></div>
@@ -178,6 +184,35 @@
       <div class="kicker">About this simulator</div>
       <h2>The first certified aeroplane flight in Europe</h2>
       <div class="modal-body" id="aboutBody"></div>
+    </div>
+  </div>
+
+  <!-- ══════════ 1906 CINEMA ══════════ -->
+  <div class="cinema" id="cinema" hidden role="dialog" aria-modal="true" aria-label="1906 cinema projection">
+    <div class="cinema-house">
+      <div class="cinema-beam" aria-hidden="true"></div>
+      <div class="cinema-marquee">
+        <span class="cq">Cinéma</span>
+        <strong>BAGATELLE · 1906</strong>
+        <span class="cq-sub">Santos-Dumont · 14-Bis · original footage, colorized 2019</span>
+      </div>
+      <div class="cinema-proscenium">
+        <div class="valance" aria-hidden="true"></div>
+        <div class="curtain curtain-l" aria-hidden="true"></div>
+        <div class="curtain curtain-r" aria-hidden="true"></div>
+        <div class="cinema-screen" id="cinemaScreen">
+          <div class="film-fx" aria-hidden="true"></div>
+        </div>
+        <div class="cinema-deck">
+          <button class="cd-btn" id="cdPlay" aria-label="Play or pause"></button>
+          <div class="cd-seek" id="cdSeek" aria-label="Seek"><i id="cdFill"></i></div>
+          <span class="cd-time" id="cdTime">0:00 / 0:59</span>
+          <button class="cd-btn" id="cdMute" aria-label="Mute or unmute"></button>
+        </div>
+      </div>
+      <div class="cinema-audience" id="cinemaAudience" aria-hidden="true"></div>
+      <button class="cinema-close" id="cinemaClose" aria-label="Leave the cinema">✕ <span>Leave the cinema</span></button>
+      <p class="cinema-hint">Esc to exit · projected at the original 1906 resolution</p>
     </div>
   </div>
 
