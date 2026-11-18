@@ -107,7 +107,9 @@
   .grid.grid-4{grid-template-columns:repeat(4,1fr)}
   .intro-fig{margin:0 0 18px}
   .intro-fig .ph{aspect-ratio:3/2}
-  .sig-note{margin-top:14px;padding:14px 18px;background:var(--card);border-left:4px solid var(--brass);border-radius:0 10px 10px 0;font-size:15.5px;color:var(--ink2)}
+  .sig-note{margin-top:14px;padding:16px 18px;background:var(--card);border-left:4px solid var(--brass);border-radius:0 10px 10px 0}
+  .sig-note .sig-img{display:block;width:min(360px,85%);height:auto;margin:0 0 14px;mix-blend-mode:multiply;opacity:.95}
+  .sig-note p{margin:0;font-size:15.5px;line-height:1.6;color:var(--ink2)}
   .photo-card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 6px 18px var(--shadow);transition:transform .18s,box-shadow .18s}
   .photo-card:hover{transform:translateY(-3px);box-shadow:0 12px 26px var(--shadow2)}
   .photo-card .ph{aspect-ratio:4/3;overflow:hidden;cursor:zoom-in;background:#efe5cf}
@@ -498,7 +500,7 @@
       <div class="rv">
         <p data-i18n="man.p1">Ele popularizou o <b>relógio de pulso</b>: Louis Cartier criou para ele o “Santos” (1904), um dos primeiros relógios de pulso masculinos, para que pudesse ler as horas sem soltar os comandos do dirigível. Usava colarinho alto e o chapéu Panamá de abas caídas, que aparece no piloto do nosso simulador como homenagem.</p>
         <p data-i18n="man.p2">Falava português, francês e inglês, escrevia sobre o futuro da aviação e sonhava com um mundo em que as máquinas encurtassem distâncias entre os povos. Desiludido com o uso militar dos aviões e com a saúde frágil, morreu no Brasil em 1932, durante a Revolução Constitucionalista.</p>
-        <p class="sig-note" data-i18n="man.sig">A assinatura <b>Santos=Dumont</b> (no topo da página) reunia as duas origens: <b>Santos</b>, da mãe brasileira, e <b>Dumont</b>, do pai francês. O sinal de igualdade era um manifesto — para ele, o Brasil valia tanto quanto a França.</p>
+        <div class="sig-note"><img class="sig-img" src="photos/signature.png" alt="Assinatura Santos=Dumont"><p data-i18n="man.sig">A assinatura <b>Santos=Dumont</b> (acima) reunia as duas origens: <b>Santos</b>, da mãe brasileira, e <b>Dumont</b>, do pai francês. O sinal de igualdade era um manifesto — para ele, o Brasil valia tanto quanto a França.</p></div>
       </div>
       <aside class="factcard rv">
         <h3 data-i18n="man.legacy.title">O legado</h3>
@@ -717,7 +719,7 @@
     'cap.bisengine':'<b>The engine</b>Santos-Dumont beside the 14-bis’s Antoinette V8 (50 hp) and propeller, mounted behind the pilot.',
     'cap.demoground':'<b>On the ground</b>The Demoiselle at rest: bamboo frame, tricycle undercarriage and the pilot seated in the truss.',
     'cap.demosigned':'<b>The Demoiselle</b>A period print with handlers and Santos-Dumont’s signature — the ultralight he gave to the world.',
-    'man.sig':'The signature <b>Santos=Dumont</b> (at the top of this page) joined his two origins: <b>Santos</b>, from his Brazilian mother, and <b>Dumont</b>, from his French father. The equals sign was a manifesto — for him, Brazil was worth as much as France.',
+    'man.sig':'The signature <b>Santos=Dumont</b> (above) joined his two origins: <b>Santos</b>, from his Brazilian mother, and <b>Dumont</b>, from his French father. The equals sign was a manifesto — for him, Brazil was worth as much as France.',
     'man.legacy.5':'<b>Patron of the Brazilian Air Force</b> (Law 7,243/1984).',
     'man.legacy.6':'<b>Honorary Air Marshal</b> (Law 3,636/1959).',
     'man.legacy.7':'<b>Book of Heroes and Heroines of the Fatherland</b> (2006).',
