@@ -36,6 +36,7 @@
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
 
   /* ---------- top nav ---------- */
+  html{scroll-padding-top:68px}
   .nav{position:sticky;top:0;z-index:40;background:rgba(243,234,214,.92);
     backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
   .nav-in{max-width:var(--maxw);margin:0 auto;padding:10px 22px;display:flex;align-items:center;gap:14px}
@@ -156,6 +157,26 @@
   .pm-note{margin-top:20px;font-size:14.5px;color:var(--ink2);background:rgba(201,162,39,.10);border-left:3px solid var(--brass2);padding:12px 16px;border-radius:0 9px 9px 0}
   .pm-note a{color:var(--link)}
   @media (max-width:860px){.pm-grid{grid-template-columns:1fr}}
+  /* legacy */
+  .trindade{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:26px}
+  .trindade .tcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 22px 20px;box-shadow:0 8px 24px var(--shadow)}
+  .trindade .tno{font-family:var(--ui);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--brass);font-weight:700}
+  .trindade h3{font-family:var(--serif);font-size:21px;margin:7px 0 3px;color:var(--ink);line-height:1.15}
+  .trindade .trole{font-family:var(--ui);font-size:12.5px;color:var(--brass);font-weight:700;letter-spacing:.02em;margin-bottom:11px;line-height:1.4}
+  .trindade .tcard p{font-size:14.5px;line-height:1.62;color:var(--ink2);margin:0}
+  @media (max-width:860px){.trindade{grid-template-columns:1fr}}
+  .legacy-timeline{display:grid;grid-template-columns:repeat(4,1fr);margin:32px 0 8px;position:relative}
+  .legacy-timeline::before{content:"";position:absolute;left:7%;right:7%;top:13px;height:2px;background:linear-gradient(90deg,var(--brass),var(--brass2));opacity:.55}
+  .legacy-timeline .tl{position:relative;padding:0 12px;text-align:center}
+  .legacy-timeline .dot{width:13px;height:13px;border-radius:50%;background:var(--brass);border:3px solid var(--paper);box-shadow:0 0 0 2px var(--brass);margin:7px auto 13px;position:relative;z-index:1}
+  .legacy-timeline .yr{font-family:var(--serif);font-size:27px;font-weight:700;color:var(--ink);line-height:1}
+  .legacy-timeline .ev{font-size:13px;color:var(--ink2);margin-top:7px;line-height:1.45}
+  .legacy-timeline .ev b{display:block;color:var(--ink);font-size:15px;font-family:var(--serif);margin-bottom:2px}
+  @media (max-width:720px){.legacy-timeline{grid-template-columns:1fr;gap:20px}.legacy-timeline::before{left:12px;right:auto;top:8px;bottom:8px;width:2px;height:auto}.legacy-timeline .tl{text-align:left;padding:0 0 0 42px}.legacy-timeline .dot{position:absolute;left:6px;top:5px;margin:0}}
+  .legacy-close{margin-top:26px;font-family:var(--serif);font-size:clamp(17px,2vw,20px);font-style:italic;color:var(--ink);line-height:1.62;border-top:1px solid var(--line);padding-top:22px}
+  .legacy-src{margin-top:20px;font-size:13px;line-height:1.75;color:var(--ink3)}
+  .legacy-src a{color:var(--link)}
+
 
   /* ---------- CTA ---------- */
   .cta{background:var(--ink);color:#f4ecd8;text-align:center;border-top:3px solid var(--brass);border-bottom:3px solid var(--brass)}
@@ -219,6 +240,7 @@
     <a class="navlink hide-sm" href="../../" data-i18n="nav.gallery">← Galeria</a>
     <a class="navlink hide-sm" href="#method" data-i18n="nav.method">Colorização</a>
     <a class="navlink hide-sm" href="#open" data-i18n="nav.open">Ciência aberta</a>
+    <a class="navlink hide-sm" href="#legado" data-i18n="nav.legacy">Legado</a>
     <div class="langtoggle" role="group" aria-label="Idioma / Language">
       <button data-lang="pt" aria-pressed="true">PT</button>
       <button data-lang="en" aria-pressed="false">EN</button>
@@ -402,6 +424,63 @@
     </div>
 
     <p class="pm-note rv" data-i18n="open.note"><b>Nota de precisão:</b> a edição de dezembro de 1909 (p. 842) anuncia a doação das patentes e traz os diagramas gerais; os planos de construção detalhados, peça por peça, saíram na edição de junho de 1910 (“How to Build the Famous ‘Demoiselle’”). O Nº 20, conforme a revista <i>Flight</i> (2/out/1909), pesava 110 kg vazio (242 lb), com 10,68 m² de asa e motor de 30 hp — números de outra versão e fonte, que não se comparam diretamente aos da PM. As imagens acima são reproduções das páginas originais. <b>Este simulador e esta página seguem esse legado:</b> código e conhecimento abertos, no <a href="https://github.com/Mjrovai/simuladores-interativos" target="_blank" rel="noopener">GitHub</a> e no <a href="https://www.hackster.io/mjrobot/colorizing-old-b-w-photos-and-videos-with-the-help-of-ai-761a85" target="_blank" rel="noopener">tutorial CC0</a>.</p>
+  </div>
+</section>
+
+<!-- ══════════ LEGACY ══════════ -->
+<section id="legado">
+  <div class="wrap">
+    <p class="kicker rv" data-i18n="leg.kicker">1906 → 1969 · o fio que continua</p>
+    <h2 class="sec rv" data-i18n="leg.title">Legado: formar gente, fazer tecnologia no Brasil</h2>
+    <p class="lede rv" data-i18n="leg.lede">O mesmo gesto que abriu os planos da Demoiselle ao mundo segue vivo em duas outras vidas. A “Santíssima Trindade da Aeronáutica brasileira” — Santos-Dumont, que criou o avião; Casimiro Montenegro Filho, que criou o ITA; e Ozires Silva, que fez a Embraer — une-se por uma única linha: formar gente e fazer tecnologia no Brasil. Como resume a própria Embraer, Ozires seguiu “o caminho de inovação aberto por Santos Dumont e bem estruturado por Casimiro Montenegro Filho”.</p>
+
+    <div class="open-quote rv">
+      <span class="qmark" aria-hidden="true">“</span>
+      <blockquote data-i18n="leg.hook.q">Por que o país de Santos Dumont não fabrica aviões?</blockquote>
+      <p class="qtrans" data-i18n="leg.hook.qt"></p>
+      <cite data-i18n="leg.hook.cite">— Ozires Silva, ainda adolescente, num banco de praça de Bauru que ele e o amigo Zico chamavam de “o Escritório” (1946) · <a href="https://www.embraer.com/ozires-silva/en" target="_blank" rel="noopener">Embraer ↗</a></cite>
+    </div>
+
+    <div class="trindade">
+      <div class="tcard rv">
+        <div class="tno" data-i18n="leg.t1.no">O pioneiro</div>
+        <h3>Santos-Dumont</h3>
+        <div class="trole" data-i18n="leg.t1.role">Criador do avião · Patrono da Aeronáutica Brasileira</div>
+        <p data-i18n="leg.t1.p">Abriu mão das patentes e publicou os planos da Demoiselle para que qualquer um pudesse construí-la. Seu legado, argumenta Mauricio Pazini Brandão (ITA, ICAS 2018), não é só técnico: ele “inspirou pessoas no mundo inteiro a estudar aeronáutica, construir aviões e pilotá-los”.</p>
+      </div>
+      <div class="tcard rv">
+        <div class="tno" data-i18n="leg.t2.no">O formador</div>
+        <h3>Casimiro Montenegro Filho</h3>
+        <div class="trole" data-i18n="leg.t2.role">Criador do ITA · Patrono da Engenharia da Aeronáutica</div>
+        <p data-i18n="leg.t2.p">Acreditava que a indústria só viria depois da escola. Criou o ITA (1950) com o professor Richard H. Smith, do MIT — seu primeiro reitor — e o CTA, na trilogia ensino, pesquisa e indústria.</p>
+      </div>
+      <div class="tcard rv">
+        <div class="tno" data-i18n="leg.t3.no">O realizador</div>
+        <h3>Ozires Silva</h3>
+        <div class="trole" data-i18n="leg.t3.role">Fundador da Embraer · o sonho virou indústria</div>
+        <p data-i18n="leg.t3.p">Formado no ITA (1962, medalha de ouro), liderou o projeto que virou o Bandeirante e fundou a Embraer. O sonho do menino do banco de praça virou indústria.</p>
+      </div>
+    </div>
+
+    <div class="legacy-timeline rv" aria-label="Linha do tempo do legado">
+      <div class="tl"><div class="dot"></div><div class="yr">1906</div><div class="ev" data-i18n="leg.tl1.ev"><b>14-bis</b>voo público homologado, Paris</div></div>
+      <div class="tl"><div class="dot"></div><div class="yr">1950</div><div class="ev" data-i18n="leg.tl2.ev"><b>ITA</b>nasce o instituto, em São José dos Campos</div></div>
+      <div class="tl"><div class="dot"></div><div class="yr">1968</div><div class="ev" data-i18n="leg.tl3.ev"><b>Bandeirante</b>primeiro voo do IPD-6504 (22/out)</div></div>
+      <div class="tl"><div class="dot"></div><div class="yr">1969</div><div class="ev" data-i18n="leg.tl4.ev"><b>Embraer</b>fundada para produzir o Bandeirante (19/ago)</div></div>
+    </div>
+
+    <div class="open-quote rv">
+      <span class="qmark" aria-hidden="true">“</span>
+      <blockquote data-i18n="leg.mq.q">Antes de produzirmos aviões, precisamos produzir engenheiros.</blockquote>
+      <p class="qtrans" data-i18n="leg.mq.qt"></p>
+      <cite data-i18n="leg.mq.cite">— Casimiro Montenegro Filho, anos 1940 · <a href="https://www.embraer.com/ozires-silva/en" target="_blank" rel="noopener">Embraer ↗</a></cite>
+    </div>
+
+    <p class="rv" data-i18n="leg.story" style="margin-top:24px;font-size:15.5px;line-height:1.7;color:var(--ink2)">Montenegro indicou Ozires ao Departamento de Aeronaves do CTA. Lá ele liderou o projeto IPD-6504; o protótipo, o Bandeirante, voou em 22 de outubro de 1968. Em 19 de agosto de 1969, o Decreto 770 criou a Embraer para produzi-lo — com Ozires como seu primeiro diretor-presidente.</p>
+
+    <p class="legacy-close rv" data-i18n="leg.close">Há uma simetria bonita nos patronos: Santos-Dumont é o Patrono da Aeronáutica Brasileira (Lei 7.243/1984); Montenegro, o Patrono da Engenharia da Aeronáutica. O pioneiro que abriu o caminho e o formador que o estruturou — e, entre eles, a geração que fez a indústria. No INCAER, a cadeira de Montenegro tem Santos-Dumont como patrono: a linhagem, literalmente, senta à mesma mesa.</p>
+
+    <p class="legacy-src rv" data-i18n="leg.src"><b>Fontes:</b> <a href="https://www.embraer.com/ozires-silva/en" target="_blank" rel="noopener">Ozires Silva — Embraer ↗</a> · <a href="https://cporaersj.dcta.mil.br/images/2024/banners/opusculo_montenegro.pdf" target="_blank" rel="noopener">Montenegro, Patrono da Engenharia da Aeronáutica — INCAER ↗</a> · <a href="https://aeromagazine.uol.com.br/artigo/conheca-o-brigadeiro-por-tras-da-criacao-do-ita.html" target="_blank" rel="noopener">O brigadeiro por trás da criação do ITA — Aero Magazine ↗</a> · <a href="https://www.icas.org/icas_archive/ICAS2018/data/papers/ICAS2018_0089_paper.pdf" target="_blank" rel="noopener">Brandão, “The Santos-Dumont Legacy to Aeronautics”, ITA, ICAS 2018 ↗</a>.</p>
   </div>
 </section>
 
@@ -642,6 +721,29 @@
     'man.legacy.5':'<b>Patron of the Brazilian Air Force</b> (Law 7,243/1984).',
     'man.legacy.6':'<b>Honorary Air Marshal</b> (Law 3,636/1959).',
     'man.legacy.7':'<b>Book of Heroes and Heroines of the Fatherland</b> (2006).',
+    'nav.legacy':'Legacy',
+    'leg.kicker':'1906 → 1969 · the thread continues',
+    'leg.title':'Legacy: forming people, building technology in Brazil',
+    'leg.lede':'The same gesture that opened the Demoiselle’s plans to the world lives on in two other lives. The “Holy Trinity of Brazilian Aeronautics” — Santos-Dumont, who created the airplane; Casimiro Montenegro Filho, who created ITA; and Ozires Silva, who built Embraer — is joined by a single thread: forming people and building technology in Brazil. As Embraer itself puts it, Ozires followed “the path of innovation opened by Santos Dumont and well-structured by Casimiro Montenegro Filho.”',
+    'leg.hook.q':'Why doesn’t the country of Santos Dumont manufacture airplanes?',
+    'leg.hook.qt':'',
+    'leg.hook.cite':'— Ozires Silva, still a teenager, on a park bench in Bauru that he and his friend Zico called “the Office” (1946) · <a href="https://www.embraer.com/ozires-silva/en" target="_blank" rel="noopener">Embraer ↗</a>',
+    'leg.t1.no':'The pioneer','leg.t1.role':'Creator of the airplane · Patron of Brazilian Aeronautics',
+    'leg.t1.p':'He gave up his patents and published the Demoiselle’s plans so anyone could build one. His legacy, argues Mauricio Pazini Brandão (ITA, ICAS 2018), is not only technical: he “inspired people all around the world to study aeronautics, to build airplanes, and to fly them.”',
+    'leg.t2.no':'The educator','leg.t2.role':'Creator of ITA · Patron of Aeronautical Engineering',
+    'leg.t2.p':'He believed industry would only come after the school. He created ITA (1950) with Professor Richard H. Smith of MIT — its first rector — and the CTA, on the trilogy of teaching, research and industry.',
+    'leg.t3.no':'The builder','leg.t3.role':'Founder of Embraer · the dream became industry',
+    'leg.t3.p':'An ITA graduate (1962, gold medal), he led the project that became the Bandeirante and founded Embraer. The dream of the boy on the park bench became an industry.',
+    'leg.tl1.ev':'<b>14-bis</b>certified public flight, Paris',
+    'leg.tl2.ev':'<b>ITA</b>the institute is born, São José dos Campos',
+    'leg.tl3.ev':'<b>Bandeirante</b>first flight of the IPD-6504 (22 Oct)',
+    'leg.tl4.ev':'<b>Embraer</b>founded to build the Bandeirante (19 Aug)',
+    'leg.mq.q':'Before producing aircraft, we need to produce engineers.',
+    'leg.mq.qt':'',
+    'leg.mq.cite':'— Casimiro Montenegro Filho, 1940s · <a href="https://www.embraer.com/ozires-silva/en" target="_blank" rel="noopener">Embraer ↗</a>',
+    'leg.story':'Montenegro recommended Ozires to the Aircraft Department of the CTA. There he led the IPD-6504 project; its prototype, the Bandeirante, flew on 22 October 1968. On 19 August 1969, Decree 770 created Embraer to build it — with Ozires as its first managing director.',
+    'leg.close':'There is a fine symmetry in the patrons: Santos-Dumont is the Patron of Brazilian Aeronautics (Law 7,243/1984); Montenegro, the Patron of Aeronautical Engineering. The pioneer who opened the path and the educator who structured it — and, between them, the generation that built the industry. At INCAER, Montenegro’s chair has Santos-Dumont as its patron: the lineage, literally, sits at the same table.',
+    'leg.src':'<b>Sources:</b> <a href="https://www.embraer.com/ozires-silva/en" target="_blank" rel="noopener">Ozires Silva — Embraer ↗</a> · <a href="https://cporaersj.dcta.mil.br/images/2024/banners/opusculo_montenegro.pdf" target="_blank" rel="noopener">Montenegro, Patron of Aeronautical Engineering — INCAER ↗</a> · <a href="https://aeromagazine.uol.com.br/artigo/conheca-o-brigadeiro-por-tras-da-criacao-do-ita.html" target="_blank" rel="noopener">The brigadier behind the creation of ITA — Aero Magazine ↗</a> · <a href="https://www.icas.org/icas_archive/ICAS2018/data/papers/ICAS2018_0089_paper.pdf" target="_blank" rel="noopener">Brandão, “The Santos-Dumont Legacy to Aeronautics”, ITA, ICAS 2018 ↗</a>.',
   };
 
   const root = document.documentElement;
