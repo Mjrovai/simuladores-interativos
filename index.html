@@ -18,7 +18,7 @@
     if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
     else document.documentElement.setAttribute('data-theme',
       window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    var l = localStorage.getItem('lang');
+    var l = new URLSearchParams(location.search).get('lang') || localStorage.getItem('lang');
     if (l === 'pt' || l === 'en') document.documentElement.setAttribute('data-lang', l);
   } catch (e) {}
 })();
@@ -362,7 +362,7 @@ main { padding-bottom: 20px; }
     <h1><span data-i18n="hero.title1">Simuladores</span><br><em data-i18n="hero.title2">Interativos</em></h1>
     <p class="lede" data-i18n-html="hero.lede">Vinte e dois <b>laboratórios que rodam no navegador</b>: assinatura de mísseis em 3D, CPU Z80 e Apple&nbsp;1, redes neurais treinando XOR na sua frente, ponto de operação de transistores, jogos e pequenas aulas visuais. Sem instalação, sem build, sem servidor.</p>
     <div class="stats">
-      <div class="stat"><b>22</b><span data-i18n="stat.apps">simuladores</span></div>
+      <div class="stat"><b>23</b><span data-i18n="stat.apps">simuladores</span></div>
       <div class="stat"><b>0</b><span data-i18n="stat.setup">instalação</span></div>
       <div class="stat"><b>PT·EN</b><span data-i18n="stat.lang">idiomas</span></div>
       <div class="stat"><b>3D·CPU·IA</b><span data-i18n="stat.topics">temas</span></div>
@@ -550,6 +550,13 @@ main { padding-bottom: 20px; }
       </a>
 
 
+      <a class="card" href="https://mjrovai.github.io/Vinte-Mil-Leguas/simulador/?lang=pt" data-href-pt="https://mjrovai.github.io/Vinte-Mil-Leguas/simulador/?lang=pt" data-href-en="https://mjrovai.github.io/Vinte-Mil-Leguas/simulador/?lang=en" target="_blank" rel="noopener" data-tags="3d physics history" data-keywords="Nautilus Nemo Júlio Verne Jules Verne vinte mil léguas twenty thousand leagues submarino submarine 1870 three.js 3d física physics empuxo buoyancy lastro ballast Neuville Riou gravuras engravings livro book externo">
+        <span class="num">23</span>
+        <h2><span data-i18n="c26.title">Nautilus · Vinte Mil Léguas</span><span class="arrow">↗</span></h2>
+        <p data-i18n="c26.desc">O submarino do Capitão Nemo (1870) em modelo 3D, com o casco pelo texto de Verne ou pelas ilustrações: pilote, mergulhe, veja o interior em raio-X, ligue a física de peso, empuxo e lastro com as contas do capítulo XIII e compare com as gravuras de Neuville e Riou. Parte do site do livro, com a tradução e o vídeo narrado.</p>
+        <div class="tags"><span class="tag hot">3D</span><span class="tag" data-i18n="tag.physics">Física</span><span class="tag" data-i18n="tag.bilingual">PT / EN</span></div>
+      </a>
+
     </div>
     <div class="empty" id="empty" data-i18n="empty">Nenhum simulador encontrado com esse filtro.</div>
   </section>
@@ -650,6 +657,8 @@ main { padding-bottom: 20px; }
     'c24.desc': "Europe's first certified powered flight (1906) as a faithful 3D model: explore the machine's anatomy, fly it with real physics, or replay the record flights of 23 October and 12 November at Bagatelle. Panama hat and liftoff shadow included.",
     'c25.title': 'Santos-Dumont · In Color',
     'c25.desc': "The Father of Aviation's life in AI-colorized photographs: a timeline, the family of aircraft (from No. 1 to the Demoiselle), the 2019 tribute video and the CNN colorization method — with a direct link to the 14-Bis simulator.",
+    'c26.title': 'Nautilus · Twenty Thousand Leagues',
+    'c26.desc': "Captain Nemo's submarine (1870) as a 3D model, with the hull drawn from Verne's text or from the illustrations: pilot it, dive, see the interior in X-ray, switch on the weight, buoyancy, and ballast physics with the calculations from chapter XIII, and compare it with the Neuville and Riou engravings. Part of the book's site, with the translation and the narrated video.",
     'empty': 'No simulator matches this filter.',
     'footer.note': 'Made for class and study · 3D models and numbers are schematic reconstructions, not official documentation.',
     'footer.code': 'Source on GitHub ↗',
@@ -712,6 +721,8 @@ main { padding-bottom: 20px; }
     root.setAttribute('data-lang', lang);
     document.querySelectorAll('.langtoggle button').forEach(b =>
       b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
+    document.querySelectorAll('[data-href-'+lang+']').forEach(a =>
+      a.setAttribute('href', a.getAttribute('data-href-'+lang)));
     applyFilter();
   }
 
@@ -747,8 +758,13 @@ main { padding-bottom: 20px; }
 
   /* idioma inicial */
   let savedLang = null;
-  try { savedLang = localStorage.getItem('lang'); } catch (e) {}
+  try { savedLang = new URLSearchParams(location.search).get('lang') || localStorage.getItem('lang'); } catch (e) {}
   applyLang(savedLang === 'en' ? 'en' : 'pt');
+  /* ?lang= vindo de outro site: grava a escolha e limpa a URL */
+  try {
+    const u = new URL(location.href);
+    if (u.searchParams.has('lang')) { localStorage.setItem('lang', lang); u.searchParams.delete('lang'); history.replaceState(null, '', u); }
+  } catch (e) {}
 
   /* aberto por file:// */
   if (location.protocol === 'file:') {

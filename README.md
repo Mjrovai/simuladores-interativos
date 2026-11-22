@@ -31,6 +31,7 @@ Sem instalação, sem build, sem dependências externas de CDN: cada app carrega
 | **Motor Fault Bench** | Oito canais sintéticos de uma bancada de motor de 2,2 kW em 22 condições de falha, com MLP 54→128→64→22 diagnosticando em tempo real, espectros com marcadores de ordem e orçamento de memória no microcontrolador. Repositório próprio | [motor-fault-bench ↗](https://mjrovai.github.io/motor-fault-bench/demo/) |
 | **14-Bis · Simulador de voo** | O primeiro voo homologado da Europa (1906) em modelo 3D fiel: anatomia da máquina, pilotagem com física real e replay dos recordes de 23/10 e 12/11 em Bagatelle. Em inglês | [`apps/14bis/`](apps/14bis/) |
 | **Santos-Dumont · In Color** | A vida do Pai da Aviação em fotos colorizadas por IA (2019): linha do tempo, família de aeronaves, a ciência aberta da Demoiselle (páginas da *Popular Mechanics*, 1909), vídeo-tributo e o método de colorização com CNN. Companheira do 14-Bis, bilíngue PT/EN | [`apps/santos-dumont-in-color/`](apps/santos-dumont-in-color/) |
+| **Nautilus · Vinte Mil Léguas** | O submarino do Capitão Nemo (1870) em 3D: casco pelo texto de Verne ou pelas ilustrações, pilotagem, raio-X, física de peso, empuxo e lastro (capítulo XIII) e as gravuras de Neuville e Riou. Parte do site do livro, bilíngue PT/EN. Repositório próprio | [Vinte-Mil-Leguas ↗](https://mjrovai.github.io/Vinte-Mil-Leguas/simulador/) |
 
 A página inicial é uma galeria com busca e filtros por tema. Cada card abre o simulador **em nova aba**, então a galeria continua disponível para escolher outro.
 
