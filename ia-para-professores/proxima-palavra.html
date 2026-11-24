@@ -69,11 +69,23 @@ summary{cursor:pointer;font-weight:600;color:var(--ink)}
 .seg button.on{background:var(--blue);color:#fff}
 footer{margin-top:28px;font-size:14px;color:var(--muted)}
 </style>
+<style>
+/* botão e janela do vídeo de demonstração */
+.vbtn{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font:700 14px/1 system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:#fff;background:var(--accent);border:0;border-radius:999px;padding:8px 14px;cursor:pointer}
+.vbtn:hover{filter:brightness(1.1)}
+.vmodal{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;padding:16px}
+.vmodal.on{display:flex}
+.vmodal .vbox{position:relative;width:min(1100px,100%)}
+.vmodal video{display:block;width:100%;max-height:calc(100vh - 80px);border-radius:10px;background:#000}
+.vmodal .vx{position:absolute;top:-40px;right:0;font:700 15px/1 system-ui,Arial,sans-serif;color:#fff;background:transparent;border:1px solid rgba(255,255,255,.6);border-radius:8px;padding:7px 12px;cursor:pointer}
+.vmodal .vnote{color:#ddd;font:14px/1.4 system-ui,Arial,sans-serif;margin-top:8px;text-align:center}
+</style>
 </head>
 <body>
 <div class="wrap">
   <div class="kicker">Como funciona um ChatGPT · demonstração</div>
   <h1>Próxima Palavra</h1>
+  <button type="button" class="vbtn" id="vopen">▶ Ver o vídeo (2 min 8 s)</button>
   <p class="lead">Esta máquina leu um texto e contou que palavra costuma vir depois de cada palavra. Só isso. Escreva um começo e veja ela "escrever" escolhendo, a cada passo, uma das palavras mais prováveis.</p>
 
   <div class="grid">
@@ -366,6 +378,22 @@ ta.value = TEXTS.todos; train(TEXTS.todos); restart();
 st.className="trainst ok"; st.textContent=`${words.length.toLocaleString("pt-BR")} palavras lidas`;
 // atalho para a palestra: #demo já escreve algumas palavras
 if(location.hash==="#demo"){ for(let i=0;i<9;i++) step(); }
+</script>
+<div class="vmodal" id="vmodal" role="dialog" aria-modal="true" aria-label="Vídeo de demonstração">
+  <div class="vbox"><button type="button" class="vx" id="vclose">Fechar ✕</button>
+  <video id="vplayer" controls preload="none" playsinline poster="videos/proxima-palavra.jpg"><source src="videos/proxima-palavra.mp4" type="video/mp4"><track kind="subtitles" srclang="pt-BR" label="Português" src="videos/proxima-palavra.vtt"></video>
+  <div class="vnote">Legenda opcional: botão CC do vídeo. Narração com a voz de Marcelo Rovai, clonada com OmniVoice.</div></div>
+</div>
+<script>
+(function () {
+  var m = document.getElementById("vmodal"), v = document.getElementById("vplayer");
+  function abrir() { m.classList.add("on"); v.play().catch(function () {}); }
+  function fechar() { v.pause(); m.classList.remove("on"); }
+  document.getElementById("vopen").addEventListener("click", abrir);
+  document.getElementById("vclose").addEventListener("click", fechar);
+  m.addEventListener("click", function (e) { if (e.target === m) fechar(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && m.classList.contains("on")) fechar(); });
+})();
 </script>
 </body>
 </html>

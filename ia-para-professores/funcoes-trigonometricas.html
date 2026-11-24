@@ -65,11 +65,23 @@ footer{margin-top:28px;font-size:14px;color:var(--muted)}
 .ctl label .p{font-family:Cambria,Georgia,serif;font-style:italic;font-weight:700;font-size:22px}
 .formula .lbl{font-family:system-ui,sans-serif;font-size:15px;color:var(--muted);display:block;letter-spacing:.06em;text-transform:uppercase}
 </style>
+<style>
+/* botão e janela do vídeo de demonstração */
+.vbtn{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font:700 14px/1 system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:#fff;background:var(--accent);border:0;border-radius:999px;padding:8px 14px;cursor:pointer}
+.vbtn:hover{filter:brightness(1.1)}
+.vmodal{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;padding:16px}
+.vmodal.on{display:flex}
+.vmodal .vbox{position:relative;width:min(1100px,100%)}
+.vmodal video{display:block;width:100%;max-height:calc(100vh - 80px);border-radius:10px;background:#000}
+.vmodal .vx{position:absolute;top:-40px;right:0;font:700 15px/1 system-ui,Arial,sans-serif;color:#fff;background:transparent;border:1px solid rgba(255,255,255,.6);border-radius:8px;padding:7px 12px;cursor:pointer}
+.vmodal .vnote{color:#ddd;font:14px/1.4 system-ui,Arial,sans-serif;margin-top:8px;text-align:center}
+</style>
 </head>
 <body>
 <div class="wrap">
   <div class="kicker">Matemática · simulador criado com IA</div>
   <h1>Funções trigonométricas</h1>
+  <button type="button" class="vbtn" id="vopen">▶ Ver o vídeo (1 min 50 s)</button>
   <p class="lead">Mexa nos parâmetros a, b, c e d e veja o que cada um faz com o gráfico. A curva cinza é a função original, sem parâmetros, para comparar.</p>
   <div class="geral" aria-label="Forma geral da função">f(x) = <span class="pa">a</span> + <span class="pb">b</span>·<span id="gfn">sen</span>(<span class="pc">c</span>·x + <span class="pd">d</span>)</div>
 
@@ -278,6 +290,22 @@ EXTRAS: um botão "Reiniciar", eixo x marcado em múltiplos de π, letras grande
     if (mq.addEventListener) mq.addEventListener("change", update);
   }
   update();
+})();
+</script>
+<div class="vmodal" id="vmodal" role="dialog" aria-modal="true" aria-label="Vídeo de demonstração">
+  <div class="vbox"><button type="button" class="vx" id="vclose">Fechar ✕</button>
+  <video id="vplayer" controls preload="none" playsinline poster="videos/funcoes-trigonometricas.jpg"><source src="videos/funcoes-trigonometricas.mp4" type="video/mp4"><track kind="subtitles" srclang="pt-BR" label="Português" src="videos/funcoes-trigonometricas.vtt"></video>
+  <div class="vnote">Legenda opcional: botão CC do vídeo. Narração com a voz de Marcelo Rovai, clonada com OmniVoice.</div></div>
+</div>
+<script>
+(function () {
+  var m = document.getElementById("vmodal"), v = document.getElementById("vplayer");
+  function abrir() { m.classList.add("on"); v.play().catch(function () {}); }
+  function fechar() { v.pause(); m.classList.remove("on"); }
+  document.getElementById("vopen").addEventListener("click", abrir);
+  document.getElementById("vclose").addEventListener("click", fechar);
+  m.addEventListener("click", function (e) { if (e.target === m) fechar(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && m.classList.contains("on")) fechar(); });
 })();
 </script>
 </body>
