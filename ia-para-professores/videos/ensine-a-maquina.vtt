@@ -1,0 +1,127 @@
+WEBVTT
+
+00:00.900 --> 00:07.128
+Ensine a Máquina. Como uma máquina aprende com
+exemplos, e por que os dados importam.
+
+00:09.328 --> 00:13.529
+Neste simulador, a pergunta é simples: a manga
+está madura?
+
+00:13.579 --> 00:18.573
+Mas ninguém vai escrever a regra. A máquina
+vai aprender com exemplos.
+
+00:19.423 --> 00:21.787
+Cada manga vira um ponto neste mapa.
+
+00:21.837 --> 00:25.206
+Na horizontal, a cor da casca, do verde ao
+amarelo.
+
+00:25.256 --> 00:28.894
+Na vertical, a firmeza, da fruta mole até a
+fruta dura.
+
+00:29.744 --> 00:34.209
+Vou ensinar. Marco algumas mangas verdes, de
+casca verde e duras.
+
+00:34.259 --> 00:36.988
+Agora algumas maduras, amarelas e moles.
+
+00:37.038 --> 00:39.836
+Repare: o fundo do mapa se pinta sozinho.
+
+00:39.886 --> 00:43.031
+Essa pintura é a regra que a máquina aprendeu.
+
+00:43.881 --> 00:49.906
+Com quarenta exemplos variados, eu testo a
+máquina com duzentas mangas que ela nunca viu.
+
+00:49.956 --> 00:52.296
+Noventa e três por cento de acerto.
+
+00:53.146 --> 00:56.681
+Mas como ela decide? Pergunto sobre uma manga
+nova.
+
+00:56.731 --> 01:03.148
+A máquina calcula a distância até cada exemplo, separa
+os cinco mais próximos, e eles votam.
+
+01:03.198 --> 01:06.242
+Duas verdes, três maduras. Resposta: madura.
+
+01:07.091 --> 01:08.865
+Por que medir a distância?
+
+01:08.915 --> 01:13.354
+Para saber quem são os vizinhos, a máquina
+precisa de um número.
+
+01:13.404 --> 01:22.753
+Ela usa o teorema de Pitágoras: a diferença na cor da casca, a diferença na
+firmeza, e a distância em linha reta entre as duas mangas.
+
+01:22.803 --> 01:25.699
+Para a máquina, parecida quer dizer perto.
+
+01:26.549 --> 01:31.914
+E se um exemplo estiver errado? Eu coloco uma
+manga madura no meio das verdes.
+
+01:31.964 --> 01:38.718
+Ouvindo só o vizinho mais próximo, a máquina cria uma ilha
+em volta do erro: ela decorou o engano.
+
+01:38.768 --> 01:42.605
+Com três vizinhos, o erro perde a votação e a
+ilha some.
+
+01:43.455 --> 01:45.607
+E se ela ouvir vizinhos demais?
+
+01:45.657 --> 01:52.708
+Com quinze, a fronteira fica borrada e o acerto cai de
+noventa e três para oitenta e sete por cento.
+
+01:52.758 --> 01:58.603
+Nem decorar cada exemplo, nem apagar os
+detalhes: escolher o k é parte do trabalho.
+
+01:59.453 --> 02:04.084
+Agora a mesma máquina, treinada com uma
+amostra desequilibrada.
+
+02:04.134 --> 02:07.724
+Trinta e quatro mangas verdes, e só seis
+maduras.
+
+02:07.774 --> 02:12.331
+Todas de casca verde ou meio-amarela. Cada
+exemplo está certo.
+
+02:12.381 --> 02:16.120
+E o resultado cai para cinquenta e cinco por
+cento.
+
+02:16.170 --> 02:19.538
+Os erros se concentram onde faltavam exemplos.
+
+02:19.588 --> 02:23.476
+Dados desequilibrados produzem uma máquina
+enviesada.
+
+02:24.326 --> 02:29.415
+Por fim, troque a manga por um rosto, um
+currículo ou um pedido de crédito.
+
+02:29.465 --> 02:33.526
+Quem fica fora dos dados, a máquina erra mais,
+e sem avisar.
+
+02:33.576 --> 02:41.338
+Na sala de aula, a pergunta que vale não é o que a inteligência
+artificial respondeu, mas de onde veio a resposta.

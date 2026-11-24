@@ -1,0 +1,83 @@
+WEBVTT
+
+00:00.900 --> 00:05.705
+Funções Trigonométricas. O que cada parâmetro
+faz com o gráfico.
+
+00:07.905 --> 00:14.225
+Esta é a função f(x) = a + b·sen(c·x + d).
+Cada letra tem uma cor e um controle.
+
+00:14.275 --> 00:21.949
+Começo com o seno puro: a curva azul cobre a curva cinza,
+que é a função original, para comparar.
+
+00:22.799 --> 00:25.726
+O parâmetro a soma um valor à função inteira.
+
+00:25.776 --> 00:28.836
+Com a igual a dois, a curva sobe duas
+unidades.
+
+00:28.886 --> 00:33.005
+A forma não muda, só a altura: a imagem agora
+vai de um a três.
+
+00:33.855 --> 00:36.017
+O b estica a curva na vertical.
+
+00:36.067 --> 00:41.370
+Com b igual a três, a onda fica três vezes
+mais alta, e a amplitude é três.
+
+00:41.420 --> 00:45.081
+E com b negativo, a curva vira de cabeça para
+baixo.
+
+00:45.931 --> 00:51.331
+O c é o que mais confunde os alunos. Ele
+multiplica o x, dentro da função.
+
+00:51.381 --> 00:58.107
+Com c igual a dois, a onda se repete duas vezes mais
+depressa, e o período cai de 2π para π.
+
+00:58.157 --> 01:00.390
+A faixa azul mostra um período.
+
+01:01.240 --> 01:04.697
+O parâmetro d empurra a curva para os lados.
+
+01:04.747 --> 01:08.841
+Com d igual a π/2, a curva anda π/2 para a
+esquerda.
+
+01:08.891 --> 01:14.817
+Repare: ficou igual ao cosseno. Seno e cosseno
+são a mesma onda, deslocada.
+
+01:15.667 --> 01:18.764
+Na sala, peça uma previsão antes de mexer.
+
+01:18.814 --> 01:22.736
+Se o c for três, quantas ondas cabem entre
+zero e 2π?
+
+01:22.786 --> 01:25.359
+Depois, o aluno confere no gráfico.
+
+01:25.409 --> 01:29.630
+É a pergunta do simulador: qual parâmetro muda
+o período?
+
+01:30.480 --> 01:35.414
+Este simulador saiu de um pedido em português,
+que está aqui embaixo.
+
+01:35.464 --> 01:40.833
+Basta trocar o que está entre colchetes para
+criar outro, de outra matéria.
+
+01:40.883 --> 01:44.445
+E, antes de levar para a turma, confira as
+contas.
