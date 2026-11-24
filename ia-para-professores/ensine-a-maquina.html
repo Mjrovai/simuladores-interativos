@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ensine a Máquina</title>
+<style>
+:root{
+  --bg:#F4F1EA; --card:#FFFFFF; --ink:#1B2029; --body:#3A404B; --muted:#5B6270; --line:#DDD6C8;
+  --a:#4F6B45; --a-tint:#DCE8D3; --b:#C7861A; --b-tint:#F7E6C4; --accent:#9A4F1F; --accent-tint:#F3DCC9;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#161A21; --card:#1F242D; --ink:#F1EEE7; --body:#D2D5DB; --muted:#9AA1AD; --line:#343B47;
+  --a:#9CC08F; --a-tint:#26341F; --b:#F0B54A; --b-tint:#3A2E17; --accent:#E08A55; --accent-tint:#3D2A1E;
+}}
+:root[data-theme="dark"]{
+  --bg:#161A21; --card:#1F242D; --ink:#F1EEE7; --body:#D2D5DB; --muted:#9AA1AD; --line:#343B47;
+  --a:#9CC08F; --a-tint:#26341F; --b:#F0B54A; --b-tint:#3A2E17; --accent:#E08A55; --accent-tint:#3D2A1E;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--body);font:18px/1.5 system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 16px 48px}
+h1,h2{font-family:Cambria,Georgia,serif;color:var(--ink);margin:0}
+h1{font-size:clamp(30px,4.5vw,46px);line-height:1.1}
+h2{font-size:22px;margin-bottom:10px}
+.kicker{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:6px}
+.lead{font-size:19px;color:var(--muted);max-width:860px;margin:10px 0 24px}
+.grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:20px}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px}
+.plot{position:relative}
+canvas{width:100%;aspect-ratio:1/1;display:block;border-radius:8px;border:1px solid var(--line);cursor:crosshair;touch-action:none}
+.axis{font-size:14px;color:var(--muted);display:flex;justify-content:space-between;margin-top:6px}
+.yaxis{font-size:14px;color:var(--muted);margin-bottom:6px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px}
+button{font:inherit;font-size:16px;padding:10px 16px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.pick{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.pick button{border:0;border-radius:0;display:flex;gap:8px;align-items:center}
+.pick button.on{background:var(--ink);color:var(--bg)}
+.dia{width:13px;height:13px;transform:rotate(45deg);border:2px solid currentColor;display:inline-block;margin:0 2px}
+.qres{margin-top:10px;font-size:16px;background:var(--accent-tint);border-left:4px solid var(--accent);padding:10px 12px;border-radius:6px}
+.dot{width:14px;height:14px;border-radius:50%;display:inline-block}
+.big{font-family:Cambria,Georgia,serif;font-size:64px;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
+.note{background:var(--a-tint);border-left:4px solid var(--a);padding:12px 14px;border-radius:6px;font-size:16px;margin-top:14px}
+.warn{background:var(--accent-tint);border-left:4px solid var(--accent);padding:12px 14px;border-radius:6px;font-size:16px;margin-top:14px}
+label{font-size:15px;color:var(--muted)}
+.counts{display:flex;gap:18px;font-size:15px;color:var(--muted);margin-top:10px}
+.counts b{color:var(--ink);font-size:20px}
+ol{padding-left:22px;margin:8px 0 0}
+details summary{cursor:pointer;font-weight:600;color:var(--ink)}
+.how summary{font-family:Cambria,Georgia,serif;font-size:22px}
+.how .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:14px}
+.how .step{border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.how .step h3{margin:0 0 6px;font-size:17px;color:var(--ink)}
+.how .step p{margin:0;font-size:16px}
+.snum{display:inline-flex;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-weight:700;font-size:14px;align-items:center;justify-content:center;margin-right:8px}
+math{font-size:1.15em;color:var(--ink)}
+.eq{margin:10px 0 8px;overflow-x:auto}
+.live{font-size:17px;margin-top:14px;background:var(--accent-tint);border-left:4px solid var(--accent);padding:12px 14px;border-radius:6px}
+ol.qs li{margin-bottom:10px}
+details.ans{margin-top:6px}
+details.ans summary{font-size:15px;font-weight:600;color:var(--accent);list-style:none}
+details.ans summary::-webkit-details-marker{display:none}
+details.ans summary::before{content:"▸ "}
+details.ans[open] summary::before{content:"▾ "}
+details.ans p{margin:6px 0 0;font-size:16px;background:var(--bg);border-radius:6px;padding:10px 12px}
+footer{margin-top:28px;font-size:14px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">Machine learning · aprender com exemplos</div>
+  <h1>Ensine a Máquina: a manga está madura?</h1>
+  <p class="lead">Ninguém escreve uma regra para a máquina. Você mostra exemplos de mangas que já sabe classificar, e ela pinta o mapa com o que "acha" que é cada região. Depois, testamos com mangas que ela nunca viu.</p>
+
+  <div class="grid">
+    <div class="card plot">
+      <div class="yaxis">↑ firmeza (mais dura)</div>
+      <canvas id="cv" width="640" height="640" aria-label="Mapa de mangas: clique para adicionar exemplos"></canvas>
+      <div class="axis"><span>casca verde</span><span>cor da casca →</span><span>casca amarela</span></div>
+      <div class="row">
+        <span style="font-size:15px;color:var(--muted)">Clique no mapa para:</span>
+        <div class="pick" id="pick">
+          <button data-c="0" class="on" title="Ensinar: você diz que esta manga é verde"><span class="dot" style="background:var(--a)"></span>ensinar verde</button>
+          <button data-c="1" title="Ensinar: você diz que esta manga é madura"><span class="dot" style="background:var(--b)"></span>ensinar madura</button>
+          <button data-c="2" title="Perguntar: a máquina decide pelos vizinhos"><span class="dia"></span>perguntar</button>
+        </div>
+      </div>
+      <div class="qres" id="qres" hidden></div>
+      <div class="counts"><span><b id="na">0</b> verdes</span><span><b id="nb">0</b> maduras</span></div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h2>1 · Escolha os dados de treino</h2>
+        <div class="row" style="margin-top:4px">
+          <button id="good">Amostra variada</button>
+          <button id="biased">Amostra enviesada</button>
+          <button id="clear">Limpar</button>
+        </div>
+        <div class="row">
+          <label for="k">Vizinhos consultados (k): <b id="kv">5</b></label>
+          <input type="range" id="k" min="1" max="15" step="2" value="5" style="flex:1">
+        </div>
+        <div class="note" id="explain">Cada ponto do mapa recebe a cor da maioria dos <b>k</b> exemplos mais próximos. É o algoritmo "k vizinhos mais próximos", um dos mais simples de machine learning.</div>
+      </div>
+
+      <div class="card" style="margin-top:20px">
+        <h2>2 · Teste com 200 mangas novas</h2>
+        <div class="row" style="margin-top:4px">
+          <button class="primary" id="test">Testar</button>
+          <button id="hide">Esconder teste</button>
+        </div>
+        <div class="row" style="align-items:flex-end;gap:16px">
+          <div class="big" id="acc">—</div>
+          <div style="font-size:15px;color:var(--muted);padding-bottom:8px">de acertos<br><span id="errs"></span></div>
+        </div>
+        <div id="lesson"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="card how" id="how" style="margin-top:20px">
+    <summary>Como a máquina decide? (opcional)</summary>
+    <p style="margin:12px 0 0">No mapa, escolha <b>perguntar</b> e clique em qualquer lugar: aparece uma manga nova (◆), ligada aos <b>k</b> exemplos que a máquina consulta, e a cor dela sai da votação. Nos botões <b>ensinar</b>, quem decide a cor é você: é assim que se dá um exemplo à máquina.</p>
+    <div class="steps">
+      <div class="step">
+        <h3><span class="snum">1</span>Cada manga vira dois números</h3>
+        <p><b>x</b> = cor da casca (0 = verde, 1 = amarela) e <b>y</b> = firmeza (0 = mole, 1 = dura). Para a máquina, uma manga é só um ponto no mapa.</p>
+      </div>
+      <div class="step">
+        <h3><span class="snum">2</span>Mede a distância até cada exemplo</h3>
+        <p>Para saber quem são os vizinhos mais próximos, a máquina precisa medir. Nós vemos isso de olho; ela calcula a distância até cada exemplo, como uma régua:</p>
+        <div class="eq"><math display="block"><mrow><mi>d</mi><mo>=</mo><msqrt><mrow><mi mathvariant="normal">Δ</mi><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><mi mathvariant="normal">Δ</mi><msup><mi>y</mi><mn>2</mn></msup></mrow></msqrt></mrow></math></div>
+        <p><b>Δx</b> é a diferença na cor da casca e <b>Δy</b>, a diferença na firmeza, entre a manga nova e o exemplo. É o teorema de Pitágoras: a distância em linha reta entre dois pontos.</p>
+      </div>
+      <div class="step">
+        <h3><span class="snum">3</span>Os k mais próximos votam</h3>
+        <p>A máquina separa os <b>k</b> exemplos de menor distância, e a maioria decide. Por isso k é sempre ímpar: não há empate.</p>
+      </div>
+      <div class="step">
+        <h3><span class="snum">4</span>Repete para o mapa inteiro</h3>
+        <p>Fazendo a votação em cada pedacinho do mapa, sai a pintura do fundo. Repare que "treinar" aqui é só <b>guardar os exemplos</b>: não existe uma fórmula escondida, a máquina consulta a memória toda vez.</p>
+      </div>
+    </div>
+    <div class="live" id="live">Escolha <b>perguntar</b> e clique no mapa para ver a votação.</div>
+  </details>
+
+  <div class="card" style="margin-top:20px">
+    <h2>Para conversar com a turma</h2>
+    <ol class="qs">
+      <li>A máquina aprendeu uma <b>regra</b> que ninguém escreveu. De onde ela veio?
+        <details class="ans"><summary>Uma resposta possível</summary><p>Dos exemplos. A fronteira entre "verde" e "madura" no mapa é só a consequência de onde os exemplos estão. Ninguém escreveu "se a casca for amarela e a fruta mole, está madura". Mude ou acrescente um exemplo e a regra muda junto.</p></details></li>
+      <li>Por que a amostra enviesada erra tanto, se cada exemplo dela está correto?
+        <details class="ans"><summary>Uma resposta possível</summary><p>Porque a amostra é desequilibrada: muitas verdes, poucas maduras, e nenhuma manga de casca amarela. Nessa região, os vizinhos mais próximos são mangas de casca verde ou meio-amarela, quase todas verdes, e a máquina estende para lá o que viu ali. Dados corretos não bastam: eles precisam representar todos os casos que a máquina vai encontrar.</p></details></li>
+      <li>Troque "manga" por "rosto", "currículo" ou "pedido de crédito". O que acontece com quem ficou fora dos dados?
+        <details class="ans"><summary>Uma resposta possível</summary><p>Acontece o mesmo que com as mangas amarelas: a máquina erra mais com essas pessoas, sem avisar. Já houve sistemas de reconhecimento facial que erravam muito mais com mulheres negras, e uma ferramenta de triagem de currículos que aprendeu, com as contratações passadas, a desfavorecer mulheres. Ninguém programou o preconceito; ele veio nos dados.</p></details></li>
+      <li>Coloque um exemplo <b>errado</b> de propósito (uma madura no meio das verdes). O que muda com k = 1 e com k = 9?
+        <details class="ans"><summary>Uma resposta possível</summary><p>Com k = 1, o exemplo errado cria uma "ilhota" madura em volta dele: a máquina decora o erro. Com k = 9, ele perde a votação para os vizinhos e a ilhota some. Um k maior ignora erros isolados, mas, se for grande demais, também apaga detalhes verdadeiros da fronteira. É o dilema entre decorar e generalizar.</p></details></li>
+    </ol>
+  </div>
+
+  <footer>Protótipo da palestra "IA para Professores". Gerado pelo Claude Opus 5.5 sob a direção de Marcelo Rovai. Roda inteiro no navegador, sem internet. A "regra verdadeira" das mangas é inventada para fins didáticos.</footer>
+</div>
+
+<script>
+const cv = document.getElementById("cv"), ctx = cv.getContext("2d"), W = cv.width;
+let pts = [], cls = 0, K = 5, test = null;
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+// regra "verdadeira" (desconhecida da máquina): madura quando a casca é mais amarela e a fruta mais mole
+const truth = (x,y) => (0.62*x + 0.38*(1-y) + 0.06*Math.sin(9*x)) > 0.5 ? 1 : 0;
+let seed = 7; const rnd = () => (seed = (seed*16807) % 2147483647) / 2147483647;
+
+let query = null; const how = document.getElementById("how"), live = document.getElementById("live"), qres = document.getElementById("qres");
+const near = (x,y) => pts.map(p=>({x:p.x, y:p.y, c:p.c, d:(p.x-x)**2+(p.y-y)**2})).sort((a,b)=>a.d-b.d).slice(0,Math.min(K,pts.length));
+function knn(x,y){
+  if(!pts.length) return null;
+  const d = near(x,y);
+  const v = d.reduce((s,p)=>s+p.c,0)/d.length;
+  return v>0.5 ? 1 : v<0.5 ? 0 : d[0].c;
+}
+function label(t, x, y, align, base, ink, bg, size=19){
+  ctx.font = "600 "+size+"px system-ui,-apple-system,Arial,sans-serif"; ctx.textAlign = align; ctx.textBaseline = base;
+  ctx.lineWidth = 5; ctx.strokeStyle = bg; ctx.lineJoin = "round"; ctx.strokeText(t, x, y);
+  ctx.fillStyle = ink; ctx.fillText(t, x, y);
+}
+const br2 = v => v.toFixed(2).replace(".",",");
+function drawScale(ink, bg){
+  ctx.save();
+  ctx.strokeStyle = css("--line"); ctx.lineWidth = 1;
+  for(let i=1;i<10;i++){ const p = i/10*W; ctx.beginPath(); ctx.moveTo(p,0); ctx.lineTo(p,W); ctx.moveTo(0,p); ctx.lineTo(W,p); ctx.stroke(); }
+  const mu = css("--muted");
+  for(let i=0;i<=5;i++){
+    const v = i/5, t = v===0||v===1 ? String(v) : br2(v).replace(/0$/,"");
+    if(i>0) label(t, v*W - (i===5?4:0), W-6, i===5?"right":"center", "bottom", mu, bg);
+    if(i>0) label(t, 6, (1-v)*W + (i===5?4:0), "left", i===5?"top":"middle", mu, bg);
+  }
+  label("0", 6, W-6, "left", "bottom", mu, bg);
+  label("x", W-6, W-28, "right", "bottom", mu, bg);
+  label("y", 30, 6, "left", "top", mu, bg);
+  ctx.restore();
+}
+function draw(){
+  const A = css("--a-tint"), B = css("--b-tint"), CA = css("--a"), CB = css("--b"), bg = css("--card"), ink = css("--ink");
+  ctx.fillStyle = bg; ctx.fillRect(0,0,W,W);
+  if(pts.length){
+    const g = 16;
+    for(let i=0;i<W;i+=g) for(let j=0;j<W;j+=g){
+      const c = knn((i+g/2)/W, 1-(j+g/2)/W);
+      ctx.fillStyle = c ? B : A; ctx.fillRect(i,j,g,g);
+    }
+  }
+  if(cls===2) drawScale(ink, bg);
+  if(test){
+    test.forEach(t=>{
+      const X=t.x*W, Y=(1-t.y)*W;
+      ctx.strokeStyle = t.ok ? (t.c?CB:CA) : "#C0392B"; ctx.lineWidth = t.ok?1.5:3;
+      ctx.beginPath(); ctx.arc(X,Y,t.ok?4:6,0,7); ctx.stroke();
+      if(!t.ok){ ctx.beginPath(); ctx.moveTo(X-4,Y-4); ctx.lineTo(X+4,Y+4); ctx.moveTo(X+4,Y-4); ctx.lineTo(X-4,Y+4); ctx.stroke(); }
+    });
+  }
+  pts.forEach(p=>{
+    ctx.fillStyle = p.c ? CB : CA; ctx.strokeStyle = ink; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(p.x*W,(1-p.y)*W,10,0,7); ctx.fill(); ctx.stroke();
+  });
+  if(query && pts.length){
+    const nb = near(query.x,query.y), c = knn(query.x,query.y), HX = query.x*W, HY = (1-query.y)*W;
+    const R = Math.sqrt(nb[nb.length-1].d)*W;
+    ctx.save();
+    ctx.setLineDash([3,4]); ctx.strokeStyle = css("--accent"); ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(HX,HY); ctx.lineTo(HX,W); ctx.moveTo(HX,HY); ctx.lineTo(0,HY); ctx.stroke();
+    ctx.setLineDash([6,5]); ctx.strokeStyle = ink; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(HX,HY,R+10,0,7); ctx.stroke();
+    ctx.setLineDash([]); ctx.lineWidth = 2;
+    nb.forEach(p=>{ ctx.strokeStyle = p.c ? CB : CA; ctx.beginPath(); ctx.moveTo(HX,HY); ctx.lineTo(p.x*W,(1-p.y)*W); ctx.stroke(); });
+    nb.forEach(p=>{ ctx.strokeStyle = ink; ctx.lineWidth = 3.5; ctx.beginPath(); ctx.arc(p.x*W,(1-p.y)*W,13,0,7); ctx.stroke(); });
+    ctx.fillStyle = c ? CB : CA; ctx.strokeStyle = ink; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(HX,HY-12); ctx.lineTo(HX+12,HY); ctx.lineTo(HX,HY+12); ctx.lineTo(HX-12,HY); ctx.closePath(); ctx.fill(); ctx.stroke();
+    const ac = css("--accent");
+    label("x = "+br2(query.x), Math.min(Math.max(HX,60),W-60), W-34, "center", "bottom", ac, bg, 23);
+    label("y = "+br2(query.y), 52, Math.min(Math.max(HY,40),W-70), "left", "middle", ac, bg, 23);
+    ctx.restore();
+    const nv = nb.filter(p=>!p.c).length, nm = nb.length - nv;
+    const fmt = v => v.toFixed(2).replace(".",",");
+    const msg = `Manga nova em <b>x = ${fmt(query.x)}</b>, <b>y = ${fmt(query.y)}</b>. ${nb.length===1?"O vizinho mais próximo":"Os "+nb.length+" vizinhos mais próximos"}: <b>${nv}</b> ${nv===1?"verde":"verdes"} e <b>${nm}</b> ${nm===1?"madura":"maduras"} → a máquina diz: <b>${c?"madura":"verde"}</b>.`;
+    live.innerHTML = msg; qres.innerHTML = msg; qres.hidden = false;
+  } else { qres.hidden = !query; if(query) qres.textContent = "Sem exemplos, a máquina não tem a quem perguntar.";
+  }
+  document.getElementById("na").textContent = pts.filter(p=>!p.c).length;
+  document.getElementById("nb").textContent = pts.filter(p=>p.c).length;
+}
+function sampleSet(n, region){
+  const out=[];
+  while(out.length<n){
+    const x=rnd(), y=rnd();
+    if(region && !region(x,y)) continue;
+    out.push({x,y,c:truth(x,y)});
+  }
+  return out;
+}
+function clearQuery(){ query=null; live.innerHTML='Escolha <b>perguntar</b> e clique no mapa para ver a votação.'; }
+function runTest(){
+  if(!pts.length){ document.getElementById("lesson").innerHTML='<div class="warn">Sem exemplos, a máquina não sabe nada. Adicione dados primeiro.</div>'; return; }
+  const s0 = seed; seed = 12345;
+  test = sampleSet(200).map(t=>({...t, ok: knn(t.x,t.y)===t.c}));
+  seed = s0;
+  const ok = test.filter(t=>t.ok).length;
+  document.getElementById("acc").textContent = Math.round(ok/2) + "%";
+  document.getElementById("errs").textContent = (200-ok) + " erros (círculos vermelhos)";
+  const pct = ok/2;
+  // os erros estão longe de qualquer exemplo (falta de dados) ou perto da fronteira (k grande)?
+  const gap = t => Math.sqrt(Math.min(...pts.map(p=>(p.x-t.x)**2+(p.y-t.y)**2)));
+  const bad = test.filter(t=>!t.ok), far = bad.length ? bad.reduce((s,t)=>s+gap(t),0)/bad.length : 0;
+  document.getElementById("lesson").innerHTML = pct>=90
+    ? '<div class="note">Ótimo resultado. Mas repare: a máquina nunca "entendeu" o que é uma manga madura. Ela só reproduz os padrões dos exemplos.</div>'
+    : far > 0.12
+    ? '<div class="warn">Os erros se concentram onde <b>não havia exemplos</b>. Cada dado de treino estava certo, mas a amostra não representava todas as mangas. Na vida real, isso é o viés dos dados.</div>'
+    : K >= 9
+    ? '<div class="warn">Os dados cobrem o mapa, mas a máquina está ouvindo <b>vizinhos demais</b>. Perto da fronteira, exemplos distantes ganham a votação e a fronteira fica borrada. Experimente um k menor.</div>'
+    : '<div class="warn">Os erros estão perto da fronteira entre verdes e maduras, onde os exemplos se misturam. Mais exemplos nessa região ajudariam.</div>';
+  draw();
+}
+cv.addEventListener("pointerdown", e=>{
+  const r = cv.getBoundingClientRect();
+  if(cls===2){ query = {x:(e.clientX-r.left)/r.width, y:1-(e.clientY-r.top)/r.height}; draw(); return; }
+  pts.push({x:(e.clientX-r.left)/r.width, y:1-(e.clientY-r.top)/r.height, c:cls});
+  test=null; document.getElementById("acc").textContent="—"; document.getElementById("errs").textContent=""; document.getElementById("lesson").innerHTML="";
+  draw();
+});
+how.addEventListener("toggle", ()=>{ if(how.open && cls!==2) document.querySelector('#pick button[data-c="2"]').click(); });
+document.querySelectorAll("#pick button").forEach(b=>b.onclick=()=>{ document.querySelectorAll("#pick button").forEach(x=>x.classList.remove("on")); b.classList.add("on"); cls=+b.dataset.c; if(cls!==2 && query) clearQuery(); draw(); });
+document.getElementById("k").oninput = e=>{ K=+e.target.value; document.getElementById("kv").textContent=K; if(test) runTest(); else draw(); };
+function load(set){ pts=set; test=null; query=null; live.innerHTML='Escolha <b>perguntar</b> e clique no mapa para ver a votação.'; ["acc","errs"].forEach(i=>document.getElementById(i).textContent=i==="acc"?"—":""); document.getElementById("lesson").innerHTML=""; draw(); }
+document.getElementById("good").onclick = ()=>{ seed=7; load(sampleSet(40)); };
+// enviesada: só mangas de casca verde a meio-amarela foram coletadas
+document.getElementById("biased").onclick = ()=>{ seed=7; load(sampleSet(40,(x,y)=>x<0.45)); };
+document.getElementById("clear").onclick = ()=>load([]);
+document.getElementById("test").onclick = ()=>{ clearQuery(); runTest(); };
+document.getElementById("hide").onclick = ()=>{ test=null; draw(); };
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
+seed=7; load(sampleSet(40));
+// atalhos para a palestra: #variada ou #enviesada já carregam a amostra e rodam o teste
+if(location.hash==="#enviesada"){ document.getElementById("biased").click(); runTest(); }
+if(location.hash==="#variada"){ runTest(); }
+</script>
+</body>
+</html>

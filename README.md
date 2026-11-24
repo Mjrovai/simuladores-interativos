@@ -33,6 +33,10 @@ Sem instalação, sem build, sem dependências externas de CDN: cada app carrega
 | **Santos-Dumont · In Color** | A vida do Pai da Aviação em fotos colorizadas por IA (2019): linha do tempo, família de aeronaves, a ciência aberta da Demoiselle (páginas da *Popular Mechanics*, 1909), vídeo-tributo e o método de colorização com CNN. Companheira do 14-Bis, bilíngue PT/EN | [`apps/santos-dumont-in-color/`](apps/santos-dumont-in-color/) |
 | **Nautilus · Vinte Mil Léguas** | O submarino do Capitão Nemo (1870) em 3D: casco pelo texto de Verne ou pelas ilustrações, pilotagem, raio-X, física de peso, empuxo e lastro (capítulo XIII) e as gravuras de Neuville e Riou. Parte do site do livro, bilíngue PT/EN. Repositório próprio | [Vinte-Mil-Leguas ↗](https://mjrovai.github.io/Vinte-Mil-Leguas/simulador/) |
 
+## Palestra "IA para Professores"
+
+A pasta [`ia-para-professores/`](ia-para-professores/) reúne o material da palestra *Da cópia à curiosidade*: três protótipos (Ensine a Máquina, Próxima Palavra e Epidemia e Vacinação) e os pedidos para copiar (tutor que pergunta e simulador da sua disciplina). Os protótipos foram gerados pelo Claude Opus 5.5 sob a direção de Marcelo Rovai. Endereço: <https://mjrovai.github.io/simuladores-interativos/ia-para-professores/>
+
 A página inicial é uma galeria com busca e filtros por tema. Cada card abre o simulador **em nova aba**, então a galeria continua disponível para escolher outro.
 
 > `apps/color-palette/` é a única exceção ao "sem build": é um app **Next.js 15** publicado como **export estático**. O código-fonte vive fora deste repositório; aqui está o resultado de `next build` com `output: "export"` e `basePath: "/simuladores-interativos/apps/color-palette"`.

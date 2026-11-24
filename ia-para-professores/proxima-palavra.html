@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Próxima Palavra</title>
+<style>
+:root{
+  --bg:#F4F1EA; --card:#FFFFFF; --ink:#1B2029; --body:#3A404B; --muted:#5B6270; --line:#DDD6C8;
+  --accent:#9A4F1F; --accent-tint:#F3DCC9; --blue:#2F6F8F; --blue-tint:#DCE7EF; --green:#4F6B45; --green-tint:#E2EADC;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#161A21; --card:#1F242D; --ink:#F1EEE7; --body:#D2D5DB; --muted:#9AA1AD; --line:#343B47;
+  --accent:#E08A55; --accent-tint:#3D2A1E; --blue:#7DB6D3; --blue-tint:#1E3340; --green:#9CC08F; --green-tint:#24331F;
+}}
+:root[data-theme="dark"]{
+  --bg:#161A21; --card:#1F242D; --ink:#F1EEE7; --body:#D2D5DB; --muted:#9AA1AD; --line:#343B47;
+  --accent:#E08A55; --accent-tint:#3D2A1E; --blue:#7DB6D3; --blue-tint:#1E3340; --green:#9CC08F; --green-tint:#24331F;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--body);font:18px/1.5 system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 16px 48px}
+h1,h2{font-family:Cambria,Georgia,serif;color:var(--ink);margin:0}
+h1{font-size:clamp(30px,4.5vw,46px);line-height:1.1}
+h2{font-size:22px;margin-bottom:10px}
+.kicker{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:6px}
+.lead{font-size:19px;color:var(--muted);max-width:820px;margin:10px 0 24px}
+.grid{display:grid;grid-template-columns:1.25fr 1fr;gap:20px}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px}
+.out{font-family:Cambria,Georgia,serif;font-size:26px;line-height:1.55;color:var(--ink);min-height:150px;word-wrap:break-word}
+.out .seed{color:var(--muted)}
+.out .gen{background:var(--accent-tint);border-radius:4px;padding:0 3px}
+.out .last{outline:2px solid var(--accent);outline-offset:1px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px}
+button{font:inherit;font-size:16px;padding:10px 16px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button:hover{filter:brightness(.96)}
+input[type=text],textarea{font:inherit;font-size:17px;width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+textarea{min-height:220px;font-size:15px;line-height:1.45}
+label{font-size:15px;color:var(--muted)}
+.bars{display:flex;flex-direction:column;gap:6px}
+.bar{display:grid;grid-template-columns:130px 1fr 56px;gap:10px;align-items:center;cursor:pointer;border-radius:6px;padding:3px 4px}
+.bar:hover{background:var(--blue-tint)}
+.bar .w{font-family:Cambria,Georgia,serif;font-size:20px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar .track{height:22px;background:var(--bg);border-radius:4px;overflow:hidden}
+.bar .fill{height:100%;background:var(--blue);border-radius:4px}
+.bar .p{text-align:right;font-variant-numeric:tabular-nums;font-size:15px;color:var(--muted)}
+.ctx{font-size:15px;color:var(--muted);margin-bottom:10px}
+.ctx b{color:var(--ink);font-family:Cambria,Georgia,serif;font-size:18px}
+.note{background:var(--green-tint);border-left:4px solid var(--green);padding:12px 14px;border-radius:6px;font-size:16px;margin-top:14px}
+.warn{background:var(--accent-tint);border-left:4px solid var(--accent);padding:12px 14px;border-radius:6px;font-size:16px}
+.meter{display:flex;align-items:center;gap:10px;margin:0 0 12px;font-size:15px}
+.meter .pill{font-weight:700;border-radius:999px;padding:4px 12px;white-space:nowrap}
+.meter .copy{background:var(--accent-tint);color:var(--accent)}
+.meter .few{background:var(--blue-tint);color:var(--blue)}
+.meter .many{background:var(--green-tint);color:var(--green)}
+select{font:inherit;font-size:16px;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);max-width:100%}
+.trainst{font-size:15px;color:var(--muted)}
+.trainst.busy{color:var(--accent);font-weight:600}
+.trainst.ok{color:var(--green);font-weight:600}
+button:disabled{opacity:.6;cursor:wait}
+.stats{display:flex;gap:22px;flex-wrap:wrap;font-size:15px;color:var(--muted);margin-top:8px}
+.stats b{font-size:22px;color:var(--ink);display:block;font-variant-numeric:tabular-nums}
+details{margin-top:20px}
+summary{cursor:pointer;font-weight:600;color:var(--ink)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;border-radius:0}
+.seg button.on{background:var(--blue);color:#fff}
+footer{margin-top:28px;font-size:14px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">Como funciona um ChatGPT · demonstração</div>
+  <h1>Próxima Palavra</h1>
+  <p class="lead">Esta máquina leu um texto e contou que palavra costuma vir depois de cada palavra. Só isso. Escreva um começo e veja ela "escrever" escolhendo, a cada passo, uma das palavras mais prováveis.</p>
+
+  <div class="grid">
+    <div class="card">
+      <h2>O texto que a máquina escreve</h2>
+      <div class="row" style="margin:0 0 14px">
+        <label for="src">Texto de treino:</label>
+        <select id="src">
+          <option value="todos" selected>Os três textos juntos</option>
+          <option value="escola">A escola (texto curto)</option>
+          <option value="ano">Um ano na escola</option>
+          <option value="ciencias">Pequeno livro de ciências</option>
+          <option value="proprio" hidden>O seu texto</option>
+        </select>
+        <span class="trainst" id="trainst"></span>
+      </div>
+      <div class="out" id="out"></div>
+      <div class="row">
+        <input type="text" id="seed" value="a escola" aria-label="Começo do texto" style="flex:1;min-width:180px">
+        <button id="restart">Começar</button>
+      </div>
+      <div class="row">
+        <button class="primary" id="step">Mais uma palavra</button>
+        <button id="run">Escrever 20</button>
+        <button id="undo">Desfazer</button>
+      </div>
+      <div class="row">
+        <label for="temp">Criatividade (temperatura): <b id="tval">1,0</b></label>
+        <input type="range" id="temp" min="0" max="2" step="0.1" value="1" style="flex:1;min-width:160px">
+      </div>
+      <div class="row">
+        <label>Quantas palavras para trás ela olha:</label>
+        <div class="seg" id="order">
+          <button data-n="1" class="on">1</button><button data-n="2">2</button><button data-n="3">3</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Próximas palavras possíveis</h2>
+      <div class="ctx" id="ctx"></div>
+      <div class="meter" id="meter"></div>
+      <div class="bars" id="bars"></div>
+      <div class="note" id="explain">Clique numa palavra para escolhê-la você mesmo, ou deixe a máquina sortear. Palavras com barra maior têm mais chance de sair.</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px">
+    <h2>O que isso tem a ver com o ChatGPT?</h2>
+    <p style="margin:0">É a mesma ideia: <b>prever a próxima palavra</b>. A diferença é de escala. Esta máquina olha 1 a 3 palavras para trás e leu <span id="nw">—</span> palavras. Um modelo de linguagem grande olha para centenas de milhares de palavras para trás e leu trilhões. Por isso escreve tão bem e por isso também <b>inventa</b> com a mesma segurança: ela não consulta fatos, ela escolhe a continuação mais provável.</p>
+    <ul style="margin-bottom:0">
+      <li><b>Temperatura 0:</b> sempre a palavra mais provável. Repetitivo, previsível.</li>
+      <li><b>Temperatura alta:</b> arrisca palavras raras. Mais "criativo", mais sem sentido.</li>
+      <li><b>Olhar 3 palavras para trás:</b> frases mais coerentes, mas começa a copiar o texto original. É o problema da memorização.</li>
+    </ul>
+  </div>
+
+  <details>
+    <summary>Usar o seu próprio texto (cole um poema, um capítulo, a ementa da sua disciplina…)</summary>
+    <div class="card" style="margin-top:10px">
+      <textarea id="corpus"></textarea>
+      <div class="row">
+        <button class="primary" id="train">Treinar com este texto</button>
+        <button id="clearta">Limpar o texto</button>
+        <button id="reset">Voltar ao texto escolhido acima</button>
+        <span class="trainst" id="trainmsg"></span>
+      </div>
+      <div class="stats">
+        <div><b id="sw">—</b>palavras lidas</div>
+        <div><b id="sv">—</b>palavras diferentes</div>
+        <div><b id="sp">—</b>sequências contadas</div>
+      </div>
+    </div>
+  </details>
+
+  <footer>Protótipo da palestra "IA para Professores". Gerado pelo Claude Opus 5.5 sob a direção de Marcelo Rovai. Roda inteiro no navegador, sem internet. Os textos de treino "A escola", "Um ano na escola" e "Pequeno livro de ciências" também foram escritos pelo Claude Opus 5.5.</footer>
+</div>
+
+<script>
+const DEFAULT = `A escola é um lugar de encontro. Na escola, o aluno aprende a ler, a escrever e a perguntar. O professor ensina e também aprende com os alunos. Uma boa pergunta vale mais do que uma resposta pronta.
+
+Brasília nasceu no meio do cerrado. A cidade foi construída em poucos anos, e o Plano Piloto tem a forma de um avião. No cerrado, a seca é longa e a chuva chega forte em outubro. Quando a chuva chega, o cerrado fica verde e as árvores florescem.
+
+O aluno chega cedo na escola. O aluno abre o caderno e copia a pergunta do quadro. O professor pede que a turma leia o texto em voz alta. A turma lê o texto e depois discute a pergunta. Cada aluno escreve uma resposta curta no caderno.
+
+A inteligência artificial é uma máquina que aprende com exemplos. A máquina não pensa como uma pessoa. A máquina conta padrões nos dados e usa esses padrões para prever. Quando a máquina erra, ela erra com a mesma confiança de quando acerta. Por isso o professor e o aluno precisam conferir a resposta.
+
+A matemática ajuda a entender o mundo. A física explica por que a chuva cai e por que o avião voa. A biologia estuda a vida no cerrado. A história conta como a cidade foi construída. A língua portuguesa ensina a escrever um bom texto. A arte mostra o mundo de outro jeito.
+
+O professor prepara a aula na noite anterior. O professor escolhe um texto, uma pergunta e um exercício. Na aula, o professor ouve as dúvidas da turma. Uma dúvida bem feita ajuda toda a turma a aprender.
+
+A cidade acorda cedo. O ônibus passa na avenida e leva o aluno para a escola. Na volta, o aluno conta em casa o que aprendeu. A família pergunta e o aluno explica. Explicar é a melhor forma de aprender.`;
+
+const TEXTS = { escola: DEFAULT, ano: `O ano começa em fevereiro, com calor e com pressa. A escola abre os portões cedo, e os alunos chegam aos poucos, com mochilas novas e cadernos ainda limpos. Na primeira semana, ninguém sabe direito onde fica cada sala. O professor de matemática chega cedo e escreve o nome dele no quadro. A professora de português chega com uma pilha de livros e um sorriso cansado. O diretor fala no pátio sobre respeito, horário e uniforme. A turma ouve em silêncio, mas pensa no intervalo.
+
+A turma do segundo ano tem trinta e dois alunos. Alguns já se conhecem desde o fundamental. Outros chegaram de outras cidades e ainda não têm amigos. Na primeira aula, a professora de português pede que cada aluno escreva uma página sobre as férias. Um aluno escreve sobre a viagem para a casa da avó. Uma aluna escreve sobre o trabalho na loja do tio. Outro aluno escreve que não fez nada nas férias, e a professora diz que não fazer nada também pode virar uma boa história.
+
+O professor de matemática começa o ano com uma pergunta. Ele pergunta quantos grãos de arroz cabem num copo. A turma ri, mas depois começa a calcular. Um grupo mede um grão com a régua. Outro grupo pesa o copo cheio na balança da cantina. No fim da aula, cada grupo tem um número diferente, e o professor diz que isso é normal. Ele explica que medir é sempre aproximar, e que a ciência começa quando a gente pergunta quanto errou.
+
+Em março, começam as chuvas. A chuva chega à tarde, forte e rápida, e o pátio vira um lago. Os alunos esperam na cantina até a chuva passar. O professor de geografia aproveita a chuva para falar do cerrado. Ele explica que o cerrado tem duas estações, a seca e a chuvosa, e que as plantas do cerrado aprenderam a esperar. A turma vai até a janela e olha as árvores tortas do terreno ao lado. Uma aluna pergunta por que as árvores do cerrado são tortas. O professor diz que é uma boa pergunta e pede que a turma pesquise a resposta para a próxima aula.
+
+Na aula seguinte, cada aluno traz uma resposta diferente. Um aluno diz que é por causa do fogo. Outro diz que é por causa do solo. Uma aluna encontra um artigo de uma universidade e lê um parágrafo em voz alta. O professor pede que a turma compare as respostas e decida quais têm evidência. A discussão dura a aula inteira. No fim, a turma conclui que há mais de uma causa, e que uma boa pergunta raramente tem uma resposta só.
+
+Em abril, a escola faz a primeira prova do bimestre. Os alunos estudam na biblioteca, no ônibus e no celular. Alguns estudam em grupo na casa de um colega. Outros estudam sozinhos, de madrugada, na véspera da prova. A professora de biologia avisa que a prova não vai pedir nomes decorados. Ela diz que a prova vai pedir explicações. A turma fica preocupada, porque explicar é mais difícil do que decorar.
+
+A prova de biologia tem só quatro perguntas. A primeira pergunta pede que o aluno explique por que uma planta murcha sem água. A segunda pede que o aluno desenhe o caminho da água dentro da planta. A terceira pede que o aluno proponha um experimento. A quarta pergunta é a mais curta e a mais difícil: o que você ainda não entendeu? Muitos alunos deixam a quarta pergunta em branco. A professora diz depois que a quarta pergunta era a mais importante.
+
+Em maio, a escola organiza a feira de ciências. Cada grupo escolhe um tema e prepara um experimento. Um grupo constrói um pequeno foguete com garrafa de plástico. Outro grupo mede a temperatura das salas ao longo do dia. Um grupo de alunas monta uma estação de medir chuva com um copo, uma régua e um caderno. Outro grupo treina um programa no computador para reconhecer folhas de árvores do cerrado. O grupo do computador fotografa cem folhas no pátio da escola.
+
+O programa do grupo acerta muitas folhas, mas erra as folhas secas. Os alunos descobrem que quase todas as fotos eram de folhas verdes. O professor de matemática explica que o programa só aprende com os exemplos que recebe. Se os exemplos são parecidos demais, o programa aprende pouco. O grupo volta ao pátio e fotografa folhas secas, folhas comidas por insetos e folhas molhadas de chuva. Na segunda tentativa, o programa erra menos. Os visitantes da feira gostam mais do erro do que do acerto, porque o erro conta uma história.
+
+Em junho, a escola faz a festa junina. A turma do segundo ano fica responsável pela barraca de pipoca. Os alunos dividem as tarefas e calculam quanto milho precisam comprar. O professor de matemática ajuda com as contas, mas deixa a turma decidir o preço. A turma discute por uma semana. No fim, a barraca vende tudo, e a turma usa o dinheiro para comprar livros para a biblioteca.
+
+Em julho, vêm as férias do meio do ano. A escola fica vazia e silenciosa. O professor de matemática corrige provas na mesa da cozinha. A professora de português lê os textos dos alunos no ônibus. A professora de biologia planeja um projeto sobre a água para o segundo semestre. Os alunos dormem até tarde, jogam bola, ajudam em casa e esquecem quase tudo o que aprenderam. Em agosto, a escola volta, e o ano recomeça mais devagar.
+
+Agosto é o mês mais seco do ano. O céu fica branco de poeira, e a umidade do ar cai muito. A escola pede que os alunos tragam garrafas de água. A professora de biologia aproveita a seca para começar o projeto da água. Ela pergunta quanta água a escola gasta por dia. Ninguém sabe a resposta. A turma vai até o relógio de água da escola e anota o número todos os dias, sempre no mesmo horário.
+
+Depois de um mês, a turma tem uma tabela com trinta números. A professora de biologia pede que a turma faça um gráfico. O gráfico mostra que a escola gasta mais água nas segundas-feiras. A turma tenta descobrir o motivo. Um aluno sugere que é por causa da limpeza do fim de semana. A turma pergunta ao zelador, e o zelador confirma: a limpeza grande acontece na segunda-feira de manhã. A professora diz que a turma acabou de fazer ciência de verdade.
+
+Em setembro, a professora de português propõe um debate sobre inteligência artificial. Ela divide a turma em dois grupos. Um grupo defende que a inteligência artificial ajuda a aprender. O outro grupo defende que a inteligência artificial atrapalha. Cada grupo prepara argumentos durante uma semana. No dia do debate, a turma descobre que os dois grupos usaram a inteligência artificial para preparar os argumentos.
+
+O debate fica animado. Um aluno diz que a inteligência artificial escreve as redações por ele. Uma aluna responde que isso não é aprender, é copiar. Outro aluno diz que usa a inteligência artificial para explicar o que não entendeu na aula. A professora pergunta como ele sabe se a explicação está certa. O aluno pensa um pouco e diz que confere no livro. A professora diz que conferir é a parte mais importante. Ela explica que a inteligência artificial escolhe a palavra mais provável, e não a palavra verdadeira.
+
+Depois do debate, a professora de português muda as tarefas de casa. Em vez de pedir uma redação pronta, ela pede que cada aluno escreva uma pergunta para a inteligência artificial e depois critique a resposta. Os alunos descobrem que a máquina inventa nomes de livros, mistura datas e erra contas simples com muita confiança. A turma começa a gostar de encontrar os erros da máquina. A professora diz que encontrar erros também é uma forma de aprender.
+
+Em outubro, o professor de física traz um simulador para a sala. O simulador mostra uma bola lançada para cima. Os alunos mudam a velocidade e o ângulo e tentam acertar um alvo. No começo, a turma chuta os valores. Depois, a turma começa a perceber um padrão. Um aluno descobre que o ângulo de quarenta e cinco graus leva a bola mais longe. O professor pergunta por quê, e a aula inteira vira uma conversa sobre o porquê.
+
+O professor de física diz que o simulador não é a realidade. Ele explica que o simulador ignora o vento e o ar. A turma sai para o pátio e lança bolas de papel de verdade. As bolas de papel não seguem o simulador. Os alunos discutem a diferença e anotam as causas no caderno. O professor diz que um bom modelo é aquele que a gente sabe onde falha.
+
+Em novembro, a escola prepara o fim do ano. Os alunos fazem as últimas provas, entregam os últimos trabalhos e começam a pensar no ano seguinte. A turma do segundo ano organiza uma exposição com tudo o que fez durante o ano. Há o gráfico da água, o foguete de garrafa, a tabela da chuva, as fotos das folhas e os textos do debate. Os pais visitam a exposição numa manhã de sábado.
+
+Na exposição, uma mãe pergunta a um aluno o que ele aprendeu no ano. O aluno pensa um pouco e diz que aprendeu a perguntar. A mãe não entende e pede que ele explique. O aluno mostra a tabela da água e conta a história da segunda-feira. Depois mostra o programa que errava as folhas secas. A mãe diz que nunca tinha pensado que um erro pudesse ensinar tanto.
+
+Em dezembro, o ano termina. A escola fecha os portões, e o pátio fica em silêncio outra vez. O professor de matemática guarda os cadernos de notas. A professora de português guarda os textos dos alunos numa caixa. A professora de biologia guarda a tabela da água para mostrar à turma do ano seguinte. Os alunos vão embora com cadernos cheios, mochilas gastas e algumas perguntas sem resposta. E é assim que um bom ano na escola termina: com mais perguntas do que no começo.`, ciencias: `A água da Terra não se perde, ela muda de lugar. O sol aquece a água dos rios, dos lagos e dos mares. A água aquecida evapora e sobe para o céu como vapor. No alto, o ar é mais frio, e o vapor se transforma em gotas muito pequenas. As gotas se juntam e formam as nuvens. Quando as gotas ficam pesadas, a água cai como chuva. A chuva enche os rios, molha o solo e alimenta as plantas. Depois, o sol aquece a água outra vez, e o ciclo recomeça. Esse caminho se chama ciclo da água.
+
+As plantas fazem o próprio alimento. Para isso, a planta precisa de luz, de água e de gás carbônico. A água entra pela raiz e sobe pelo caule até as folhas. O gás carbônico entra pelas folhas, por pequenos poros. Nas folhas, a luz do sol fornece a energia para transformar a água e o gás carbônico em açúcar. Esse processo se chama fotossíntese. Na fotossíntese, a planta também libera oxigênio para o ar. O oxigênio que respiramos vem, em grande parte, da fotossíntese das plantas e das algas.
+
+As plantas também respiram. Durante o dia e durante a noite, a planta usa o açúcar para obter energia. Na respiração, a planta consome oxigênio e libera gás carbônico. Durante o dia, a fotossíntese é maior do que a respiração. Por isso, durante o dia, a planta libera mais oxigênio do que consome.
+
+Todos os corpos caem por causa da gravidade. A gravidade é a força que puxa os corpos para o centro da Terra. Uma pedra cai, uma folha cai, uma gota de chuva cai. A pedra cai mais rápido do que a folha porque o ar empurra a folha para cima. Sem o ar, a pedra e a folha cairiam juntas. Os astronautas fizeram esse teste na Lua, onde não há ar, e a pena e o martelo chegaram ao chão ao mesmo tempo.
+
+A gravidade também segura a Lua perto da Terra. A Lua gira em volta da Terra, e a Terra gira em volta do Sol. A Terra leva um dia para girar em torno de si mesma e um ano para dar a volta em torno do Sol. As estações do ano acontecem porque o eixo da Terra é inclinado. Quando uma parte da Terra fica mais voltada para o Sol, ela recebe mais luz e mais calor.
+
+A matéria é feita de partículas muito pequenas. Essas partículas se chamam átomos. Os átomos se juntam e formam as moléculas. Uma molécula de água tem dois átomos de hidrogênio e um átomo de oxigênio. No gelo, as moléculas de água ficam presas umas às outras. Na água líquida, as moléculas se movem e deslizam. No vapor, as moléculas se movem muito rápido e se afastam. Quando a água esquenta, as moléculas se movem mais rápido. Quando a água esfria, as moléculas se movem mais devagar.
+
+A luz viaja muito rápido. A luz do Sol leva cerca de oito minutos para chegar à Terra. A luz branca é a mistura de todas as cores. Quando a luz passa por uma gota de chuva, as cores se separam e aparece o arco-íris. Uma folha parece verde porque reflete a luz verde e absorve as outras cores. Uma camisa preta esquenta mais no sol porque absorve quase toda a luz.
+
+O som é uma vibração que viaja pelo ar. Quando uma corda de violão vibra, ela empurra o ar, e o ar leva a vibração até o ouvido. O som viaja mais devagar do que a luz. Por isso, numa tempestade, a gente vê o relâmpago antes de ouvir o trovão. Contando os segundos entre o relâmpago e o trovão, é possível estimar a distância da tempestade.
+
+O corpo humano também é feito de células. As células formam os tecidos, os tecidos formam os órgãos, e os órgãos formam os sistemas. O coração bombeia o sangue para todo o corpo. O sangue leva oxigênio e alimento para as células e recolhe o gás carbônico. Os pulmões trocam o gás carbônico pelo oxigênio do ar. O cérebro controla os movimentos, guarda as memórias e aprende com a experiência.
+
+O cérebro aprende com a repetição e com o erro. Quando a gente pratica uma tarefa, as ligações entre os neurônios ficam mais fortes. Quando a gente erra e percebe o erro, o cérebro ajusta essas ligações. Por isso, errar faz parte de aprender. Uma máquina que aprende com exemplos também ajusta os números internos quando erra. A diferença é que a máquina precisa de muito mais exemplos do que uma criança.
+
+A ciência começa com uma pergunta. Depois da pergunta, o cientista faz uma hipótese, que é uma resposta possível. Para testar a hipótese, o cientista faz um experimento e anota os resultados. Se os resultados combinam com a hipótese, a hipótese ganha força. Se os resultados não combinam, a hipótese precisa mudar. Um bom experimento muda uma coisa de cada vez e mede o resultado com cuidado.
+
+A ciência também depende de medir bem. Toda medida tem um erro. Uma régua mede com erro de um milímetro, e uma balança de cozinha mede com erro de alguns gramas. Por isso, o cientista repete a medida várias vezes e calcula a média. Quando duas pessoas medem a mesma coisa e chegam a números diferentes, isso não quer dizer que alguém mentiu. Quer dizer que é preciso entender de onde veio a diferença.
+
+Os dados ajudam a responder perguntas, mas os dados também podem enganar. Se a gente mede a temperatura só ao meio-dia, vai achar que o dia inteiro é quente. Se a gente pergunta a opinião só dos amigos, vai achar que todo mundo pensa igual. Uma boa amostra representa todos os casos, e não só os casos mais fáceis de encontrar. Uma máquina treinada com uma amostra ruim aprende uma regra ruim.
+
+A ciência não é uma lista de respostas prontas. A ciência é um jeito de perguntar, testar e corrigir. Muitas ideias que hoje parecem óbvias já foram consideradas erradas. Muitas ideias que hoje parecem certas ainda vão mudar. Por isso, a pergunta mais importante da ciência não é qual é a resposta, mas como a gente sabe que a resposta está certa.` };
+TEXTS.todos = [TEXTS.escola, TEXTS.ano, TEXTS.ciencias].join("\n\n");
+const NAMES = { todos:"os três textos", escola:"A escola", ano:"Um ano na escola", ciencias:"Pequeno livro de ciências", proprio:"o seu texto" };
+
+let model = {}, words = [], N = 1, temp = 1, tokens = [], history = [], seedLen = 0;
+
+function tokenize(t){
+  return t.toLowerCase().replace(/[“”"«»()\[\]]/g," ")
+    .replace(/([.,;:!?])/g," $1 ").split(/\s+/).filter(Boolean);
+}
+// compara palavras sem acento: "brasilia" encontra "brasília"
+const norm = w => w.normalize("NFD").replace(/[̀-ͯ]/g,"");
+const keyOf = arr => arr.map(norm).join(" ");
+let vocabList = [];
+function train(text){
+  words = tokenize(text); model = {1:{},2:{},3:{}};
+  vocabList = [...new Set(words.filter(w=>!/^[.,;:!?]$/.test(w)))];
+  for(let n=1;n<=3;n++){
+    for(let i=n;i<words.length;i++){
+      const k = keyOf(words.slice(i-n,i)), w = words[i];
+      (model[n][k] ||= {}); model[n][k][w] = (model[n][k][w]||0)+1;
+    }
+  }
+  const vocab = new Set(words).size;
+  let pairs=0; for(const k in model[2]) pairs += Object.keys(model[2][k]).length;
+  document.getElementById("sw").textContent = words.length.toLocaleString("pt-BR");
+  document.getElementById("sv").textContent = vocab.toLocaleString("pt-BR");
+  document.getElementById("sp").textContent = pairs.toLocaleString("pt-BR");
+  document.getElementById("nw").textContent = words.length.toLocaleString("pt-BR");
+}
+function dist(){
+  // tenta o contexto pedido; se nunca foi visto, recua para contextos menores
+  for(let n=Math.min(N,tokens.length); n>=1; n--){
+    const k = keyOf(tokens.slice(-n));
+    if(model[n][k]) return {n, k:tokens.slice(-n).join(" "), counts:model[n][k], backoff:n<Math.min(N,tokens.length)};
+  }
+  return null;
+}
+function probs(counts){
+  const e = Object.entries(counts);
+  const tot = e.reduce((s,[,c])=>s+c,0);
+  return e.map(([w,c])=>({w, p:c/tot})).sort((a,b)=>b.p-a.p);
+}
+function sample(list){
+  if(temp<=0.05) return list[0].w;
+  const ws = list.map(x=>Math.pow(x.p,1/temp)); const s = ws.reduce((a,b)=>a+b,0);
+  let r = Math.random()*s;
+  for(let i=0;i<list.length;i++){ r-=ws[i]; if(r<=0) return list[i].w; }
+  return list[list.length-1].w;
+}
+function render(){
+  const out = document.getElementById("out");
+  let html = "";
+  tokens.forEach((t,i)=>{
+    const cls = i<seedLen ? "seed" : "gen" + (i===tokens.length-1 ? " last":"");
+    const sp = /^[.,;:!?]$/.test(t) ? "" : " ";
+    html += sp + `<span class="${cls}">${t}</span>`;
+  });
+  out.innerHTML = html.trim() || '<span class="seed">(escreva um começo)</span>';
+  const d = dist(), bars = document.getElementById("bars"), ctx = document.getElementById("ctx"), ex = document.getElementById("explain");
+  if(!d){
+    ctx.innerHTML = "";
+    const last = tokens.at(-1)||"", nl = norm(last);
+    // sugestões: palavras conhecidas que começam parecido; se não houver, as mais frequentes
+    let sug = vocabList.filter(w=>norm(w).startsWith(nl.slice(0,3)) && w.length>2).slice(0,8);
+    if(!sug.length){ const f={}; words.forEach(w=>{ if(w.length>3) f[w]=(f[w]||0)+1; }); sug = Object.entries(f).sort((a,b)=>b[1]-a[1]).slice(0,8).map(x=>x[0]); }
+    bars.innerHTML = (last ? '<div class="warn">A palavra <b>"'+last+'"</b> não aparece no texto de treino. A máquina não tem a menor ideia do que vem depois: ela só sabe o que viu.</div>' : '<div class="warn">Escreva um começo.</div>')
+      + '<div style="margin-top:14px;font-size:15px;color:var(--muted)">Palavras que ela conhece (clique para trocar):</div><div class="row" style="margin-top:6px">'
+      + sug.map(w=>`<button class="sug" data-w="${w}">${w}</button>`).join("") + '</div>';
+    bars.querySelectorAll(".sug").forEach(b=>b.onclick=()=>{
+      if(tokens.length){ tokens[tokens.length-1]=b.dataset.w; } else { tokens=[b.dataset.w]; seedLen=1; }
+      if(tokens.length<=seedLen) document.getElementById("seed").value = tokens.join(" ");
+      render();
+    });
+    ex.style.display = "none"; document.getElementById("meter").innerHTML = "";
+    return;
+  }
+  ex.style.display = "";
+  const nopt = Object.keys(d.counts).length, meter = document.getElementById("meter");
+  meter.innerHTML = nopt===1
+    ? '<span class="pill copy">1 opção</span><span>só viu uma continuação: <b>está copiando</b> o texto de treino</span>'
+    : nopt<=3
+    ? `<span class="pill few">${nopt} opções</span><span>pouca escolha: quase copiando</span>`
+    : `<span class="pill many">${nopt} opções</span><span>viu várias continuações: <b>está sorteando</b></span>`;
+  ctx.innerHTML = `Olhando para: <b>"${d.k}"</b>` + (d.backoff ? ` <br>(nunca viu essa sequência de ${N} palavras, então olhou só ${d.n})` : "");
+  const list = probs(d.counts).slice(0,10);
+  bars.innerHTML = list.map(x=>`<div class="bar" data-w="${x.w}"><div class="w">${x.w}</div><div class="track"><div class="fill" style="width:${(x.p*100).toFixed(1)}%"></div></div><div class="p">${(x.p*100).toFixed(0)}%</div></div>`).join("");
+  bars.querySelectorAll(".bar").forEach(b=>b.onclick=()=>push(b.dataset.w));
+  ex.textContent = list.length===1
+    ? "Só existe uma continuação possível: no texto de treino essa sequência apareceu sempre seguida da mesma palavra. Aqui a máquina está copiando."
+    : "Clique numa palavra para escolhê-la você mesmo, ou deixe a máquina sortear. Palavras com barra maior têm mais chance de sair.";
+}
+function push(w){ history.push(tokens.length); tokens.push(w); render(); }
+function step(){ const d = dist(); if(!d) return false; push(sample(probs(d.counts))); return true; }
+function restart(){ tokens = tokenize(document.getElementById("seed").value); seedLen = tokens.length; history=[]; render(); }
+
+document.getElementById("step").onclick = step;
+document.getElementById("run").onclick = ()=>{ let i=0; const t=setInterval(()=>{ if(i++>=20||!step()) clearInterval(t); },120); };
+document.getElementById("undo").onclick = ()=>{ if(tokens.length>seedLen){ tokens.pop(); render(); } };
+document.getElementById("restart").onclick = restart;
+document.getElementById("seed").addEventListener("keydown",e=>{ if(e.key==="Enter") restart(); });
+document.getElementById("temp").oninput = e=>{ temp=+e.target.value; document.getElementById("tval").textContent = temp.toFixed(1).replace(".",","); };
+document.querySelectorAll("#order button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("#order button").forEach(x=>x.classList.remove("on")); b.classList.add("on"); N=+b.dataset.n; render();
+});
+const ta = document.getElementById("corpus"), src = document.getElementById("src");
+const st = document.getElementById("trainst"), msg = document.getElementById("trainmsg"), tbtn = document.getElementById("train");
+// treina mostrando "Treinando…"; o setTimeout deixa a tela atualizar antes do trabalho pesado
+function doTrain(text, key){
+  if(!tokenize(text).length){ msg.className="trainst busy"; msg.textContent="O texto está vazio."; return; }
+  [st,msg].forEach(e=>{ e.className="trainst busy"; e.textContent="Treinando…"; });
+  tbtn.disabled = true; tbtn.textContent = "Treinando…";
+  setTimeout(()=>{
+    const t0 = performance.now();
+    train(text);
+    // se o começo atual não existe no texto novo, começa com as duas primeiras palavras dele
+    const seedIn = document.getElementById("seed"), last = tokenize(seedIn.value).at(-1);
+    if(!last || !model[1][keyOf([last])]) seedIn.value = words.filter(w=>!/^[.,;:!?]$/.test(w)).slice(0,2).join(" ");
+    restart();
+    const ms = Math.max(1, Math.round(performance.now()-t0));
+    const done = `✓ Treinada com ${NAMES[key]}: ${words.length.toLocaleString("pt-BR")} palavras lidas (${ms} ms)`;
+    [st,msg].forEach(e=>{ e.className="trainst ok"; e.textContent=done; });
+    tbtn.disabled = false; tbtn.textContent = "Treinar com este texto";
+  }, 60);
+}
+document.getElementById("clearta").onclick = ()=>{ ta.value = ""; msg.className = "trainst"; msg.textContent = "Cole o novo texto e clique em Treinar."; ta.focus(); };
+src.onchange = ()=>{ if(src.value==="proprio") return; ta.value = TEXTS[src.value]; doTrain(TEXTS[src.value], src.value); };
+tbtn.onclick = ()=>{ if(!tokenize(ta.value).length){ msg.className="trainst busy"; msg.textContent="O texto está vazio: cole um texto antes de treinar."; return; } const o = src.querySelector('option[value="proprio"]'); o.hidden = false; src.value = "proprio"; doTrain(ta.value, "proprio"); };
+document.getElementById("reset").onclick = ()=>{ const k = src.value==="proprio" ? "todos" : src.value; src.value = k; ta.value = TEXTS[k]; doTrain(TEXTS[k], k); };
+ta.value = TEXTS.todos; train(TEXTS.todos); restart();
+st.className="trainst ok"; st.textContent=`${words.length.toLocaleString("pt-BR")} palavras lidas`;
+// atalho para a palestra: #demo já escreve algumas palavras
+if(location.hash==="#demo"){ for(let i=0;i<9;i++) step(); }
+</script>
+</body>
+</html>
