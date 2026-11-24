@@ -61,7 +61,13 @@ O QUE O ALUNO PODE MEXER: [controles deslizantes para R₀ (de 1 a 18, para incl
 O QUE APARECE NA TELA: [as curvas S, I e R ao longo do tempo, o pico de infectados e o total de doentes].
 PERGUNTA QUE O SIMULADOR AJUDA A RESPONDER: [por que vacinar parte da população protege quem não foi vacinado?]
 EXTRAS: um botão "Reiniciar", um texto curto explicando o modelo, letras grandes para projetar em sala.</pre>
-    <p class="hint">Copie a resposta, cole no Bloco de Notas (ou no TextEdit, em modo texto simples) e salve como <code>simulador.html</code>; depois, abra no navegador. No Gemini (Canvas) e no Claude, dá para ver o simulador funcionando na própria conversa. Teste e peça ajustes em português ("o gráfico ficou cortado", "acrescente um botão de pausa"). Confira a ciência: num teste com este pedido, o gráfico saiu certo, mas o total de doentes em destaque veio errado.</p>
+    <p class="hint">Copie a resposta, cole no Bloco de Notas (ou no TextEdit, em modo texto simples) e salve como <code>simulador.html</code>; depois, abra no navegador. No Gemini (Canvas) e no Claude, dá para ver o simulador funcionando na própria conversa. Teste e peça ajustes em português ("o gráfico ficou cortado", "acrescente um botão de pausa"). Confira a ciência: num teste com este pedido, o gráfico saiu certo, mas o total de doentes em destaque dizia que, quanto mais gente vacinada, mais gente adoecia.</p>
+  </div>
+
+  <div class="prompt">
+    <div class="phead"><span class="tag">Exemplo de ajuste em português</span><button type="button" data-copy="p-fix">Copiar</button></div>
+<pre id="p-fix">O total de doentes está errado: com 0% de vacinados aparece um número negativo, e ele aumenta quando a vacinação aumenta. O total deve ser o número de suscetíveis no início menos o número de suscetíveis no fim. Corrija e responda de novo com o código completo.</pre>
+    <p class="hint">Serve para o erro do teste acima. Descreva o que está errado e o que você esperava ver; não é preciso saber programar.</p>
   </div>
 
   <footer>Mais 23 simuladores em <a href="https://mjrovai.github.io/simuladores-interativos/">mjrovai.github.io/simuladores-interativos</a>. Protótipos gerados pelo Claude Opus 5.5 sob a direção de Marcelo Rovai.</footer>
