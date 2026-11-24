@@ -35,7 +35,7 @@ Sem instalação, sem build, sem dependências externas de CDN: cada app carrega
 
 ## Palestra "IA para Professores"
 
-A pasta [`ia-para-professores/`](ia-para-professores/) reúne o material da palestra *Da cópia à curiosidade*: três protótipos (Ensine a Máquina, Próxima Palavra e Epidemia e Vacinação) e os pedidos para copiar (tutor que pergunta e simulador da sua disciplina). Os protótipos foram gerados pelo Claude Opus 5.5 sob a direção de Marcelo Rovai. Endereço: <https://mjrovai.github.io/simuladores-interativos/ia-para-professores/>
+A pasta [`ia-para-professores/`](ia-para-professores/) reúne o material da palestra *Da cópia à curiosidade*: quatro protótipos (Ensine a Máquina, Próxima Palavra, Epidemia e Vacinação e Funções Trigonométricas) e os pedidos para copiar (tutor que pergunta, simulador da sua disciplina e um exemplo de ajuste). Os protótipos foram gerados pelo Claude Opus 5.5 sob a direção de Marcelo Rovai. Endereço: <https://mjrovai.github.io/simuladores-interativos/ia-para-professores/>
 
 A página inicial é uma galeria com busca e filtros por tema. Cada card abre o simulador **em nova aba**, então a galeria continua disponível para escolher outro.
 

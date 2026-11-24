@@ -15,7 +15,7 @@ h1,h2{font-family:Cambria,Georgia,serif;margin:0}
 h1{font-size:clamp(32px,5vw,50px)}
 .kicker{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700}
 p{color:var(--muted)}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:24px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:24px}
 a.card{display:block;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;text-decoration:none;color:inherit}
 a.card:hover{border-color:var(--accent)}
 a.card h2{font-size:24px;margin:6px 0}
@@ -35,11 +35,12 @@ h2.sec{font-size:30px;margin:44px 0 0}
 <div class="wrap">
   <div class="kicker">Palestra · Da cópia à curiosidade</div>
   <h1>IA para Professores</h1>
-  <p>Três demonstrações que rodam no navegador, sem instalação. Cada uma é um arquivo só: depois de aberta, funciona até sem internet. Dá para usar no computador da sala, com o projetor.</p>
+  <p>Quatro demonstrações que rodam no navegador, sem instalação. Cada uma é um arquivo só: depois de aberta, funciona até sem internet. Dá para usar no computador da sala, com o projetor.</p>
   <div class="cards">
     <a class="card" href="ensine-a-maquina.html"><span class="tag">O que é machine learning</span><h2>Ensine a Máquina</h2><p>A máquina aprende com exemplos de mangas e erra onde os dados não chegaram. Viés de dados na prática.</p></a>
     <a class="card" href="proxima-palavra.html"><span class="tag">O que é um LLM</span><h2>Próxima Palavra</h2><p>Um "mini-ChatGPT" que prevê a próxima palavra. Cole qualquer texto e treine de novo.</p></a>
     <a class="card" href="epidemia-sir.html"><span class="tag">Do usuário ao autor</span><h2>Epidemia e Vacinação</h2><p>Um simulador de Biologia e Matemática. O pedido que gera um simulador como este está logo abaixo.</p></a>
+    <a class="card" href="funcoes-trigonometricas.html"><span class="tag">Matemática</span><h2>Funções Trigonométricas</h2><p>Mexa em a, b, c e d e veja o gráfico de f(x) = a + b·sen(c·x + d) mudar. O pedido também está logo abaixo.</p></a>
   </div>
 
   <h2 class="sec">Pedidos para copiar</h2>
@@ -68,6 +69,19 @@ EXTRAS: um botão "Reiniciar", um texto curto explicando o modelo, letras grande
     <div class="phead"><span class="tag">Exemplo de ajuste em português</span><button type="button" data-copy="p-fix">Copiar</button></div>
 <pre id="p-fix">O total de doentes está errado: com 0% de vacinados aparece um número negativo, e ele aumenta quando a vacinação aumenta. O total deve ser o número de suscetíveis no início menos o número de suscetíveis no fim. Corrija e responda de novo com o código completo.</pre>
     <p class="hint">Serve para o erro do teste acima. Descreva o que está errado e o que você esperava ver; não é preciso saber programar.</p>
+  </div>
+
+  <div class="prompt">
+    <div class="phead"><span class="tag">Outro exemplo: Matemática</span><button type="button" data-copy="p-trig">Copiar</button></div>
+<pre id="p-trig">Crie um simulador interativo em um único arquivo HTML (HTML, CSS e JavaScript juntos, sem bibliotecas externas e sem servidor), em português. Responda apenas com o código completo, num único bloco, de &lt;!DOCTYPE html&gt; até &lt;/html&gt;, sem usar Python e sem criar arquivos.
+
+TEMA: [funções trigonométricas: f(x) = a + b·sen(c·x + d)]
+PARA QUEM: alunos do [2º ano do Ensino Médio], disciplina [Matemática].
+O QUE O ALUNO PODE MEXER: [controles deslizantes para a, b, c e d, e um botão para trocar seno por cosseno].
+O QUE APARECE NA TELA: [o gráfico de f(x) de −2π a 2π, o gráfico de sen(x) em cinza para comparar, e a amplitude, o período e a imagem calculados].
+PERGUNTA QUE O SIMULADOR AJUDA A RESPONDER: [o que cada parâmetro faz com o gráfico? Qual deles muda o período?]
+EXTRAS: um botão "Reiniciar", eixo x marcado em múltiplos de π, letras grandes para projetar em sala.</pre>
+    <p class="hint">Para conferir o resultado: em sen(x + π/2), o gráfico anda para a esquerda, e o deslocamento horizontal é −π/2. Com c = 2, o período cai pela metade, de 2π para π.</p>
   </div>
 
   <footer>Mais 23 simuladores em <a href="https://mjrovai.github.io/simuladores-interativos/">mjrovai.github.io/simuladores-interativos</a>. Protótipos gerados pelo Claude Opus 5.5 sob a direção de Marcelo Rovai.</footer>
