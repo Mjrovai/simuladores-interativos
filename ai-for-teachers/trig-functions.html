@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trigonometric Functions</title>
+<style>
+:root{
+  --bg:#F4F1EA; --card:#FFFFFF; --ink:#1B2029; --body:#3A404B; --muted:#5B6270; --line:#DDD6C8; --grid:#ECE6DA;
+  --f:#2F6F8F; --ref:#A7A196; --accent:#9A4F1F; --accent-tint:#F3DCC9; --band:#2F6F8F;
+  --pa:#B5462F; --pb:#3F7A3A; --pc:#7A4FA3; --pd:#C27C12;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#161A21; --card:#1F242D; --ink:#F1EEE7; --body:#D2D5DB; --muted:#9AA1AD; --line:#343B47; --grid:#2A303A;
+  --f:#7DB6D3; --ref:#6E7480; --accent:#E08A55; --accent-tint:#3D2A1E; --band:#7DB6D3;
+  --pa:#F08A72; --pb:#8FC987; --pc:#C2A0E8; --pd:#F2B84B;
+}}
+:root[data-theme="dark"]{
+  --bg:#161A21; --card:#1F242D; --ink:#F1EEE7; --body:#D2D5DB; --muted:#9AA1AD; --line:#343B47; --grid:#2A303A;
+  --f:#7DB6D3; --ref:#6E7480; --accent:#E08A55; --accent-tint:#3D2A1E; --band:#7DB6D3;
+  --pa:#F08A72; --pb:#8FC987; --pc:#C2A0E8; --pd:#F2B84B;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--body);font:19px/1.5 system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 16px 48px}
+h1,h2{font-family:Cambria,Georgia,serif;color:var(--ink);margin:0}
+h1{font-size:clamp(30px,4.5vw,46px);line-height:1.1}
+h2{font-size:22px;margin-bottom:10px}
+.kicker{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:6px}
+.lead{font-size:19px;color:var(--muted);max-width:860px;margin:10px 0 24px}
+.grid{display:grid;grid-template-columns:340px minmax(0,1fr);gap:20px}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px}
+.ctl{margin-bottom:18px}
+.ctl label{display:flex;justify-content:space-between;font-size:18px;color:var(--ink)}
+.ctl label b{font-variant-numeric:tabular-nums}
+.ctl small{display:block;color:var(--muted);font-size:15px;line-height:1.35;margin-top:2px}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.toggle{display:flex;gap:8px;margin-bottom:18px}
+button{font:inherit;font-size:17px;padding:10px 16px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.toggle button{flex:1}
+.toggle button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.formula{font-family:Cambria,Georgia,serif;font-size:clamp(24px,3.4vw,34px);color:var(--ink);margin:0 0 10px;font-variant-numeric:tabular-nums}
+canvas{width:100%;height:auto;display:block;touch-action:pan-y}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:16px;margin-top:8px}
+.legend span{display:flex;align-items:center;gap:6px}
+.sw{width:24px;height:4px;border-radius:2px;display:inline-block}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
+@media (max-width:760px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{border:1px solid var(--line);border-radius:10px;padding:12px}
+.kpi .n{font-family:Cambria,Georgia,serif;font-size:30px;color:var(--ink);line-height:1.15;font-variant-numeric:tabular-nums}
+.kpi .l{font-size:15px;color:var(--muted)}
+.kpi .h{font-size:14px;color:var(--muted);margin-top:2px}
+.ask{background:var(--accent-tint);border-left:4px solid var(--accent);padding:14px 16px;border-radius:6px;margin-top:18px;color:var(--ink)}
+pre{white-space:pre-wrap;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:14px;line-height:1.45;color:var(--ink);margin:10px 0 0}
+details{margin-top:24px}
+details summary{cursor:pointer;font-weight:600;color:var(--ink)}
+footer{margin-top:28px;font-size:14px;color:var(--muted)}
+.geral{display:inline-block;white-space:nowrap;max-width:100%;font-family:Cambria,Georgia,serif;font-size:clamp(22px,6.5vw,48px);color:var(--ink);background:var(--card);border:2px solid var(--ink);border-radius:12px;padding:8px 24px;margin:4px 0 22px;font-style:italic}
+.pa{color:var(--pa)} .pb{color:var(--pb)} .pc{color:var(--pc)} .pd{color:var(--pd)}
+.chk{display:flex;align-items:center;gap:10px;font-size:17px;color:var(--ink);margin:0 0 16px;cursor:pointer}
+.chk input{width:20px;height:20px;accent-color:var(--ink)}
+#a{accent-color:var(--pa)} #b{accent-color:var(--pb)} #c{accent-color:var(--pc)} #d{accent-color:var(--pd)}
+.geral .pa,.geral .pb,.geral .pc,.geral .pd{font-weight:700}
+.ctl label .p{font-family:Cambria,Georgia,serif;font-style:italic;font-weight:700;font-size:22px}
+.formula .lbl{font-family:system-ui,sans-serif;font-size:15px;color:var(--muted);display:block;letter-spacing:.06em;text-transform:uppercase}
+</style>
+<style>
+/* demo video button and window */
+.vbtn{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font:700 14px/1 system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:#fff;background:var(--accent);border:0;border-radius:999px;padding:8px 14px;cursor:pointer}
+.vbtn:hover{filter:brightness(1.1)}
+.vmodal{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;padding:16px}
+.vmodal.on{display:flex}
+.vmodal .vbox{position:relative;width:min(1100px,100%)}
+.vmodal video{display:block;width:100%;max-height:calc(100vh - 80px);border-radius:10px;background:#000}
+.vmodal .vx{position:absolute;top:-40px;right:0;font:700 15px/1 system-ui,Arial,sans-serif;color:#fff;background:transparent;border:1px solid rgba(255,255,255,.6);border-radius:8px;padding:7px 12px;cursor:pointer}
+.vmodal .vnote{color:#ddd;font:14px/1.4 system-ui,Arial,sans-serif;margin-top:8px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">Mathematics · simulator made with AI</div>
+  <h1>Trigonometric functions</h1>
+  <button type="button" class="vbtn" id="vopen">▶ Watch the video (1 min 59 s)</button>
+  <p class="lead">Move the parameters a, b, c, and d and see what each one does to the graph. The gray curve is the original function, without parameters, for comparison.</p>
+  <div class="geral" aria-label="General form of the function">f(x) = <span class="pa">a</span> + <span class="pb">b</span>·<span id="gfn">sin</span>(<span class="pc">c</span>·x + <span class="pd">d</span>)</div>
+
+  <div class="grid">
+    <section class="card" aria-label="Parameters">
+      <h2>Parameters</h2>
+      <div class="toggle" role="group" aria-label="Basic function">
+        <button type="button" id="bSen" aria-pressed="true">sine</button>
+        <button type="button" id="bCos" aria-pressed="false">cosine</button>
+      </div>
+      <div class="ctl">
+        <label for="a"><span class="p pa">a</span> <b id="av" class="pa"></b></label>
+        <input id="a" type="range" min="-3" max="3" step="0.5" value="0">
+        <small>Adds a value to the whole function.</small>
+      </div>
+      <div class="ctl">
+        <label for="b"><span class="p pb">b</span> <b id="bv" class="pb"></b></label>
+        <input id="b" type="range" min="-3" max="3" step="0.5" value="1">
+        <small>Multiplies the result of the sine or the cosine.</small>
+      </div>
+      <div class="ctl">
+        <label for="c"><span class="p pc">c</span> <b id="cv" class="pc"></b></label>
+        <input id="c" type="range" min="1" max="8" step="1" value="2">
+        <small>Multiplies x, inside the function.</small>
+      </div>
+      <div class="ctl">
+        <label for="d"><span class="p pd">d</span> <b id="dv" class="pd"></b></label>
+        <input id="d" type="range" min="-4" max="4" step="1" value="0">
+        <small>Adds a value to the angle, inside the function.</small>
+      </div>
+      <label class="chk"><input type="checkbox" id="showRef" checked> Show the original function</label>
+      <button type="button" id="reset">↺ Reset</button>
+    </section>
+
+    <section class="card" aria-label="Graph">
+      <p class="formula"><span class="lbl">With the current values</span><span id="formula"></span></p>
+      <canvas id="plot" width="1600" height="900" aria-label="Graph of the function from −2π to 2π"></canvas>
+      <div class="legend">
+        <span><i class="sw" style="background:var(--f)"></i> f(x)</span>
+        <span id="refLeg"><i class="sw" style="background:var(--ref)"></i> <span id="refName">sin(x), the original function (a = 0, b = 1, c = 1, d = 0)</span></span>
+        <span><i class="sw" style="background:var(--band);opacity:.35;height:10px"></i> one period of f</span>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><div class="l">Amplitude</div><div class="n" id="amp"></div><div class="h">|b|</div></div>
+        <div class="kpi"><div class="l">Period</div><div class="n" id="per"></div><div class="h">2π ÷ |c|</div></div>
+        <div class="kpi"><div class="l">Range</div><div class="n" id="img"></div><div class="h">from a − |b| to a + |b|</div></div>
+        <div class="kpi"><div class="l">Horizontal shift</div><div class="n" id="desl"></div><div class="h">−d ÷ c</div></div>
+      </div>
+      <div class="ask"><strong>Question:</strong> what does each parameter do to the graph? Which one changes the period? Before moving anything, make a prediction.</div>
+    </section>
+  </div>
+
+  <details>
+    <summary>The request that generated this simulator</summary>
+<pre>Create an interactive simulator in a single HTML file (HTML, CSS, and JavaScript together, no external libraries and no server), in English. Reply only with the complete code, in a single block, from &lt;!DOCTYPE html&gt; to &lt;/html&gt;, without using Python and without creating files.
+
+TOPIC: [trigonometric functions: f(x) = a + b·sin(c·x + d)]
+FOR WHOM: [11th grade] students, subject [Mathematics].
+WHAT THE STUDENT CAN CHANGE: [sliders for a, b, c, and d, and a button to switch between sine and cosine].
+WHAT APPEARS ON SCREEN: [the graph of f(x) from −2π to 2π, the graph of sin(x) in gray for comparison, and the calculated amplitude, period, and range].
+QUESTION THE SIMULATOR HELPS ANSWER: [what does each parameter do to the graph? Which one changes the period?]
+EXTRAS: a "Reset" button, the x axis marked in multiples of π, large fonts for projecting in class.</pre>
+  </details>
+
+  <footer>Prototype from the talk "AI for Teachers." Generated by Claude Opus 5.5 under the direction of Marcelo Rovai. Runs entirely in the browser, with no internet.</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var PI = Math.PI;
+  // c moves in halves (0.5 to 4) and d in quarters of π (−π to π): so period and shift come out as fractions of π
+  var state = { cos: false };
+
+  function gcd(x, y) { x = Math.abs(x); y = Math.abs(y); while (y) { var t = y; y = x % y; x = t; } return x || 1; }
+  // writes (num/den)·π as text: "π/2", "−3π/4", "4π", "0"
+  function fracPi(num, den) {
+    if (num === 0) return "0";
+    var g = gcd(num, den); num /= g; den /= g;
+    if (den < 0) { num = -num; den = -den; }
+    var sign = num < 0 ? "−" : "", n = Math.abs(num);
+    var top = (n === 1 ? "" : n) + "π";
+    return sign + (den === 1 ? top : top + "/" + den);
+  }
+  function num(v) { return (v < 0 ? "−" : "") + String(Math.abs(v)); }
+
+  function read() {
+    return {
+      a: +$("a").value, b: +$("b").value,
+      ch: +$("c").value,          // c = ch/2
+      dq: +$("d").value           // d = dq·π/4
+    };
+  }
+
+  // the same formula, with each number in its parameter's color
+  function formula(p) {
+    var span = function (cls, t) { return '<span class="' + cls + '">' + t + "</span>"; };
+    var fn = state.cos ? "cos" : "sin";
+    var c = p.ch / 2;
+    var arg = (c === 1 ? "" : span("pc", num(c))) + "x";
+    if (p.dq !== 0) arg += (p.dq > 0 ? " + " : " − ") + span("pd", fracPi(Math.abs(p.dq), 4));
+    var s = "f(x) = ";
+    var bAbs = Math.abs(p.b), bTxt = bAbs === 1 ? "" : span("pb", num(bAbs)) + "·";
+    if (p.a !== 0) s += span("pa", num(p.a)) + (p.b < 0 ? " − " : " + ") + bTxt;
+    else s += (p.b < 0 ? "−" : "") + bTxt;
+    return s + fn + "(" + arg + ")";
+  }
+
+  function update() {
+    var p = read();
+    $("av").textContent = num(p.a);
+    $("bv").textContent = num(p.b);
+    $("cv").textContent = num(p.ch / 2);
+    $("dv").textContent = fracPi(p.dq, 4);
+    $("formula").innerHTML = formula(p);
+    $("refName").textContent = (state.cos ? "cos(x)" : "sin(x)") + ", the original function (a = 0, b = 1, c = 1, d = 0)";
+    $("refLeg").style.display = $("showRef").checked ? "" : "none";
+    $("gfn").textContent = state.cos ? "cos" : "sin";
+    $("amp").textContent = num(Math.abs(p.b));
+    // period = 2π ÷ (ch/2) = 4π/ch
+    $("per").textContent = p.b === 0 ? "—" : fracPi(4, p.ch);
+    var lo = p.a - Math.abs(p.b), hi = p.a + Math.abs(p.b);
+    $("img").textContent = p.b === 0 ? "{" + num(p.a) + "}" : "[" + num(lo) + ", " + num(hi) + "]";
+    // shift = −d ÷ c = −(dq/4)π ÷ (ch/2) = −dq·π/(2·ch)
+    $("desl").textContent = fracPi(-p.dq, 2 * p.ch);
+    draw(p);
+  }
+
+  function css(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+  function draw(p) {
+    var cv = $("plot"), ctx = cv.getContext("2d");
+    var W = cv.width, H = cv.height, L = 90, R = 30, T = 30, B = 70;
+    var X0 = -2 * PI, X1 = 2 * PI, Y0 = -6.5, Y1 = 6.5;
+    var sx = function (x) { return L + (x - X0) / (X1 - X0) * (W - L - R); };
+    var sy = function (y) { return T + (Y1 - y) / (Y1 - Y0) * (H - T - B); };
+    ctx.clearRect(0, 0, W, H);
+    ctx.lineWidth = 1.5; ctx.strokeStyle = css("--grid");
+    ctx.font = "30px system-ui, sans-serif"; ctx.fillStyle = css("--muted");
+    ctx.textAlign = "right"; ctx.textBaseline = "middle";
+    for (var y = -6; y <= 6; y++) {
+      ctx.beginPath(); ctx.moveTo(L, sy(y)); ctx.lineTo(W - R, sy(y)); ctx.stroke();
+      if (y % 2 === 0) ctx.fillText(num(y), L - 14, sy(y));
+    }
+    ctx.textAlign = "center"; ctx.textBaseline = "top";
+    for (var k = -4; k <= 4; k++) {           // multiples of π/2
+      var x = k * PI / 2;
+      ctx.beginPath(); ctx.moveTo(sx(x), T); ctx.lineTo(sx(x), H - B); ctx.stroke();
+      ctx.fillText(fracPi(k, 2), sx(x), H - B + 14);
+    }
+    // axes
+    ctx.strokeStyle = css("--muted"); ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(L, sy(0)); ctx.lineTo(W - R, sy(0)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(sx(0), T); ctx.lineTo(sx(0), H - B); ctx.stroke();
+
+    var base = state.cos ? Math.cos : Math.sin;
+    var c = p.ch / 2, d = p.dq * PI / 4;
+    var f = function (x) { return p.a + p.b * base(c * x + d); };
+
+    // one period, starting at the horizontal shift (−d ÷ c); if it does not fit, step back one period at a time
+    if (p.b !== 0) {
+      var per = 2 * PI / c, x0 = -d / c;
+      while (x0 < X0) x0 += per;
+      while (x0 + per > X1 && x0 - per >= X0) x0 -= per;
+      var x1 = Math.min(x0 + per, X1);
+      ctx.fillStyle = css("--band"); ctx.globalAlpha = 0.12;
+      ctx.fillRect(sx(x0), T, sx(x1) - sx(x0), H - T - B);
+      ctx.globalAlpha = 1;
+      // range limits
+      ctx.setLineDash([12, 10]); ctx.strokeStyle = css("--f"); ctx.lineWidth = 2;
+      [p.a - Math.abs(p.b), p.a + Math.abs(p.b)].forEach(function (yy) {
+        ctx.beginPath(); ctx.moveTo(L, sy(yy)); ctx.lineTo(W - R, sy(yy)); ctx.stroke();
+      });
+      ctx.setLineDash([]);
+    }
+
+    function curve(g, color, width) {
+      ctx.strokeStyle = color; ctx.lineWidth = width; ctx.lineJoin = "round"; ctx.beginPath();
+      var n = 1200;
+      for (var i = 0; i <= n; i++) {
+        var x = X0 + (X1 - X0) * i / n, yy = g(x);
+        if (i === 0) ctx.moveTo(sx(x), sy(yy)); else ctx.lineTo(sx(x), sy(yy));
+      }
+      ctx.stroke();
+    }
+    if ($("showRef").checked) curve(base, css("--ref"), 4);
+    curve(f, css("--f"), 7);
+  }
+
+  function setFn(cos) {
+    state.cos = cos;
+    $("bSen").setAttribute("aria-pressed", String(!cos));
+    $("bCos").setAttribute("aria-pressed", String(cos));
+    update();
+  }
+  $("bSen").addEventListener("click", function () { setFn(false); });
+  $("bCos").addEventListener("click", function () { setFn(true); });
+  ["a", "b", "c", "d"].forEach(function (id) { $(id).addEventListener("input", update); });
+  $("showRef").addEventListener("change", update);
+  $("reset").addEventListener("click", function () {
+    $("a").value = 0; $("b").value = 1; $("c").value = 2; $("d").value = 0; $("showRef").checked = true; setFn(false);
+  });
+  if (window.matchMedia) {
+    var mq = window.matchMedia("(prefers-color-scheme: dark)");
+    if (mq.addEventListener) mq.addEventListener("change", update);
+  }
+  update();
+})();
+</script>
+<div class="vmodal" id="vmodal" role="dialog" aria-modal="true" aria-label="Demo video">
+  <div class="vbox"><button type="button" class="vx" id="vclose">Close ✕</button>
+  <video id="vplayer" controls preload="none" playsinline poster="videos/trig-functions.jpg"><source src="videos/trig-functions.mp4" type="video/mp4"><track kind="subtitles" srclang="en" label="English" src="videos/trig-functions.vtt"></video>
+  <div class="vnote">Optional subtitles: CC button on the video. Narrated in the voice of Marcelo Rovai, cloned with OmniVoice.</div></div>
+</div>
+<script>
+(function () {
+  var m = document.getElementById("vmodal"), v = document.getElementById("vplayer");
+  function abrir() { m.classList.add("on"); v.play().catch(function () {}); }
+  function fechar() { v.pause(); m.classList.remove("on"); }
+  document.getElementById("vopen").addEventListener("click", abrir);
+  document.getElementById("vclose").addEventListener("click", fechar);
+  m.addEventListener("click", function (e) { if (e.target === m) fechar(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && m.classList.contains("on")) fechar(); });
+})();
+</script>
+</body>
+</html>

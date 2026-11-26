@@ -1,0 +1,103 @@
+WEBVTT
+
+00:00.900 --> 00:08.592
+Epidemic and Vaccination. Why vaccinating part of the class
+also protects those who were not vaccinated.
+
+00:10.792 --> 00:15.478
+This simulator shows how a disease spreads
+through a population.
+
+00:15.528 --> 00:21.027
+In blue, those who can still catch the
+disease. In red, those who are sick.
+
+00:21.077 --> 00:25.022
+In green, those who have recovered and are now
+immune.
+
+00:25.872 --> 00:32.870
+I start with the flu: each sick person passes the disease
+to three people and stays sick for a week.
+
+00:32.920 --> 00:39.213
+Without a vaccine, at the peak, thirty percent
+of the population is sick at the same time.
+
+00:39.263 --> 00:42.807
+In the end, ninety-four percent caught the
+disease.
+
+00:43.657 --> 00:48.862
+Now I vaccinate thirty percent of the
+population, before the first case.
+
+00:48.912 --> 00:51.636
+The band at the top is the vaccinated.
+
+00:51.686 --> 00:56.088
+The peak drops from thirty to twelve percent
+and comes later.
+
+00:56.138 --> 01:00.613
+And the total number of sick people drops
+below sixty percent.
+
+01:01.463 --> 01:03.727
+I keep raising the vaccination.
+
+01:03.777 --> 01:07.386
+With half vaccinated, the peak almost
+disappears.
+
+01:07.436 --> 01:12.239
+Past sixty-seven percent, the message turns
+green: herd immunity.
+
+01:12.289 --> 01:18.884
+The disease finds no path to spread, and those
+who were not vaccinated are protected too.
+
+01:19.734 --> 01:25.427
+And what if the disease is measles? Each sick
+person infects twelve others.
+
+01:25.477 --> 01:30.480
+With the same seventy percent vaccinated, the
+epidemic comes back.
+
+01:30.530 --> 01:34.232
+For measles, the threshold is ninety-two
+percent.
+
+01:34.282 --> 01:38.903
+That is why measles vaccination has to reach
+almost everyone.
+
+01:39.753 --> 01:42.212
+Further down, the math behind it.
+
+01:42.262 --> 01:50.121
+Three short equations that a high school student can follow,
+with the numbers from the current controls.
+
+01:50.171 --> 01:54.152
+And the threshold calculation: one minus one
+over R₀.
+
+01:54.202 --> 01:56.585
+For measles, ninety-two percent.
+
+01:57.435 --> 02:02.996
+This simulator came from a plain-language
+request, which is right here below.
+
+02:03.046 --> 02:05.547
+But the AI can get a formula wrong.
+
+02:05.597 --> 02:11.814
+Before taking it to the class, check the
+numbers against what you know of the subject.
+
+02:11.864 --> 02:15.166
+The one who checks the science is the teacher.

@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teach the Machine</title>
+<style>
+:root{
+  --bg:#F4F1EA; --card:#FFFFFF; --ink:#1B2029; --body:#3A404B; --muted:#5B6270; --line:#DDD6C8;
+  --a:#4F6B45; --a-tint:#DCE8D3; --b:#C7861A; --b-tint:#F7E6C4; --accent:#9A4F1F; --accent-tint:#F3DCC9;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#161A21; --card:#1F242D; --ink:#F1EEE7; --body:#D2D5DB; --muted:#9AA1AD; --line:#343B47;
+  --a:#9CC08F; --a-tint:#26341F; --b:#F0B54A; --b-tint:#3A2E17; --accent:#E08A55; --accent-tint:#3D2A1E;
+}}
+:root[data-theme="dark"]{
+  --bg:#161A21; --card:#1F242D; --ink:#F1EEE7; --body:#D2D5DB; --muted:#9AA1AD; --line:#343B47;
+  --a:#9CC08F; --a-tint:#26341F; --b:#F0B54A; --b-tint:#3A2E17; --accent:#E08A55; --accent-tint:#3D2A1E;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--body);font:18px/1.5 system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 16px 48px}
+h1,h2{font-family:Cambria,Georgia,serif;color:var(--ink);margin:0}
+h1{font-size:clamp(30px,4.5vw,46px);line-height:1.1}
+h2{font-size:22px;margin-bottom:10px}
+.kicker{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:6px}
+.lead{font-size:19px;color:var(--muted);max-width:860px;margin:10px 0 24px}
+.grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:20px}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px}
+.plot{position:relative}
+canvas{width:100%;aspect-ratio:1/1;display:block;border-radius:8px;border:1px solid var(--line);cursor:crosshair;touch-action:none}
+.axis{font-size:14px;color:var(--muted);display:flex;justify-content:space-between;margin-top:6px}
+.yaxis{font-size:14px;color:var(--muted);margin-bottom:6px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px}
+button{font:inherit;font-size:16px;padding:10px 16px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.pick{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.pick button{border:0;border-radius:0;display:flex;gap:8px;align-items:center}
+.pick button.on{background:var(--ink);color:var(--bg)}
+.dia{width:13px;height:13px;transform:rotate(45deg);border:2px solid currentColor;display:inline-block;margin:0 2px}
+.qres{margin-top:10px;font-size:16px;background:var(--accent-tint);border-left:4px solid var(--accent);padding:10px 12px;border-radius:6px}
+.dot{width:14px;height:14px;border-radius:50%;display:inline-block}
+.big{font-family:Cambria,Georgia,serif;font-size:64px;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
+.note{background:var(--a-tint);border-left:4px solid var(--a);padding:12px 14px;border-radius:6px;font-size:16px;margin-top:14px}
+.warn{background:var(--accent-tint);border-left:4px solid var(--accent);padding:12px 14px;border-radius:6px;font-size:16px;margin-top:14px}
+label{font-size:15px;color:var(--muted)}
+.counts{display:flex;gap:18px;font-size:15px;color:var(--muted);margin-top:10px}
+.counts b{color:var(--ink);font-size:20px}
+ol{padding-left:22px;margin:8px 0 0}
+details summary{cursor:pointer;font-weight:600;color:var(--ink)}
+.how summary{font-family:Cambria,Georgia,serif;font-size:22px}
+.how .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:14px}
+.how .step{border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.how .step h3{margin:0 0 6px;font-size:17px;color:var(--ink)}
+.how .step p{margin:0;font-size:16px}
+.snum{display:inline-flex;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-weight:700;font-size:14px;align-items:center;justify-content:center;margin-right:8px}
+math{font-size:1.15em;color:var(--ink)}
+.eq{margin:10px 0 8px;overflow-x:auto}
+.live{font-size:17px;margin-top:14px;background:var(--accent-tint);border-left:4px solid var(--accent);padding:12px 14px;border-radius:6px}
+ol.qs li{margin-bottom:10px}
+details.ans{margin-top:6px}
+details.ans summary{font-size:15px;font-weight:600;color:var(--accent);list-style:none}
+details.ans summary::-webkit-details-marker{display:none}
+details.ans summary::before{content:"▸ "}
+details.ans[open] summary::before{content:"▾ "}
+details.ans p{margin:6px 0 0;font-size:16px;background:var(--bg);border-radius:6px;padding:10px 12px}
+footer{margin-top:28px;font-size:14px;color:var(--muted)}
+</style>
+<style>
+/* demo video button and window */
+.vbtn{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font:700 14px/1 system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:#fff;background:var(--accent);border:0;border-radius:999px;padding:8px 14px;cursor:pointer}
+.vbtn:hover{filter:brightness(1.1)}
+.vmodal{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;padding:16px}
+.vmodal.on{display:flex}
+.vmodal .vbox{position:relative;width:min(1100px,100%)}
+.vmodal video{display:block;width:100%;max-height:calc(100vh - 80px);border-radius:10px;background:#000}
+.vmodal .vx{position:absolute;top:-40px;right:0;font:700 15px/1 system-ui,Arial,sans-serif;color:#fff;background:transparent;border:1px solid rgba(255,255,255,.6);border-radius:8px;padding:7px 12px;cursor:pointer}
+.vmodal .vnote{color:#ddd;font:14px/1.4 system-ui,Arial,sans-serif;margin-top:8px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">Machine learning · learning from examples</div>
+  <h1>Teach the Machine: is the mango ripe?</h1>
+  <button type="button" class="vbtn" id="vopen">▶ Watch the video (3 min)</button>
+  <p class="lead">Nobody writes a rule for the machine. You show it examples of mangoes you already know how to classify, and it colors the map with what it "thinks" each region is. Then we test it with mangoes it has never seen.</p>
+
+  <div class="grid">
+    <div class="card plot">
+      <div class="yaxis">↑ firmness (harder)</div>
+      <canvas id="cv" width="640" height="640" aria-label="Mango map: click to add examples"></canvas>
+      <div class="axis"><span>green skin</span><span>skin color →</span><span>yellow skin</span></div>
+      <div class="row">
+        <span style="font-size:15px;color:var(--muted)">Click on the map to:</span>
+        <div class="pick" id="pick">
+          <button data-c="0" class="on" title="Teach: you say this mango is unripe"><span class="dot" style="background:var(--a)"></span>teach unripe</button>
+          <button data-c="1" title="Teach: you say this mango is ripe"><span class="dot" style="background:var(--b)"></span>teach ripe</button>
+          <button data-c="2" title="Ask: the machine decides by its neighbors"><span class="dia"></span>ask</button>
+        </div>
+      </div>
+      <div class="qres" id="qres" hidden></div>
+      <div class="counts"><span><b id="na">0</b> unripe</span><span><b id="nb">0</b> ripe</span></div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h2>1 · Choose the training data</h2>
+        <div class="row" style="margin-top:4px">
+          <button id="good">Varied sample</button>
+          <button id="biased">Biased sample</button>
+          <button id="clear">Clear</button>
+        </div>
+        <div class="row">
+          <label for="k">Neighbors consulted (k): <b id="kv">5</b></label>
+          <input type="range" id="k" min="1" max="15" step="2" value="5" style="flex:1">
+        </div>
+        <div class="note" id="explain">Each point on the map takes the color of the majority of its <b>k</b> nearest examples. This is the "k nearest neighbors" algorithm, one of the simplest in machine learning.</div>
+      </div>
+
+      <div class="card" style="margin-top:20px">
+        <h2>2 · Test with 200 new mangoes</h2>
+        <div class="row" style="margin-top:4px">
+          <button class="primary" id="test">Test</button>
+          <button id="hide">Hide test</button>
+        </div>
+        <div class="row" style="align-items:flex-end;gap:16px">
+          <div class="big" id="acc">—</div>
+          <div style="font-size:15px;color:var(--muted);padding-bottom:8px">correct<br><span id="errs"></span></div>
+        </div>
+        <div id="lesson"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="card how" id="how" style="margin-top:20px">
+    <summary>How does the machine decide? (optional)</summary>
+    <p style="margin:12px 0 0">On the map, choose <b>ask</b> and click anywhere: a new mango (◆) appears, linked to the <b>k</b> examples the machine consults, and its color comes from the vote. With the <b>teach</b> buttons, you decide the color: that is how you give the machine an example.</p>
+    <div class="steps">
+      <div class="step">
+        <h3><span class="snum">1</span>Each mango becomes two numbers</h3>
+        <p><b>x</b> = skin color (0 = green, 1 = yellow) and <b>y</b> = firmness (0 = soft, 1 = hard). To the machine, a mango is just a point on the map.</p>
+      </div>
+      <div class="step">
+        <h3><span class="snum">2</span>It measures the distance to each example</h3>
+        <p>To find the nearest neighbors, the machine has to measure. We see it at a glance; it calculates the distance to each example, like a ruler:</p>
+        <div class="eq"><math display="block"><mrow><mi>d</mi><mo>=</mo><msqrt><mrow><mi mathvariant="normal">Δ</mi><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><mi mathvariant="normal">Δ</mi><msup><mi>y</mi><mn>2</mn></msup></mrow></msqrt></mrow></math></div>
+        <p><b>Δx</b> is the difference in skin color and <b>Δy</b> the difference in firmness between the new mango and the example. It is the Pythagorean theorem: the straight-line distance between two points.</p>
+      </div>
+      <div class="step">
+        <h3><span class="snum">3</span>The k nearest ones vote</h3>
+        <p>The machine picks the <b>k</b> examples with the smallest distance, and the majority decides. That is why k is always odd: there are no ties.</p>
+      </div>
+      <div class="step">
+        <h3><span class="snum">4</span>It repeats this for the whole map</h3>
+        <p>Running the vote on every small piece of the map produces the background colors. Notice that "training" here is just <b>storing the examples</b>: there is no hidden formula, the machine looks at its memory every time.</p>
+      </div>
+    </div>
+    <div class="live" id="live">Choose <b>ask</b> and click on the map to see the vote.</div>
+  </details>
+
+  <div class="card" style="margin-top:20px">
+    <h2>To discuss with the class</h2>
+    <ol class="qs">
+      <li>The machine learned a <b>rule</b> that nobody wrote. Where did it come from?
+        <details class="ans"><summary>A possible answer</summary><p>From the examples. The boundary between "unripe" and "ripe" on the map is just a consequence of where the examples are. Nobody wrote "if the skin is yellow and the fruit is soft, it is ripe." Change or add an example and the rule changes with it.</p></details></li>
+      <li>Why does the biased sample get so much wrong, if every one of its examples is correct?
+        <details class="ans"><summary>A possible answer</summary><p>Because the sample is unbalanced: many unripe, few ripe, and no mango with yellow skin. In that region, the nearest neighbors are mangoes with green or half-yellow skin, almost all unripe, and the machine extends what it saw there. Correct data is not enough: it has to represent all the cases the machine will meet.</p></details></li>
+      <li>Replace "mango" with "face," "résumé," or "loan application." What happens to the people who were left out of the data?
+        <details class="ans"><summary>A possible answer</summary><p>The same thing that happened to the yellow mangoes: the machine makes more mistakes with them, without warning. There have been face recognition systems that failed far more often with Black women, and a résumé screening tool that learned, from past hiring, to penalize women. Nobody programmed the prejudice; it came with the data.</p></details></li>
+      <li>Add a <b>wrong</b> example on purpose (a ripe one among the unripe ones). What changes with k = 1 and with k = 9?
+        <details class="ans"><summary>A possible answer</summary><p>With k = 1, the wrong example creates a small "ripe island" around it: the machine memorizes the mistake. With k = 9, it loses the vote to its neighbors and the island disappears. A larger k ignores isolated mistakes, but if it is too large it also erases real details of the boundary. It is the trade-off between memorizing and generalizing.</p></details></li>
+    </ol>
+  </div>
+
+  <footer>Prototype from the talk "AI for Teachers." Generated by Claude Opus 5.5 under the direction of Marcelo Rovai. Runs entirely in the browser, with no internet. The "true rule" for the mangoes is made up for teaching purposes.</footer>
+</div>
+
+<script>
+const cv = document.getElementById("cv"), ctx = cv.getContext("2d"), W = cv.width;
+let pts = [], cls = 0, K = 5, test = null;
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+// "true" rule (unknown to the machine): ripe when the skin is more yellow and the fruit softer
+const truth = (x,y) => (0.62*x + 0.38*(1-y) + 0.06*Math.sin(9*x)) > 0.5 ? 1 : 0;
+let seed = 7; const rnd = () => (seed = (seed*16807) % 2147483647) / 2147483647;
+
+let query = null; const how = document.getElementById("how"), live = document.getElementById("live"), qres = document.getElementById("qres");
+const near = (x,y) => pts.map(p=>({x:p.x, y:p.y, c:p.c, d:(p.x-x)**2+(p.y-y)**2})).sort((a,b)=>a.d-b.d).slice(0,Math.min(K,pts.length));
+function knn(x,y){
+  if(!pts.length) return null;
+  const d = near(x,y);
+  const v = d.reduce((s,p)=>s+p.c,0)/d.length;
+  return v>0.5 ? 1 : v<0.5 ? 0 : d[0].c;
+}
+function label(t, x, y, align, base, ink, bg, size=19){
+  ctx.font = "600 "+size+"px system-ui,-apple-system,Arial,sans-serif"; ctx.textAlign = align; ctx.textBaseline = base;
+  ctx.lineWidth = 5; ctx.strokeStyle = bg; ctx.lineJoin = "round"; ctx.strokeText(t, x, y);
+  ctx.fillStyle = ink; ctx.fillText(t, x, y);
+}
+const br2 = v => v.toFixed(2);
+function drawScale(ink, bg){
+  ctx.save();
+  ctx.strokeStyle = css("--line"); ctx.lineWidth = 1;
+  for(let i=1;i<10;i++){ const p = i/10*W; ctx.beginPath(); ctx.moveTo(p,0); ctx.lineTo(p,W); ctx.moveTo(0,p); ctx.lineTo(W,p); ctx.stroke(); }
+  const mu = css("--muted");
+  for(let i=0;i<=5;i++){
+    const v = i/5, t = v===0||v===1 ? String(v) : br2(v).replace(/0$/,"");
+    if(i>0) label(t, v*W - (i===5?4:0), W-6, i===5?"right":"center", "bottom", mu, bg);
+    if(i>0) label(t, 6, (1-v)*W + (i===5?4:0), "left", i===5?"top":"middle", mu, bg);
+  }
+  label("0", 6, W-6, "left", "bottom", mu, bg);
+  label("x", W-6, W-28, "right", "bottom", mu, bg);
+  label("y", 30, 6, "left", "top", mu, bg);
+  ctx.restore();
+}
+function draw(){
+  const A = css("--a-tint"), B = css("--b-tint"), CA = css("--a"), CB = css("--b"), bg = css("--card"), ink = css("--ink");
+  ctx.fillStyle = bg; ctx.fillRect(0,0,W,W);
+  if(pts.length){
+    const g = 16;
+    for(let i=0;i<W;i+=g) for(let j=0;j<W;j+=g){
+      const c = knn((i+g/2)/W, 1-(j+g/2)/W);
+      ctx.fillStyle = c ? B : A; ctx.fillRect(i,j,g,g);
+    }
+  }
+  if(cls===2) drawScale(ink, bg);
+  if(test){
+    test.forEach(t=>{
+      const X=t.x*W, Y=(1-t.y)*W;
+      ctx.strokeStyle = t.ok ? (t.c?CB:CA) : "#C0392B"; ctx.lineWidth = t.ok?1.5:3;
+      ctx.beginPath(); ctx.arc(X,Y,t.ok?4:6,0,7); ctx.stroke();
+      if(!t.ok){ ctx.beginPath(); ctx.moveTo(X-4,Y-4); ctx.lineTo(X+4,Y+4); ctx.moveTo(X+4,Y-4); ctx.lineTo(X-4,Y+4); ctx.stroke(); }
+    });
+  }
+  pts.forEach(p=>{
+    ctx.fillStyle = p.c ? CB : CA; ctx.strokeStyle = ink; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(p.x*W,(1-p.y)*W,10,0,7); ctx.fill(); ctx.stroke();
+  });
+  if(query && pts.length){
+    const nb = near(query.x,query.y), c = knn(query.x,query.y), HX = query.x*W, HY = (1-query.y)*W;
+    const R = Math.sqrt(nb[nb.length-1].d)*W;
+    ctx.save();
+    ctx.setLineDash([3,4]); ctx.strokeStyle = css("--accent"); ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(HX,HY); ctx.lineTo(HX,W); ctx.moveTo(HX,HY); ctx.lineTo(0,HY); ctx.stroke();
+    ctx.setLineDash([6,5]); ctx.strokeStyle = ink; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(HX,HY,R+10,0,7); ctx.stroke();
+    ctx.setLineDash([]); ctx.lineWidth = 2;
+    nb.forEach(p=>{ ctx.strokeStyle = p.c ? CB : CA; ctx.beginPath(); ctx.moveTo(HX,HY); ctx.lineTo(p.x*W,(1-p.y)*W); ctx.stroke(); });
+    nb.forEach(p=>{ ctx.strokeStyle = ink; ctx.lineWidth = 3.5; ctx.beginPath(); ctx.arc(p.x*W,(1-p.y)*W,13,0,7); ctx.stroke(); });
+    ctx.fillStyle = c ? CB : CA; ctx.strokeStyle = ink; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(HX,HY-12); ctx.lineTo(HX+12,HY); ctx.lineTo(HX,HY+12); ctx.lineTo(HX-12,HY); ctx.closePath(); ctx.fill(); ctx.stroke();
+    const ac = css("--accent");
+    label("x = "+br2(query.x), Math.min(Math.max(HX,60),W-60), W-34, "center", "bottom", ac, bg, 23);
+    label("y = "+br2(query.y), 52, Math.min(Math.max(HY,40),W-70), "left", "middle", ac, bg, 23);
+    ctx.restore();
+    const nv = nb.filter(p=>!p.c).length, nm = nb.length - nv;
+    const fmt = v => v.toFixed(2);
+    const msg = `New mango at <b>x = ${fmt(query.x)}</b>, <b>y = ${fmt(query.y)}</b>. ${nb.length===1?"The nearest neighbor":"The "+nb.length+" nearest neighbors"}: <b>${nv}</b> unripe and <b>${nm}</b> ripe → the machine says: <b>${c?"ripe":"unripe"}</b>.`;
+    live.innerHTML = msg; qres.innerHTML = msg; qres.hidden = false;
+  } else { qres.hidden = !query; if(query) qres.textContent = "With no examples, the machine has no one to ask.";
+  }
+  document.getElementById("na").textContent = pts.filter(p=>!p.c).length;
+  document.getElementById("nb").textContent = pts.filter(p=>p.c).length;
+}
+function sampleSet(n, region){
+  const out=[];
+  while(out.length<n){
+    const x=rnd(), y=rnd();
+    if(region && !region(x,y)) continue;
+    out.push({x,y,c:truth(x,y)});
+  }
+  return out;
+}
+function clearQuery(){ query=null; live.innerHTML='Choose <b>ask</b> and click on the map to see the vote.'; }
+function runTest(){
+  if(!pts.length){ document.getElementById("lesson").innerHTML='<div class="warn">With no examples, the machine knows nothing. Add data first.</div>'; return; }
+  const s0 = seed; seed = 12345;
+  test = sampleSet(200).map(t=>({...t, ok: knn(t.x,t.y)===t.c}));
+  seed = s0;
+  const ok = test.filter(t=>t.ok).length;
+  document.getElementById("acc").textContent = Math.round(ok/2) + "%";
+  document.getElementById("errs").textContent = (200-ok) + " errors (red circles)";
+  const pct = ok/2;
+  // are the errors far from any example (missing data) or near the boundary (large k)?
+  const gap = t => Math.sqrt(Math.min(...pts.map(p=>(p.x-t.x)**2+(p.y-t.y)**2)));
+  const bad = test.filter(t=>!t.ok), far = bad.length ? bad.reduce((s,t)=>s+gap(t),0)/bad.length : 0;
+  document.getElementById("lesson").innerHTML = pct>=90
+    ? '<div class="note">Great result. But notice: the machine never "understood" what a ripe mango is. It only reproduces the patterns in the examples.</div>'
+    : far > 0.12
+    ? '<div class="warn">The errors cluster where <b>there were no examples</b>. Every training example was correct, but the sample did not represent all mangoes. In real life, this is data bias.</div>'
+    : K >= 9
+    ? '<div class="warn">The data covers the map, but the machine is listening to <b>too many neighbors</b>. Near the boundary, distant examples win the vote and the boundary gets blurred. Try a smaller k.</div>'
+    : '<div class="warn">The errors are near the boundary between unripe and ripe, where the examples mix. More examples in that region would help.</div>';
+  draw();
+}
+cv.addEventListener("pointerdown", e=>{
+  const r = cv.getBoundingClientRect();
+  if(cls===2){ query = {x:(e.clientX-r.left)/r.width, y:1-(e.clientY-r.top)/r.height}; draw(); return; }
+  pts.push({x:(e.clientX-r.left)/r.width, y:1-(e.clientY-r.top)/r.height, c:cls});
+  test=null; document.getElementById("acc").textContent="—"; document.getElementById("errs").textContent=""; document.getElementById("lesson").innerHTML="";
+  draw();
+});
+how.addEventListener("toggle", ()=>{ if(how.open && cls!==2) document.querySelector('#pick button[data-c="2"]').click(); });
+document.querySelectorAll("#pick button").forEach(b=>b.onclick=()=>{ document.querySelectorAll("#pick button").forEach(x=>x.classList.remove("on")); b.classList.add("on"); cls=+b.dataset.c; if(cls!==2 && query) clearQuery(); draw(); });
+document.getElementById("k").oninput = e=>{ K=+e.target.value; document.getElementById("kv").textContent=K; if(test) runTest(); else draw(); };
+function load(set){ pts=set; test=null; query=null; live.innerHTML='Choose <b>ask</b> and click on the map to see the vote.'; ["acc","errs"].forEach(i=>document.getElementById(i).textContent=i==="acc"?"—":""); document.getElementById("lesson").innerHTML=""; draw(); }
+document.getElementById("good").onclick = ()=>{ seed=7; load(sampleSet(40)); };
+// biased: only mangoes with green to half-yellow skin were collected
+document.getElementById("biased").onclick = ()=>{ seed=7; load(sampleSet(40,(x,y)=>x<0.45)); };
+document.getElementById("clear").onclick = ()=>load([]);
+document.getElementById("test").onclick = ()=>{ clearQuery(); runTest(); };
+document.getElementById("hide").onclick = ()=>{ test=null; draw(); };
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
+seed=7; load(sampleSet(40));
+// shortcuts for the talk: #varied or #biased load the sample and run the test
+if(location.hash==="#biased"||location.hash==="#enviesada"){ document.getElementById("biased").click(); runTest(); }
+if(location.hash==="#varied"||location.hash==="#variada"){ runTest(); }
+</script>
+<div class="vmodal" id="vmodal" role="dialog" aria-modal="true" aria-label="Demo video">
+  <div class="vbox"><button type="button" class="vx" id="vclose">Close ✕</button>
+  <video id="vplayer" controls preload="none" playsinline poster="videos/teach-the-machine.jpg"><source src="videos/teach-the-machine.mp4" type="video/mp4"><track kind="subtitles" srclang="en" label="English" src="videos/teach-the-machine.vtt"></video>
+  <div class="vnote">Optional subtitles: CC button on the video. Narrated in the voice of Marcelo Rovai, cloned with OmniVoice.</div></div>
+</div>
+<script>
+(function () {
+  var m = document.getElementById("vmodal"), v = document.getElementById("vplayer");
+  function abrir() { m.classList.add("on"); v.play().catch(function () {}); }
+  function fechar() { v.pause(); m.classList.remove("on"); }
+  document.getElementById("vopen").addEventListener("click", abrir);
+  document.getElementById("vclose").addEventListener("click", fechar);
+  m.addEventListener("click", function (e) { if (e.target === m) fechar(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && m.classList.contains("on")) fechar(); });
+})();
+</script>
+</body>
+</html>

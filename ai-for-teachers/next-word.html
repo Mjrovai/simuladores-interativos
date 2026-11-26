@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Next Word</title>
+<style>
+:root{
+  --bg:#F4F1EA; --card:#FFFFFF; --ink:#1B2029; --body:#3A404B; --muted:#5B6270; --line:#DDD6C8;
+  --accent:#9A4F1F; --accent-tint:#F3DCC9; --blue:#2F6F8F; --blue-tint:#DCE7EF; --green:#4F6B45; --green-tint:#E2EADC;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#161A21; --card:#1F242D; --ink:#F1EEE7; --body:#D2D5DB; --muted:#9AA1AD; --line:#343B47;
+  --accent:#E08A55; --accent-tint:#3D2A1E; --blue:#7DB6D3; --blue-tint:#1E3340; --green:#9CC08F; --green-tint:#24331F;
+}}
+:root[data-theme="dark"]{
+  --bg:#161A21; --card:#1F242D; --ink:#F1EEE7; --body:#D2D5DB; --muted:#9AA1AD; --line:#343B47;
+  --accent:#E08A55; --accent-tint:#3D2A1E; --blue:#7DB6D3; --blue-tint:#1E3340; --green:#9CC08F; --green-tint:#24331F;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--body);font:18px/1.5 system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 16px 48px}
+h1,h2{font-family:Cambria,Georgia,serif;color:var(--ink);margin:0}
+h1{font-size:clamp(30px,4.5vw,46px);line-height:1.1}
+h2{font-size:22px;margin-bottom:10px}
+.kicker{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:6px}
+.lead{font-size:19px;color:var(--muted);max-width:820px;margin:10px 0 24px}
+.grid{display:grid;grid-template-columns:1.25fr 1fr;gap:20px}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px}
+.out{font-family:Cambria,Georgia,serif;font-size:26px;line-height:1.55;color:var(--ink);min-height:150px;word-wrap:break-word}
+.out .seed{color:var(--muted)}
+.out .gen{background:var(--accent-tint);border-radius:4px;padding:0 3px}
+.out .last{outline:2px solid var(--accent);outline-offset:1px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px}
+button{font:inherit;font-size:16px;padding:10px 16px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button:hover{filter:brightness(.96)}
+input[type=text],textarea{font:inherit;font-size:17px;width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+textarea{min-height:220px;font-size:15px;line-height:1.45}
+label{font-size:15px;color:var(--muted)}
+.bars{display:flex;flex-direction:column;gap:6px}
+.bar{display:grid;grid-template-columns:130px 1fr 56px;gap:10px;align-items:center;cursor:pointer;border-radius:6px;padding:3px 4px}
+.bar:hover{background:var(--blue-tint)}
+.bar .w{font-family:Cambria,Georgia,serif;font-size:20px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar .track{height:22px;background:var(--bg);border-radius:4px;overflow:hidden}
+.bar .fill{height:100%;background:var(--blue);border-radius:4px}
+.bar .p{text-align:right;font-variant-numeric:tabular-nums;font-size:15px;color:var(--muted)}
+.ctx{font-size:15px;color:var(--muted);margin-bottom:10px}
+.ctx b{color:var(--ink);font-family:Cambria,Georgia,serif;font-size:18px}
+.note{background:var(--green-tint);border-left:4px solid var(--green);padding:12px 14px;border-radius:6px;font-size:16px;margin-top:14px}
+.warn{background:var(--accent-tint);border-left:4px solid var(--accent);padding:12px 14px;border-radius:6px;font-size:16px}
+.meter{display:flex;align-items:center;gap:10px;margin:0 0 12px;font-size:15px}
+.meter .pill{font-weight:700;border-radius:999px;padding:4px 12px;white-space:nowrap}
+.meter .copy{background:var(--accent-tint);color:var(--accent)}
+.meter .few{background:var(--blue-tint);color:var(--blue)}
+.meter .many{background:var(--green-tint);color:var(--green)}
+select{font:inherit;font-size:16px;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);max-width:100%}
+.trainst{font-size:15px;color:var(--muted)}
+.trainst.busy{color:var(--accent);font-weight:600}
+.trainst.ok{color:var(--green);font-weight:600}
+button:disabled{opacity:.6;cursor:wait}
+.stats{display:flex;gap:22px;flex-wrap:wrap;font-size:15px;color:var(--muted);margin-top:8px}
+.stats b{font-size:22px;color:var(--ink);display:block;font-variant-numeric:tabular-nums}
+details{margin-top:20px}
+summary{cursor:pointer;font-weight:600;color:var(--ink)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;border-radius:0}
+.seg button.on{background:var(--blue);color:#fff}
+footer{margin-top:28px;font-size:14px;color:var(--muted)}
+</style>
+<style>
+/* demo video button and window */
+.vbtn{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font:700 14px/1 system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:#fff;background:var(--accent);border:0;border-radius:999px;padding:8px 14px;cursor:pointer}
+.vbtn:hover{filter:brightness(1.1)}
+.vmodal{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;padding:16px}
+.vmodal.on{display:flex}
+.vmodal .vbox{position:relative;width:min(1100px,100%)}
+.vmodal video{display:block;width:100%;max-height:calc(100vh - 80px);border-radius:10px;background:#000}
+.vmodal .vx{position:absolute;top:-40px;right:0;font:700 15px/1 system-ui,Arial,sans-serif;color:#fff;background:transparent;border:1px solid rgba(255,255,255,.6);border-radius:8px;padding:7px 12px;cursor:pointer}
+.vmodal .vnote{color:#ddd;font:14px/1.4 system-ui,Arial,sans-serif;margin-top:8px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">How a ChatGPT works · demonstration</div>
+  <h1>Next Word</h1>
+  <button type="button" class="vbtn" id="vopen">▶ Watch the video (2 min 6 s)</button>
+  <p class="lead">This machine read a text and counted which word usually comes after each word. That is all. Write a beginning and watch it "write," choosing one of the most probable words at each step.</p>
+
+  <div class="grid">
+    <div class="card">
+      <h2>The text the machine writes</h2>
+      <div class="row" style="margin:0 0 14px">
+        <label for="src">Training text:</label>
+        <select id="src">
+          <option value="todos" selected>All three texts together</option>
+          <option value="escola">The school (short text)</option>
+          <option value="ano">A year at school</option>
+          <option value="ciencias">A small book of science</option>
+          <option value="proprio" hidden>Your text</option>
+        </select>
+        <span class="trainst" id="trainst"></span>
+      </div>
+      <div class="out" id="out"></div>
+      <div class="row">
+        <input type="text" id="seed" value="the school" aria-label="Beginning of the text" style="flex:1;min-width:180px">
+        <button id="restart">Start</button>
+      </div>
+      <div class="row">
+        <button class="primary" id="step">One more word</button>
+        <button id="run">Write 20</button>
+        <button id="undo">Undo</button>
+      </div>
+      <div class="row">
+        <label for="temp">Creativity (temperature): <b id="tval">1.0</b></label>
+        <input type="range" id="temp" min="0" max="2" step="0.1" value="1" style="flex:1;min-width:160px">
+      </div>
+      <div class="row">
+        <label>How many words back it looks:</label>
+        <div class="seg" id="order">
+          <button data-n="1" class="on">1</button><button data-n="2">2</button><button data-n="3">3</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Possible next words</h2>
+      <div class="ctx" id="ctx"></div>
+      <div class="meter" id="meter"></div>
+      <div class="bars" id="bars"></div>
+      <div class="note" id="explain">Click a word to choose it yourself, or let the machine draw one. Words with a longer bar are more likely to come out.</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px">
+    <h2>What does this have to do with ChatGPT?</h2>
+    <p style="margin:0">It is the same idea: <b>predicting the next word</b>. The difference is scale. This machine looks 1 to 3 words back and has read <span id="nw">—</span> words. A large language model looks hundreds of thousands of words back and has read trillions. That is why it writes so well, and that is also why it <b>makes things up</b> with the same confidence: it does not look up facts, it chooses the most probable continuation.</p>
+    <ul style="margin-bottom:0">
+      <li><b>Temperature 0:</b> always the most probable word. Repetitive, predictable.</li>
+      <li><b>High temperature:</b> it risks rare words. More "creative," less sense.</li>
+      <li><b>Looking 3 words back:</b> more coherent sentences, but it starts copying the original text. This is the memorization problem.</li>
+    </ul>
+  </div>
+
+  <details>
+    <summary>Use your own text (paste a poem, a chapter, your course syllabus…)</summary>
+    <div class="card" style="margin-top:10px">
+      <textarea id="corpus"></textarea>
+      <div class="row">
+        <button class="primary" id="train">Train with this text</button>
+        <button id="clearta">Clear the text</button>
+        <button id="reset">Back to the text chosen above</button>
+        <span class="trainst" id="trainmsg"></span>
+      </div>
+      <div class="stats">
+        <div><b id="sw">—</b>words read</div>
+        <div><b id="sv">—</b>different words</div>
+        <div><b id="sp">—</b>sequences counted</div>
+      </div>
+    </div>
+  </details>
+
+  <footer>Prototype from the talk "AI for Teachers." Generated by Claude Opus 5.5 under the direction of Marcelo Rovai. Runs entirely in the browser, with no internet. The training texts "The school," "A year at school," and "A small book of science" were also written by Claude Opus 5.5.</footer>
+</div>
+
+<script>
+const DEFAULT = `The school is a place where people meet. At school, the student learns to read, to write, and to ask questions. The teacher teaches and also learns from the students. A good question is worth more than a ready answer.
+
+The city grew around the river. The first houses were built near the water, and the old bridge still crosses the river in the center of the city. In the dry season, the river is low and slow. When the rain comes, the river rises and the trees along the banks turn green again.
+
+The student arrives at school early. The student opens the notebook and copies the question from the board. The teacher asks the class to read the text aloud. The class reads the text and then discusses the question. Each student writes a short answer in the notebook.
+
+Artificial intelligence is a machine that learns from examples. The machine does not think like a person. The machine counts patterns in the data and uses those patterns to predict. When the machine is wrong, it is wrong with the same confidence as when it is right. That is why the teacher and the student need to check the answer.
+
+Mathematics helps us understand the world. Physics explains why the rain falls and why the airplane flies. Biology studies life in the river and in the forest. History tells how the city was built. Language class teaches how to write a good text. Art shows the world in another way.
+
+The teacher prepares the lesson the night before. The teacher chooses a text, a question, and an exercise. In class, the teacher listens to the questions of the class. A good question helps the whole class learn.
+
+The city wakes up early. The bus goes down the avenue and takes the student to school. On the way back, the student tells the family what he learned. The family asks and the student explains. Explaining is the best way to learn.`;
+
+const TEXTS = { escola: DEFAULT, ano: `The school year begins with noise and with hurry. The school opens the gates early, and the students arrive a few at a time, with new backpacks and clean notebooks. In the first week, nobody really knows where each room is. The math teacher arrives early and writes his name on the board. The language teacher arrives with a pile of books and a tired smile. The principal talks in the yard about respect, time, and the school rules. The class listens in silence, but thinks about the break.
+
+The eleventh grade class has thirty two students. Some of them have known each other since primary school. Others came from other cities and do not have friends yet. In the first lesson, the language teacher asks each student to write a page about the holidays. One student writes about the trip to his grandmother's house. One girl writes about her work in her uncle's shop. Another student writes that he did nothing during the holidays, and the teacher says that doing nothing can also become a good story.
+
+The math teacher starts the year with a question. He asks how many grains of rice fit in a glass. The class laughs, but then starts to calculate. One group measures a grain with a ruler. Another group weighs the full glass on the scale in the cafeteria. At the end of the lesson, each group has a different number, and the teacher says that this is normal. He explains that measuring is always approximating, and that science begins when we ask how much we were wrong.
+
+A few weeks later, the rain begins. The rain comes in the afternoon, strong and fast, and the yard becomes a lake. The students wait in the cafeteria until the rain stops. The geography teacher uses the rain to talk about the climate. He explains that some places have a dry season and a rainy season, and that the plants in those places learned to wait. The class goes to the window and looks at the crooked trees in the park next to the school. One girl asks why the trees are crooked. The teacher says it is a good question and asks the class to research the answer for the next lesson.
+
+In the next lesson, each student brings a different answer. One student says it is because of the wind. Another says it is because of the soil. One girl finds an article from a university and reads a paragraph aloud. The teacher asks the class to compare the answers and decide which ones have evidence. The discussion lasts the whole lesson. In the end, the class concludes that there is more than one cause, and that a good question rarely has only one answer.
+
+Then the school has the first test of the term. The students study in the library, on the bus, and on the phone. Some study in groups at a friend's house. Others study alone, late at night, the day before the test. The biology teacher says that the test will not ask for memorized names. She says that the test will ask for explanations. The class is worried, because explaining is harder than memorizing.
+
+The biology test has only four questions. The first question asks the student to explain why a plant wilts without water. The second asks the student to draw the path of water inside the plant. The third asks the student to propose an experiment. The fourth question is the shortest and the hardest: what do you still not understand? Many students leave the fourth question blank. The teacher says later that the fourth question was the most important.
+
+Later in the term, the school organizes the science fair. Each group chooses a topic and prepares an experiment. One group builds a small rocket with a plastic bottle. Another group measures the temperature of the classrooms during the day. A group of girls builds a station to measure the rain with a glass, a ruler, and a notebook. Another group trains a program on the computer to recognize the leaves of the trees in the park. The computer group takes pictures of one hundred leaves in the school yard.
+
+The program of the group gets many leaves right, but it gets the dry leaves wrong. The students discover that almost all the pictures were of green leaves. The math teacher explains that the program only learns from the examples it receives. If the examples are too similar, the program learns little. The group goes back to the yard and takes pictures of dry leaves, leaves eaten by insects, and leaves wet with rain. On the second try, the program makes fewer mistakes. The visitors at the fair like the mistake more than the success, because the mistake tells a story.
+
+Before the holidays, the school has a party. The eleventh grade class is in charge of the popcorn stand. The students divide the tasks and calculate how much corn they need to buy. The math teacher helps with the numbers, but lets the class decide the price. The class discusses it for a week. In the end, the stand sells everything, and the class uses the money to buy books for the library.
+
+Then come the holidays. The school is empty and silent. The math teacher grades tests at the kitchen table. The language teacher reads the texts of the students on the bus. The biology teacher plans a project about water for the second term. The students sleep late, play ball, help at home, and forget almost everything they learned. When the school opens again, the year starts over more slowly.
+
+The second term starts in the driest weeks of the year. The sky is white with dust, and the air is very dry. The school asks the students to bring bottles of water. The biology teacher uses the dry weeks to start the water project. She asks how much water the school uses each day. Nobody knows the answer. The class goes to the water meter of the school and writes down the number every day, always at the same time.
+
+After a month, the class has a table with thirty numbers. The biology teacher asks the class to make a graph. The graph shows that the school uses more water on Mondays. The class tries to find the reason. One student suggests that it is because of the cleaning after the weekend. The class asks the janitor, and the janitor confirms: the big cleaning happens on Monday morning. The teacher says that the class has just done real science.
+
+Then the language teacher proposes a debate about artificial intelligence. She divides the class into two groups. One group argues that artificial intelligence helps us learn. The other group argues that artificial intelligence gets in the way. Each group prepares arguments for a week. On the day of the debate, the class discovers that both groups used artificial intelligence to prepare their arguments.
+
+The debate gets lively. One student says that artificial intelligence writes his essays for him. One girl answers that this is not learning, it is copying. Another student says that he uses artificial intelligence to explain what he did not understand in class. The teacher asks how he knows if the explanation is right. The student thinks for a moment and says that he checks it in the book. The teacher says that checking is the most important part. She explains that artificial intelligence chooses the most probable word, and not the true word.
+
+After the debate, the language teacher changes the homework. Instead of asking for a finished essay, she asks each student to write a question for the artificial intelligence and then criticize the answer. The students discover that the machine invents the names of books, mixes up dates, and gets simple sums wrong with a lot of confidence. The class starts to enjoy finding the mistakes of the machine. The teacher says that finding mistakes is also a way of learning.
+
+Next, the physics teacher brings a simulator to the classroom. The simulator shows a ball thrown up into the air. The students change the speed and the angle and try to hit a target. At first, the class guesses the values. Then the class starts to notice a pattern. One student discovers that an angle of forty five degrees sends the ball farthest. The teacher asks why, and the whole lesson becomes a conversation about why.
+
+The physics teacher says that the simulator is not reality. He explains that the simulator ignores the wind and the air. The class goes out to the yard and throws real paper balls. The paper balls do not follow the simulator. The students discuss the difference and write the causes in the notebook. The teacher says that a good model is one where we know where it fails.
+
+At the end of the year, the school gets ready to close. The students take the last tests, hand in the last projects, and start to think about the next year. The eleventh grade class organizes an exhibition with everything it did during the year. There is the water graph, the bottle rocket, the rain table, the pictures of the leaves, and the texts from the debate. The parents visit the exhibition on a Saturday morning.
+
+At the exhibition, a mother asks a student what he learned this year. The student thinks for a moment and says that he learned to ask questions. The mother does not understand and asks him to explain. The student shows the water table and tells the story of the Monday. Then he shows the program that got the dry leaves wrong. The mother says that she never thought a mistake could teach so much.
+
+And then the year ends. The school closes the gates, and the yard is silent again. The math teacher puts away the grade books. The language teacher keeps the texts of the students in a box. The biology teacher keeps the water table to show to next year's class. The students leave with full notebooks, worn backpacks, and a few questions without answers. And that is how a good year at school ends: with more questions than at the beginning.`, ciencias: `The water on Earth is not lost, it changes place. The sun heats the water in the rivers, the lakes, and the seas. The heated water evaporates and rises into the sky as vapor. High up, the air is colder, and the vapor turns into very small drops. The drops come together and form the clouds. When the drops get heavy, the water falls as rain. The rain fills the rivers, wets the soil, and feeds the plants. Then the sun heats the water again, and the cycle starts over. This path is called the water cycle.
+
+Plants make their own food. To do this, the plant needs light, water, and carbon dioxide. The water enters through the root and rises through the stem to the leaves. The carbon dioxide enters through the leaves, through small pores. In the leaves, the light of the sun provides the energy to turn the water and the carbon dioxide into sugar. This process is called photosynthesis. In photosynthesis, the plant also releases oxygen into the air. The oxygen we breathe comes, for the most part, from the photosynthesis of plants and algae.
+
+Plants also breathe. During the day and during the night, the plant uses sugar to get energy. In respiration, the plant consumes oxygen and releases carbon dioxide. During the day, photosynthesis is greater than respiration. That is why, during the day, the plant releases more oxygen than it consumes.
+
+All bodies fall because of gravity. Gravity is the force that pulls bodies toward the center of the Earth. A stone falls, a leaf falls, a drop of rain falls. The stone falls faster than the leaf because the air pushes the leaf up. Without air, the stone and the leaf would fall together. The astronauts did this test on the Moon, where there is no air, and the feather and the hammer reached the ground at the same time.
+
+Gravity also keeps the Moon close to the Earth. The Moon goes around the Earth, and the Earth goes around the Sun. The Earth takes a day to turn around itself and a year to go around the Sun. The seasons of the year happen because the axis of the Earth is tilted. When one part of the Earth faces the Sun more, it receives more light and more heat.
+
+Matter is made of very small particles. These particles are called atoms. Atoms come together and form molecules. A molecule of water has two atoms of hydrogen and one atom of oxygen. In ice, the molecules of water are held to one another. In liquid water, the molecules move and slide. In vapor, the molecules move very fast and spread apart. When water gets hotter, the molecules move faster. When water gets colder, the molecules move more slowly.
+
+Light travels very fast. The light of the Sun takes about eight minutes to reach the Earth. White light is the mixture of all the colors. When light passes through a drop of rain, the colors separate and the rainbow appears. A leaf looks green because it reflects green light and absorbs the other colors. A black shirt gets hotter in the sun because it absorbs almost all the light.
+
+Sound is a vibration that travels through the air. When a guitar string vibrates, it pushes the air, and the air carries the vibration to the ear. Sound travels more slowly than light. That is why, in a storm, we see the lightning before we hear the thunder. By counting the seconds between the lightning and the thunder, it is possible to estimate the distance of the storm.
+
+The human body is also made of cells. Cells form tissues, tissues form organs, and organs form systems. The heart pumps blood to the whole body. The blood carries oxygen and food to the cells and collects the carbon dioxide. The lungs exchange the carbon dioxide for the oxygen in the air. The brain controls movement, keeps memories, and learns from experience.
+
+The brain learns from repetition and from mistakes. When we practice a task, the connections between neurons get stronger. When we make a mistake and notice it, the brain adjusts those connections. That is why making mistakes is part of learning. A machine that learns from examples also adjusts its internal numbers when it is wrong. The difference is that the machine needs many more examples than a child.
+
+Science begins with a question. After the question, the scientist makes a hypothesis, which is a possible answer. To test the hypothesis, the scientist does an experiment and writes down the results. If the results agree with the hypothesis, the hypothesis gets stronger. If the results do not agree, the hypothesis needs to change. A good experiment changes one thing at a time and measures the result with care.
+
+Science also depends on measuring well. Every measurement has an error. A ruler measures with an error of one millimeter, and a kitchen scale measures with an error of a few grams. That is why the scientist repeats the measurement several times and calculates the average. When two people measure the same thing and get different numbers, it does not mean that someone lied. It means that we need to understand where the difference came from.
+
+Data helps answer questions, but data can also fool us. If we measure the temperature only at noon, we will think the whole day is hot. If we ask the opinion of our friends only, we will think everyone thinks the same. A good sample represents all the cases, and not only the cases that are easiest to find. A machine trained with a bad sample learns a bad rule.
+
+Science is not a list of ready answers. Science is a way of asking, testing, and correcting. Many ideas that seem obvious today were once considered wrong. Many ideas that seem right today will still change. That is why the most important question in science is not what the answer is, but how we know that the answer is right.` };
+TEXTS.todos = [TEXTS.escola, TEXTS.ano, TEXTS.ciencias].join("\n\n");
+const NAMES = { todos:"the three texts", escola:"The school", ano:"A year at school", ciencias:"A small book of science", proprio:"your text" };
+
+let model = {}, words = [], N = 1, temp = 1, tokens = [], history = [], seedLen = 0;
+
+function tokenize(t){
+  return t.toLowerCase().replace(/[“”"«»()\[\]]/g," ")
+    .replace(/([.,;:!?])/g," $1 ").split(/\s+/).filter(Boolean);
+}
+// compare words without accents: "cafe" finds "café"
+const norm = w => w.normalize("NFD").replace(/[̀-ͯ]/g,"");
+const keyOf = arr => arr.map(norm).join(" ");
+let vocabList = [];
+function train(text){
+  words = tokenize(text); model = {1:{},2:{},3:{}};
+  vocabList = [...new Set(words.filter(w=>!/^[.,;:!?]$/.test(w)))];
+  for(let n=1;n<=3;n++){
+    for(let i=n;i<words.length;i++){
+      const k = keyOf(words.slice(i-n,i)), w = words[i];
+      (model[n][k] ||= {}); model[n][k][w] = (model[n][k][w]||0)+1;
+    }
+  }
+  const vocab = new Set(words).size;
+  let pairs=0; for(const k in model[2]) pairs += Object.keys(model[2][k]).length;
+  document.getElementById("sw").textContent = words.length.toLocaleString("en-US");
+  document.getElementById("sv").textContent = vocab.toLocaleString("en-US");
+  document.getElementById("sp").textContent = pairs.toLocaleString("en-US");
+  document.getElementById("nw").textContent = words.length.toLocaleString("en-US");
+}
+function dist(){
+  // try the requested context; if never seen, back off to shorter contexts
+  for(let n=Math.min(N,tokens.length); n>=1; n--){
+    const k = keyOf(tokens.slice(-n));
+    if(model[n][k]) return {n, k:tokens.slice(-n).join(" "), counts:model[n][k], backoff:n<Math.min(N,tokens.length)};
+  }
+  return null;
+}
+function probs(counts){
+  const e = Object.entries(counts);
+  const tot = e.reduce((s,[,c])=>s+c,0);
+  return e.map(([w,c])=>({w, p:c/tot})).sort((a,b)=>b.p-a.p);
+}
+function sample(list){
+  if(temp<=0.05) return list[0].w;
+  const ws = list.map(x=>Math.pow(x.p,1/temp)); const s = ws.reduce((a,b)=>a+b,0);
+  let r = Math.random()*s;
+  for(let i=0;i<list.length;i++){ r-=ws[i]; if(r<=0) return list[i].w; }
+  return list[list.length-1].w;
+}
+function render(){
+  const out = document.getElementById("out");
+  let html = "";
+  tokens.forEach((t,i)=>{
+    const cls = i<seedLen ? "seed" : "gen" + (i===tokens.length-1 ? " last":"");
+    const sp = /^[.,;:!?]$/.test(t) ? "" : " ";
+    html += sp + `<span class="${cls}">${t}</span>`;
+  });
+  out.innerHTML = html.trim() || '<span class="seed">(write a beginning)</span>';
+  const d = dist(), bars = document.getElementById("bars"), ctx = document.getElementById("ctx"), ex = document.getElementById("explain");
+  if(!d){
+    ctx.innerHTML = "";
+    const last = tokens.at(-1)||"", nl = norm(last);
+    // suggestions: known words that start the same way; if none, the most frequent
+    let sug = vocabList.filter(w=>norm(w).startsWith(nl.slice(0,3)) && w.length>2).slice(0,8);
+    if(!sug.length){ const f={}; words.forEach(w=>{ if(w.length>3) f[w]=(f[w]||0)+1; }); sug = Object.entries(f).sort((a,b)=>b[1]-a[1]).slice(0,8).map(x=>x[0]); }
+    bars.innerHTML = (last ? '<div class="warn">The word <b>"'+last+'"</b> does not appear in the training text. The machine has no idea what comes next: it only knows what it has seen.</div>' : '<div class="warn">Write a beginning.</div>')
+      + '<div style="margin-top:14px;font-size:15px;color:var(--muted)">Words it knows (click to swap):</div><div class="row" style="margin-top:6px">'
+      + sug.map(w=>`<button class="sug" data-w="${w}">${w}</button>`).join("") + '</div>';
+    bars.querySelectorAll(".sug").forEach(b=>b.onclick=()=>{
+      if(tokens.length){ tokens[tokens.length-1]=b.dataset.w; } else { tokens=[b.dataset.w]; seedLen=1; }
+      if(tokens.length<=seedLen) document.getElementById("seed").value = tokens.join(" ");
+      render();
+    });
+    ex.style.display = "none"; document.getElementById("meter").innerHTML = "";
+    return;
+  }
+  ex.style.display = "";
+  const nopt = Object.keys(d.counts).length, meter = document.getElementById("meter");
+  meter.innerHTML = nopt===1
+    ? '<span class="pill copy">1 option</span><span>it saw only one continuation: <b>it is copying</b> the training text</span>'
+    : nopt<=3
+    ? `<span class="pill few">${nopt} options</span><span>little choice: almost copying</span>`
+    : `<span class="pill many">${nopt} options</span><span>it saw several continuations: <b>it is drawing</b></span>`;
+  ctx.innerHTML = `Looking at: <b>"${d.k}"</b>` + (d.backoff ? ` <br>(it never saw this sequence of ${N} words, so it looked at only ${d.n})` : "");
+  const list = probs(d.counts).slice(0,10);
+  bars.innerHTML = list.map(x=>`<div class="bar" data-w="${x.w}"><div class="w">${x.w}</div><div class="track"><div class="fill" style="width:${(x.p*100).toFixed(1)}%"></div></div><div class="p">${(x.p*100).toFixed(0)}%</div></div>`).join("");
+  bars.querySelectorAll(".bar").forEach(b=>b.onclick=()=>push(b.dataset.w));
+  ex.textContent = list.length===1
+    ? "There is only one possible continuation: in the training text, this sequence was always followed by the same word. Here the machine is copying."
+    : "Click a word to choose it yourself, or let the machine draw one. Words with a longer bar are more likely to come out.";
+}
+function push(w){ history.push(tokens.length); tokens.push(w); render(); }
+function step(){ const d = dist(); if(!d) return false; push(sample(probs(d.counts))); return true; }
+function restart(){ tokens = tokenize(document.getElementById("seed").value); seedLen = tokens.length; history=[]; render(); }
+
+document.getElementById("step").onclick = step;
+document.getElementById("run").onclick = ()=>{ let i=0; const t=setInterval(()=>{ if(i++>=20||!step()) clearInterval(t); },120); };
+document.getElementById("undo").onclick = ()=>{ if(tokens.length>seedLen){ tokens.pop(); render(); } };
+document.getElementById("restart").onclick = restart;
+document.getElementById("seed").addEventListener("keydown",e=>{ if(e.key==="Enter") restart(); });
+document.getElementById("temp").oninput = e=>{ temp=+e.target.value; document.getElementById("tval").textContent = temp.toFixed(1); };
+document.querySelectorAll("#order button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("#order button").forEach(x=>x.classList.remove("on")); b.classList.add("on"); N=+b.dataset.n; render();
+});
+const ta = document.getElementById("corpus"), src = document.getElementById("src");
+const st = document.getElementById("trainst"), msg = document.getElementById("trainmsg"), tbtn = document.getElementById("train");
+// train while showing "Training…"; the setTimeout lets the screen update before the heavy work
+function doTrain(text, key){
+  if(!tokenize(text).length){ msg.className="trainst busy"; msg.textContent="The text is empty."; return; }
+  [st,msg].forEach(e=>{ e.className="trainst busy"; e.textContent="Training…"; });
+  tbtn.disabled = true; tbtn.textContent = "Training…";
+  setTimeout(()=>{
+    const t0 = performance.now();
+    train(text);
+    // if the current beginning is not in the new text, start with its first two words
+    const seedIn = document.getElementById("seed"), last = tokenize(seedIn.value).at(-1);
+    if(!last || !model[1][keyOf([last])]) seedIn.value = words.filter(w=>!/^[.,;:!?]$/.test(w)).slice(0,2).join(" ");
+    restart();
+    const ms = Math.max(1, Math.round(performance.now()-t0));
+    const done = `✓ Trained on ${NAMES[key]}: ${words.length.toLocaleString("en-US")} words read (${ms} ms)`;
+    [st,msg].forEach(e=>{ e.className="trainst ok"; e.textContent=done; });
+    tbtn.disabled = false; tbtn.textContent = "Train with this text";
+  }, 60);
+}
+document.getElementById("clearta").onclick = ()=>{ ta.value = ""; msg.className = "trainst"; msg.textContent = "Paste the new text and click Train."; ta.focus(); };
+src.onchange = ()=>{ if(src.value==="proprio") return; ta.value = TEXTS[src.value]; doTrain(TEXTS[src.value], src.value); };
+tbtn.onclick = ()=>{ if(!tokenize(ta.value).length){ msg.className="trainst busy"; msg.textContent="The text is empty: paste a text before training."; return; } const o = src.querySelector('option[value="proprio"]'); o.hidden = false; src.value = "proprio"; doTrain(ta.value, "proprio"); };
+document.getElementById("reset").onclick = ()=>{ const k = src.value==="proprio" ? "todos" : src.value; src.value = k; ta.value = TEXTS[k]; doTrain(TEXTS[k], k); };
+ta.value = TEXTS.todos; train(TEXTS.todos); restart();
+st.className="trainst ok"; st.textContent=`${words.length.toLocaleString("en-US")} words read`;
+// shortcut for the talk: #demo writes a few words right away
+if(location.hash==="#demo"){ for(let i=0;i<9;i++) step(); }
+</script>
+<div class="vmodal" id="vmodal" role="dialog" aria-modal="true" aria-label="Demo video">
+  <div class="vbox"><button type="button" class="vx" id="vclose">Close ✕</button>
+  <video id="vplayer" controls preload="none" playsinline poster="videos/next-word.jpg"><source src="videos/next-word.mp4" type="video/mp4"><track kind="subtitles" srclang="en" label="English" src="videos/next-word.vtt"></video>
+  <div class="vnote">Optional subtitles: CC button on the video. Narrated in the voice of Marcelo Rovai, cloned with OmniVoice.</div></div>
+</div>
+<script>
+(function () {
+  var m = document.getElementById("vmodal"), v = document.getElementById("vplayer");
+  function abrir() { m.classList.add("on"); v.play().catch(function () {}); }
+  function fechar() { v.pause(); m.classList.remove("on"); }
+  document.getElementById("vopen").addEventListener("click", abrir);
+  document.getElementById("vclose").addEventListener("click", fechar);
+  m.addEventListener("click", function (e) { if (e.target === m) fechar(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && m.classList.contains("on")) fechar(); });
+})();
+</script>
+</body>
+</html>

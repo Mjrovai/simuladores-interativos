@@ -1,0 +1,91 @@
+WEBVTT
+
+00:00.900 --> 00:05.512
+Trigonometric Functions. What each parameter
+does to the graph.
+
+00:07.712 --> 00:11.366
+This is the function f(x) = a + b·sin(c·x +
+d).
+
+00:11.416 --> 00:14.361
+Each letter has a color and a control.
+
+00:14.411 --> 00:23.347
+I start with the plain sine: the blue curve covers the gray curve,
+which is the original function, for comparison.
+
+00:24.197 --> 00:27.829
+The parameter a adds a value to the whole
+function.
+
+00:27.879 --> 00:31.222
+With a equal to two, the curve rises two
+units.
+
+00:31.272 --> 00:37.069
+The shape does not change, only the height:
+the range now goes from one to three.
+
+00:37.919 --> 00:40.586
+The b stretches the curve vertically.
+
+00:40.636 --> 00:46.754
+With b equal to three, the wave gets three
+times taller, and the amplitude is three.
+
+00:46.804 --> 00:50.499
+And with a negative b, the curve turns upside
+down.
+
+00:51.349 --> 00:54.962
+The c is the one that confuses students the
+most.
+
+00:55.012 --> 00:57.729
+It multiplies x, inside the function.
+
+00:57.779 --> 01:04.233
+With c equal to two, the wave repeats twice as
+fast, and the period drops from 2π to π.
+
+01:04.283 --> 01:06.551
+The blue band shows one period.
+
+01:07.401 --> 01:10.765
+The parameter d pushes the curve sideways.
+
+01:10.815 --> 01:15.073
+With d equal to π/2, the curve moves π/2 to
+the left.
+
+01:15.123 --> 01:20.845
+Look: it became the cosine. Sine and cosine
+are the same wave, shifted.
+
+01:21.695 --> 01:25.566
+In class, ask for a prediction before moving
+anything.
+
+01:25.616 --> 01:29.488
+If c is three, how many waves fit between zero
+and 2π?
+
+01:29.538 --> 01:32.393
+Then the student checks it on the graph.
+
+01:32.443 --> 01:37.404
+That is the simulator's question: which
+parameter changes the period?
+
+01:38.254 --> 01:43.650
+This simulator came from a plain-language
+request, which is right here below.
+
+01:43.700 --> 01:49.522
+Just replace what is in square brackets to
+create another one, for another subject.
+
+01:49.572 --> 01:53.059
+And before taking it to the class, check the
+math.

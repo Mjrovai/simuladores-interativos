@@ -1,0 +1,129 @@
+WEBVTT
+
+00:00.900 --> 00:06.342
+Teach the Machine. How a machine learns from
+examples, and why the data matters.
+
+00:08.542 --> 00:13.111
+In this simulator, the question is simple: is
+the mango ripe?
+
+00:13.161 --> 00:18.867
+But nobody is going to write the rule. The
+machine will learn from examples.
+
+00:19.717 --> 00:22.499
+Each mango becomes a point on this map.
+
+00:22.549 --> 00:26.275
+Across, the color of the skin, from green to
+yellow.
+
+00:26.325 --> 00:30.413
+Up and down, the firmness, from soft fruit to
+hard fruit.
+
+00:31.263 --> 00:36.534
+Let me teach it. I mark a few unripe mangoes,
+with green skin and hard.
+
+00:36.584 --> 00:39.306
+Now a few ripe ones, yellow and soft.
+
+00:39.356 --> 00:42.754
+Look: the background of the map colors itself.
+
+00:42.804 --> 00:46.201
+That coloring is the rule the machine learned.
+
+00:47.051 --> 00:53.527
+With forty varied examples, I test the machine
+on two hundred mangoes it has never seen.
+
+00:53.577 --> 00:55.678
+Ninety-three percent correct.
+
+00:56.528 --> 01:00.342
+But how does it decide? I ask about a new
+mango.
+
+01:00.392 --> 01:08.072
+The machine calculates the distance to each example,
+picks the five closest ones, and they vote.
+
+01:08.122 --> 01:11.051
+Two unripe, three ripe. Answer: ripe.
+
+01:11.901 --> 01:13.629
+Why measure the distance?
+
+01:13.679 --> 01:17.752
+To know who the neighbors are, the machine
+needs a number.
+
+01:17.802 --> 01:28.131
+It uses the Pythagorean theorem: the difference in skin color, the difference in
+firmness, and the straight-line distance between the two mangoes.
+
+01:28.181 --> 01:30.761
+For the machine, similar means close.
+
+01:31.611 --> 01:33.953
+And what if one example is wrong?
+
+01:34.003 --> 01:37.721
+I put a ripe mango in the middle of the unripe
+ones.
+
+01:37.771 --> 01:45.909
+Listening only to the nearest neighbor, the machine creates an
+island around the mistake: it memorized the error.
+
+01:45.959 --> 01:51.344
+With three neighbors, the mistake loses the
+vote and the island disappears.
+
+01:52.194 --> 01:55.334
+And what if it listens to too many neighbors?
+
+01:55.384 --> 02:02.777
+With fifteen, the boundary gets blurred and the accuracy
+drops from ninety-three to eighty-seven percent.
+
+02:02.827 --> 02:09.581
+Not memorizing every example, and not erasing the details
+either: choosing k is part of the job.
+
+02:10.431 --> 02:14.678
+Now the same machine, trained with an
+unbalanced sample.
+
+02:14.728 --> 02:18.591
+Thirty-four unripe mangoes, and only six ripe
+ones.
+
+02:18.641 --> 02:23.272
+All with green or half-yellow skin. Every
+example is correct.
+
+02:23.322 --> 02:26.571
+And the result drops to fifty-five percent.
+
+02:26.621 --> 02:30.178
+The errors cluster where examples were
+missing.
+
+02:30.228 --> 02:33.400
+Unbalanced data produces a biased machine.
+
+02:34.250 --> 02:39.172
+Finally, replace the mango with a face, a
+résumé, or a loan application.
+
+02:39.222 --> 02:45.800
+The people left out of the data are the ones the machine
+gets wrong more often, without warning.
+
+02:45.850 --> 02:54.432
+In the classroom, the question that matters is not what the artificial
+intelligence answered, but where the answer came from.

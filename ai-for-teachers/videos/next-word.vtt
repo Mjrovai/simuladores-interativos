@@ -1,0 +1,95 @@
+WEBVTT
+
+00:00.900 --> 00:04.768
+Next Word. How a ChatGPT writes, one word at a
+time.
+
+00:06.968 --> 00:15.578
+This machine read three short texts, about school and about science,
+and counted which word usually comes after each word.
+
+00:15.628 --> 00:21.257
+That is all. It does not know grammar, and it
+does not know what the words mean.
+
+00:22.107 --> 00:24.135
+I write a beginning: the teacher.
+
+00:24.185 --> 00:29.299
+On the right are the words it has seen after
+teacher, with the chance of each one.
+
+00:29.349 --> 00:32.763
+The word says comes up more than a quarter of
+the time.
+
+00:33.613 --> 00:38.025
+I can choose the next word myself, or let the
+machine draw one.
+
+00:38.075 --> 00:44.116
+With each click, it looks at the last word,
+checks its counts, and draws the next one.
+
+00:44.966 --> 00:48.855
+Now the creativity, which the experts call
+temperature.
+
+00:48.905 --> 00:52.293
+At zero, it always picks the most probable
+word.
+
+00:52.343 --> 00:57.880
+And then the text goes around in circles: the
+class to the class to the class.
+
+00:58.730 --> 01:02.564
+With a high temperature, it takes risks on
+rare words.
+
+01:02.614 --> 01:08.246
+The words still come from the text it read,
+but the sentence loses its meaning.
+
+01:09.096 --> 01:11.732
+And how many words does it look back?
+
+01:11.782 --> 01:17.903
+Looking at only one, it has several options
+and is drawing, as the green label shows.
+
+01:17.953 --> 01:21.242
+Looking at three, the sentences come out neat.
+
+01:21.292 --> 01:25.235
+But look at the label: one option, almost all
+the time.
+
+01:25.285 --> 01:27.486
+It is copying the text it read.
+
+01:28.336 --> 01:32.718
+Any text works: a poem, a textbook chapter, a
+course syllabus.
+
+01:32.768 --> 01:37.579
+I clear the text box, paste a new text, and
+train the machine again.
+
+01:37.629 --> 01:40.438
+Now it writes in the style of that text.
+
+01:41.288 --> 01:44.706
+A ChatGPT does the same thing, at another
+scale.
+
+01:44.756 --> 01:50.270
+It has read trillions of words and looks
+hundreds of thousands of words back.
+
+01:50.320 --> 01:52.438
+That is why it writes so well.
+
+01:52.488 --> 02:00.603
+And that is also why it makes things up with the same confidence:
+it chooses the probable word, not the true one.

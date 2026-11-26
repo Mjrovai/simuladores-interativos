@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI for Teachers</title>
+<style>
+:root{--bg:#F4F1EA;--card:#FFFFFF;--ink:#1B2029;--muted:#5B6270;--line:#DDD6C8;--accent:#9A4F1F}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#161A21;--card:#1F242D;--ink:#F1EEE7;--muted:#9AA1AD;--line:#343B47;--accent:#E08A55}}
+:root[data-theme="dark"]{--bg:#161A21;--card:#1F242D;--ink:#F1EEE7;--muted:#9AA1AD;--line:#343B47;--accent:#E08A55}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.5 system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+.wrap{max-width:1000px;margin:0 auto;padding:36px 16px 48px}
+h1,h2{font-family:Cambria,Georgia,serif;margin:0}
+h1{font-size:clamp(32px,5vw,50px)}
+.kicker{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700}
+p{color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:24px}
+a.card{display:block;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;text-decoration:none;color:inherit}
+a.card:hover{border-color:var(--accent)}
+a.card h2{font-size:24px;margin:6px 0}
+a.card p{margin:0;font-size:16px}
+.tag{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);font-weight:700}
+footer{margin-top:32px;font-size:14px;color:var(--muted)}
+footer a{color:var(--accent)}
+h2.sec{font-size:30px;margin:44px 0 0}
+.prompt{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-top:16px}
+.phead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.prompt pre{white-space:pre-wrap;word-wrap:break-word;font:15px/1.55 ui-monospace,Menlo,Consolas,monospace;color:var(--ink);margin:12px 0 0}
+.prompt .hint{font-size:15px;margin:12px 0 0}
+.prompt button{font:inherit;font-size:14px;font-weight:700;color:var(--accent);background:transparent;border:1px solid var(--accent);border-radius:8px;padding:6px 14px;cursor:pointer}
+.videos{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:16px;margin-top:20px}
+.vid{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin:0}
+.vid video{display:block;width:100%;aspect-ratio:16/9;border-radius:8px;background:#000}
+.vid figcaption{font-size:16px;margin-top:10px;color:var(--muted)}
+.vid figcaption b{color:var(--ink)}
+.vid figcaption a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">Talk · From copying to curiosity</div>
+  <h1>AI for Teachers</h1>
+  <p>Four demonstrations that run in the browser, with nothing to install. Each one is a single file: once it is open, it works even without internet. You can use them on the classroom computer, with the projector.</p>
+  <div class="cards">
+    <a class="card" href="teach-the-machine.html"><span class="tag">What machine learning is</span><h2>Teach the Machine</h2><p>The machine learns from examples of mangoes and fails where the data did not reach. Data bias in practice.</p></a>
+    <a class="card" href="next-word.html"><span class="tag">What an LLM is</span><h2>Next Word</h2><p>A "mini-ChatGPT" that predicts the next word. Paste any text and train it again.</p></a>
+    <a class="card" href="epidemic-sir.html"><span class="tag">From user to author</span><h2>Epidemic and Vaccination</h2><p>A Biology and Mathematics simulator. The request that generates a simulator like this one is just below.</p></a>
+    <a class="card" href="trig-functions.html"><span class="tag">Mathematics</span><h2>Trigonometric Functions</h2><p>Move a, b, c, and d and watch the graph of f(x) = a + b·sin(c·x + d) change. The request is also just below.</p></a>
+  </div>
+
+  <h2 class="sec">Videos</h2>
+  <p>A walkthrough of two to three minutes for each demonstration. Subtitles are optional: turn them on in the video menu (CC). Good for reviewing later or for showing a colleague.</p>
+  <div class="videos">
+    <figure class="vid"><video controls preload="none" playsinline poster="videos/teach-the-machine.jpg"><source src="videos/teach-the-machine.mp4" type="video/mp4"><track kind="subtitles" srclang="en" label="English" src="videos/teach-the-machine.vtt"></video><figcaption><b>Teach the Machine</b> · <a href="teach-the-machine.html">open the simulator</a></figcaption></figure>
+    <figure class="vid"><video controls preload="none" playsinline poster="videos/next-word.jpg"><source src="videos/next-word.mp4" type="video/mp4"><track kind="subtitles" srclang="en" label="English" src="videos/next-word.vtt"></video><figcaption><b>Next Word</b> · <a href="next-word.html">open the simulator</a></figcaption></figure>
+    <figure class="vid"><video controls preload="none" playsinline poster="videos/epidemic-vaccination.jpg"><source src="videos/epidemic-vaccination.mp4" type="video/mp4"><track kind="subtitles" srclang="en" label="English" src="videos/epidemic-vaccination.vtt"></video><figcaption><b>Epidemic and Vaccination</b> · <a href="epidemic-sir.html">open the simulator</a></figcaption></figure>
+    <figure class="vid"><video controls preload="none" playsinline poster="videos/trig-functions.jpg"><source src="videos/trig-functions.mp4" type="video/mp4"><track kind="subtitles" srclang="en" label="English" src="videos/trig-functions.vtt"></video><figcaption><b>Trigonometric Functions</b> · <a href="trig-functions.html">open the simulator</a></figcaption></figure>
+  </div>
+
+  <h2 class="sec">Requests to copy</h2>
+  <p>They work in ChatGPT, Gemini, DeepSeek, or Claude, including the free versions. Replace what is in square brackets.</p>
+
+  <div class="prompt">
+    <div class="phead"><span class="tag">A tutor that asks instead of answering</span><button type="button" data-copy="p-tutor">Copy</button></div>
+<pre id="p-tutor">You are a [Physics] tutor for [11th grade] students. Never give the final answer, even if I ask for it. Ask one question at a time to help me reach the answer on my own. If I make a mistake, do not correct it directly: ask something that makes me notice the mistake. When I get it right, ask me to explain in my own words why it is right.</pre>
+    <p class="hint">Paste it at the start of the conversation. Test it before using it with the class: try to convince it to give you the answer.</p>
+  </div>
+
+  <div class="prompt">
+    <div class="phead"><span class="tag">A simulator for your subject</span><button type="button" data-copy="p-sim">Copy</button></div>
+<pre id="p-sim">Create an interactive simulator in a single HTML file (HTML, CSS, and JavaScript together, no external libraries and no server), in English. Reply only with the complete code, in a single block, from &lt;!DOCTYPE html&gt; to &lt;/html&gt;, without using Python and without creating files.
+
+TOPIC: [the SIR model of epidemics, with vaccination]
+FOR WHOM: [11th grade] students, subjects [Biology and Mathematics].
+WHAT THE STUDENT CAN CHANGE: [sliders for R₀ (from 1 to 18, to include measles), days sick, and % vaccinated].
+WHAT APPEARS ON SCREEN: [the S, I, and R curves over time, the infection peak, and the total number of people who got sick].
+QUESTION THE SIMULATOR HELPS ANSWER: [why does vaccinating part of the population protect those who were not vaccinated?]
+EXTRAS: a "Reset" button, a short text explaining the model, large fonts for projecting in class.</pre>
+    <p class="hint">Copy the reply, paste it into Notepad (or TextEdit, in plain text mode), and save it as <code>simulator.html</code>; then open it in the browser. In Gemini (Canvas) and in Claude, you can see the simulator working right in the conversation. Test it and ask for changes in plain language ("the chart is cut off," "add a pause button"). Check the science: in one test of this request, the chart came out right, but the highlighted total of sick people said that the more people were vaccinated, the more people got sick.</p>
+  </div>
+
+  <div class="prompt">
+    <div class="phead"><span class="tag">Example of a fix in plain language</span><button type="button" data-copy="p-fix">Copy</button></div>
+<pre id="p-fix">The total number of sick people is wrong: with 0% vaccinated it shows a negative number, and it goes up when vaccination goes up. The total should be the number of susceptible people at the start minus the number of susceptible people at the end. Fix it and reply again with the complete code.</pre>
+    <p class="hint">This is for the error in the test above. Describe what is wrong and what you expected to see; you do not need to know how to program.</p>
+  </div>
+
+  <div class="prompt">
+    <div class="phead"><span class="tag">Another example: Mathematics</span><button type="button" data-copy="p-trig">Copy</button></div>
+<pre id="p-trig">Create an interactive simulator in a single HTML file (HTML, CSS, and JavaScript together, no external libraries and no server), in English. Reply only with the complete code, in a single block, from &lt;!DOCTYPE html&gt; to &lt;/html&gt;, without using Python and without creating files.
+
+TOPIC: [trigonometric functions: f(x) = a + b·sin(c·x + d)]
+FOR WHOM: [11th grade] students, subject [Mathematics].
+WHAT THE STUDENT CAN CHANGE: [sliders for a, b, c, and d, and a button to switch between sine and cosine].
+WHAT APPEARS ON SCREEN: [the graph of f(x) from −2π to 2π, the graph of sin(x) in gray for comparison, and the calculated amplitude, period, and range].
+QUESTION THE SIMULATOR HELPS ANSWER: [what does each parameter do to the graph? Which one changes the period?]
+EXTRAS: a "Reset" button, the x axis marked in multiples of π, large fonts for projecting in class.</pre>
+    <p class="hint">To check the result: in sin(x + π/2), the graph moves to the left, and the horizontal shift is −π/2. With c = 2, the period is cut in half, from 2π to π.</p>
+  </div>
+
+  <h2 class="sec" id="agents">Going further: agents</h2>
+  <p>A chat answers a question. An agent receives a goal and works until it delivers: it opens pages, writes files, tests, and fixes. The chats you already use (ChatGPT, Gemini, Claude) are getting an agent mode, and Claude Code and Codex work with the files in a folder on your computer. There are also open options. I use these two:</p>
+  <div class="cards">
+    <a class="card" href="https://www.deepseek.com/en/harness/" target="_blank" rel="noopener"><span class="tag">Open · DeepSeek</span><h2>DeepSeek Harness</h2><p>A desktop app. It works with the DeepSeek model, which is very cheap, and also with other providers.</p></a>
+    <a class="card" href="https://hermes-agent.nousresearch.com/" target="_blank" rel="noopener"><span class="tag">Open · Nous Research</span><h2>Hermes</h2><p>Runs on your computer, with a model over the internet or with a local model that sends nothing to the cloud.</p></a>
+  </div>
+
+  <footer>23 more simulators at <a href="https://mjrovai.github.io/simuladores-interativos/">mjrovai.github.io/simuladores-interativos</a>. Portuguese version of this page: <a href="../ia-para-professores/">IA para Professores</a>. Prototypes and videos generated by Claude Opus 5.5 under the direction of Marcelo Rovai. Narrated in the voice of Marcelo Rovai, cloned with OmniVoice.</footer>
+</div>
+<script>
+document.querySelectorAll("button[data-copy]").forEach(function (b) {
+  b.addEventListener("click", function () {
+    var t = document.getElementById(b.dataset.copy).textContent;
+    var ok = function () { b.textContent = "Copied!"; setTimeout(function () { b.textContent = "Copy"; }, 1600); };
+    if (navigator.clipboard) navigator.clipboard.writeText(t).then(ok, function () {});
+  });
+});
+</script>
+</body>
+</html>

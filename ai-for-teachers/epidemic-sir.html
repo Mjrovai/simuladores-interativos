@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Epidemic and Vaccination</title>
+<style>
+:root{
+  --bg:#F4F1EA; --card:#FFFFFF; --ink:#1B2029; --body:#3A404B; --muted:#5B6270; --line:#DDD6C8;
+  --s:#2F6F8F; --i:#B23A2B; --r:#4F6B45; --v:#8A7A5C; --accent:#9A4F1F; --accent-tint:#F3DCC9; --green-tint:#E2EADC;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#161A21; --card:#1F242D; --ink:#F1EEE7; --body:#D2D5DB; --muted:#9AA1AD; --line:#343B47;
+  --s:#7DB6D3; --i:#F07A68; --r:#9CC08F; --v:#C9B88F; --accent:#E08A55; --accent-tint:#3D2A1E; --green-tint:#24331F;
+}}
+:root[data-theme="dark"]{
+  --bg:#161A21; --card:#1F242D; --ink:#F1EEE7; --body:#D2D5DB; --muted:#9AA1AD; --line:#343B47;
+  --s:#7DB6D3; --i:#F07A68; --r:#9CC08F; --v:#C9B88F; --accent:#E08A55; --accent-tint:#3D2A1E; --green-tint:#24331F;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--body);font:18px/1.5 system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 16px 48px}
+h1,h2{font-family:Cambria,Georgia,serif;color:var(--ink);margin:0}
+h1{font-size:clamp(30px,4.5vw,46px);line-height:1.1}
+h2{font-size:22px;margin-bottom:10px}
+.kicker{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:6px}
+.lead{font-size:19px;color:var(--muted);max-width:860px;margin:10px 0 24px}
+.grid{display:grid;grid-template-columns:340px minmax(0,1fr);gap:20px}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px}
+.ctl{margin-bottom:18px}
+.ctl label{display:flex;justify-content:space-between;font-size:16px;color:var(--ink)}
+.ctl label b{font-variant-numeric:tabular-nums}
+.ctl small{display:block;color:var(--muted);font-size:14px;line-height:1.35;margin-top:2px}
+input[type=range]{width:100%}
+canvas{width:100%;height:auto;display:block}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:15px;margin-top:8px}
+.legend span{display:flex;align-items:center;gap:6px}
+.sw{width:22px;height:4px;border-radius:2px;display:inline-block}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+@media (max-width:560px){.kpis{grid-template-columns:1fr}}
+.kpi{border:1px solid var(--line);border-radius:10px;padding:12px}
+.kpi .n{font-family:Cambria,Georgia,serif;font-size:36px;color:var(--ink);line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi .l{font-size:14px;color:var(--muted)}
+.msg{padding:12px 14px;border-radius:6px;font-size:16px;margin-top:14px}
+.msg.ok{background:var(--green-tint);border-left:4px solid var(--r)}
+.msg.bad{background:var(--accent-tint);border-left:4px solid var(--accent)}
+button{font:inherit;font-size:16px;padding:10px 16px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.presets{display:flex;flex-wrap:wrap;gap:8px}
+pre{white-space:pre-wrap;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:14px;line-height:1.45;color:var(--ink);margin:10px 0 0}
+details summary{cursor:pointer;font-weight:600;color:var(--ink)}
+footer{margin-top:28px;font-size:14px;color:var(--muted)}
+.cs{color:var(--s)} .ci{color:var(--i)} .cr{color:var(--r)}
+.mlead{margin:0 0 18px;max-width:900px}
+.mgrid{display:grid;grid-template-columns:1.15fr 1fr 1.25fr;gap:16px}
+@media (max-width:960px){.mgrid{grid-template-columns:1fr}}
+.step{border:1px solid var(--line);border-radius:10px;padding:16px;background:var(--bg);position:relative}
+.step h3{font-family:Cambria,Georgia,serif;color:var(--ink);font-size:19px;margin:0 0 10px 40px;line-height:1.3;min-height:28px}
+.snum{position:absolute;left:14px;top:14px;width:28px;height:28px;border-radius:50%;background:var(--ink);color:var(--bg);font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center}
+.eq{margin:8px 0 14px}
+.eq p,.mt{margin:4px 0 0;font-size:15px;color:var(--muted);line-height:1.4}
+math{font-family:"Cambria Math","STIX Two Math",Cambria,Georgia,serif;font-size:24px;color:var(--ink)}
+math[display="block"]{text-align:left;margin:4px 0}
+.step math .lbl{font-family:system-ui,Arial,sans-serif;font-size:12px;color:var(--muted)}
+.chain{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap}
+.chain math[display="block"]{display:inline-block;margin:0}
+.arr{font-size:22px;color:var(--muted)}
+.herd{margin-top:10px;padding:12px 14px;border-radius:8px;background:var(--card);border:1px solid var(--line);font-size:16px;line-height:1.6}
+.herd math{font-size:21px;vertical-align:middle}
+</style>
+<style>
+/* demo video button and window */
+.vbtn{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font:700 14px/1 system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:#fff;background:var(--accent);border:0;border-radius:999px;padding:8px 14px;cursor:pointer}
+.vbtn:hover{filter:brightness(1.1)}
+.vmodal{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;padding:16px}
+.vmodal.on{display:flex}
+.vmodal .vbox{position:relative;width:min(1100px,100%)}
+.vmodal video{display:block;width:100%;max-height:calc(100vh - 80px);border-radius:10px;background:#000}
+.vmodal .vx{position:absolute;top:-40px;right:0;font:700 15px/1 system-ui,Arial,sans-serif;color:#fff;background:transparent;border:1px solid rgba(255,255,255,.6);border-radius:8px;padding:7px 12px;cursor:pointer}
+.vmodal .vnote{color:#ddd;font:14px/1.4 system-ui,Arial,sans-serif;margin-top:8px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">Biology · Mathematics · simulator made with AI</div>
+  <h1>Epidemic and vaccination</h1>
+  <button type="button" class="vbtn" id="vopen">▶ Watch the video (2 min 21 s)</button>
+  <p class="lead">The SIR model divides the population into <b style="color:var(--s)">Susceptible</b>, <b style="color:var(--i)">Infected</b>, and <b style="color:var(--r)">Recovered</b>. Move the controls and find out why vaccinating part of the class also protects those who were not vaccinated.</p>
+
+  <div class="grid">
+    <div class="card">
+      <div class="ctl">
+        <label for="r0">Contagion (R₀) <b id="r0v"></b></label>
+        <input type="range" id="r0" min="1" max="12" step="0.1" value="3">
+        <small>How many people, on average, one infected person infects in an unprotected population.</small>
+      </div>
+      <div class="ctl">
+        <label for="dur">Days sick <b id="durv"></b></label>
+        <input type="range" id="dur" min="2" max="21" step="1" value="7">
+        <small>Average time until the person recovers and stops spreading it.</small>
+      </div>
+      <div class="ctl">
+        <label for="vac">Vaccinated <b id="vacv"></b></label>
+        <input type="range" id="vac" min="0" max="95" step="1" value="0">
+        <small>Share of the population immunized before the first case.</small>
+      </div>
+      <div class="ctl" style="margin-bottom:8px">
+        <label>Examples</label>
+        <div class="presets">
+          <button data-p="3,7">Flu (R₀≈3)</button>
+          <button data-p="6,10">Mumps (R₀≈6)</button>
+          <button data-p="12,8">Measles (R₀≈12)</button>
+        </div>
+        <small>Approximate values, for teaching purposes.</small>
+      </div>
+    </div>
+
+    <div class="card">
+      <canvas id="cv" width="900" height="420" aria-label="Chart of the S, I, and R curves"></canvas>
+      <div class="legend">
+        <span><i class="sw" style="background:var(--s)"></i>Susceptible</span>
+        <span><i class="sw" style="background:var(--i)"></i>Infected</span>
+        <span><i class="sw" style="background:var(--r)"></i>Recovered</span>
+        <span><i class="sw" style="background:var(--v)"></i>Vaccinated</span>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><div class="n" id="peak">—</div><div class="l">sick at the same time, at the peak</div></div>
+        <div class="kpi"><div class="n" id="day">—</div><div class="l">day of the peak</div></div>
+        <div class="kpi"><div class="n" id="tot">—</div><div class="l">caught the disease in total</div></div>
+      </div>
+      <div class="msg" id="msg"></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px">
+    <h2>The math behind it</h2>
+    <p class="mlead"><b class="cs">S</b>, <b class="ci">I</b>, and <b class="cr">R</b> are <b>fractions of the population</b>, from 0 to 1 (0.3 = 30% of the people). The symbol <b>Δ</b> means "how much it changes from one day to the next."</p>
+
+    <div class="mgrid">
+      <div class="step">
+        <div class="snum">1</div>
+        <h3>Each day, the population changes like this</h3>
+        <div class="eqs">
+          <div class="eq">
+            <math display="block"><mrow><mi mathvariant="normal">Δ</mi><mi class="cs">S</mi><mo>=</mo><mo>−</mo><mi>β</mi><mo>·</mo><mi class="cs">S</mi><mo>·</mo><mi class="ci">I</mi></mrow></math>
+            <p>The susceptible go down: each meeting between a <span class="cs">susceptible</span> person and an <span class="ci">infected</span> one can become a new case.</p>
+          </div>
+          <div class="eq">
+            <math display="block"><mrow><mi mathvariant="normal">Δ</mi><mi class="ci">I</mi><mo>=</mo><munder><mrow><mi>β</mi><mo>·</mo><mi class="cs">S</mi><mo>·</mo><mi class="ci">I</mi></mrow><mtext class="lbl">in</mtext></munder><mo>−</mo><munder><mrow><mi>γ</mi><mo>·</mo><mi class="ci">I</mi></mrow><mtext class="lbl">out</mtext></munder></mrow></math>
+            <p>New cases come in; those who recover go out.</p>
+          </div>
+          <div class="eq">
+            <math display="block"><mrow><mi mathvariant="normal">Δ</mi><mi class="cr">R</mi><mo>=</mo><mi>γ</mi><mo>·</mo><mi class="ci">I</mi></mrow></math>
+            <p>Those who recover become immune and do not catch it again.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="snum">2</div>
+        <h3>The two numbers of the model</h3>
+        <div class="eq">
+          <math display="block"><mrow><mi>γ</mi><mo>=</mo><mfrac><mn>1</mn><mtext>days sick</mtext></mfrac><mo>=</mo><mfrac><mn>1</mn><mn id="mDur">7</mn></mfrac><mo>≈</mo><mn id="mGam">0.14</mn></mrow></math>
+          <p><b>γ</b> (gamma): the fraction of the sick who recover each day.</p>
+        </div>
+        <div class="eq">
+          <math display="block"><mrow><mi>β</mi><mo>=</mo><msub><mi>R</mi><mn>0</mn></msub><mo>·</mo><mi>γ</mi><mo>=</mo><mn id="mR0a">3</mn><mo>·</mo><mn id="mGam2">0.14</mn><mo>≈</mo><mn id="mBet">0.43</mn></mrow></math>
+          <p><b>β</b> (beta): the strength of contagion per day.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="snum">3</div>
+        <h3>When does the epidemic grow?</h3>
+        <p class="mt">When more cases come in than go out:</p>
+        <div class="eq chain">
+          <math display="block"><mrow><mi>β</mi><mo>·</mo><mi class="cs">S</mi><mo>·</mo><mi class="ci">I</mi><mo>&gt;</mo><mi>γ</mi><mo>·</mo><mi class="ci">I</mi></mrow></math>
+          <span class="arr">⟹</span>
+          <math display="block"><mrow><msub><mi>R</mi><mn>0</mn></msub><mo>·</mo><mi class="cs">S</mi><mo>&gt;</mo><mn>1</mn></mrow></math>
+        </div>
+        <p class="mt" style="margin-top:-6px">(dividing both sides by <b>γ · I</b> and remembering that <b style="white-space:nowrap">β / γ = R₀</b>)</p>
+        <p class="mt">Vaccinating a fraction <b>v</b> of the population takes those people out of <span class="cs">S</span>. The epidemic stops growing when</p>
+        <div class="eq">
+          <math display="block"><mrow><msub><mi>R</mi><mn>0</mn></msub><mo>·</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>v</mi><mo stretchy="false">)</mo><mo>≤</mo><mn>1</mn><mspace width="0.6em"/><mo>⟹</mo><mspace width="0.6em"/><mi>v</mi><mo>≥</mo><mn>1</mn><mo>−</mo><mfrac><mn>1</mn><msub><mi>R</mi><mn>0</mn></msub></mfrac></mrow></math>
+        </div>
+        <div class="herd">
+          Now: <math><mstyle displaystyle="true"><mrow><mn>1</mn><mo>−</mo><mfrac><mn>1</mn><mn id="mR0b">3</mn></mfrac><mo>≈</mo><mn id="mHerd">0.67</mn></mrow></mstyle></math>
+          → you need to vaccinate <b id="mHerdPct">67%</b>. You are at <b id="mVac">0%</b>.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <details class="card" style="margin-top:20px">
+    <summary>The plain-language request that generated this simulator</summary>
+    <pre>Create an interactive simulator in a single HTML file (HTML, CSS, and
+JavaScript together, no external libraries and no server), in English.
+
+TOPIC: the SIR model of epidemics, with vaccination.
+FOR WHOM: 11th grade students, Biology and Mathematics.
+WHAT THE STUDENT CAN CHANGE: R₀, days sick, and % vaccinated; buttons with
+  examples for flu, mumps, and measles.
+WHAT APPEARS ON SCREEN: a chart of the S, I, and R curves over 180 days,
+  the infection peak, the day of the peak, and the total number of people
+  who got sick.
+QUESTION THE SIMULATOR HELPS ANSWER: why does vaccinating part of the
+  population protect those who were not vaccinated?
+EXTRAS: a message that tells when vaccination has passed the herd immunity
+  threshold, the equations explained step by step with the current values
+  of the controls, large fonts for projecting in class, light and dark mode.</pre>
+  </details>
+
+  <footer>Prototype from the talk "AI for Teachers." Generated by Claude Opus 5.5 under the direction of Marcelo Rovai. Runs entirely in the browser, with no internet. Simplified model: closed population, homogeneous mixing, no deaths or births.</footer>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const cv = $("cv"), ctx = cv.getContext("2d");
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const DAYS = 180, I0 = 0.001;
+const pct = x => (x*100).toLocaleString("en-US",{maximumFractionDigits:x<0.1?1:0}) + "%";
+
+function simulate(R0, dur, vac){
+  const g = 1/dur, b = R0*g, dt = 0.1;
+  let S = Math.max(0, 1 - vac - I0), I = I0, R = 0;
+  const out = [{S,I,R}];
+  for(let t=0;t<DAYS;t++){
+    for(let k=0;k<10;k++){ const inf=b*S*I*dt, rec=g*I*dt; S-=inf; I+=inf-rec; R+=rec; }
+    out.push({S,I,R});
+  }
+  return out;
+}
+function draw(){
+  const R0=+$("r0").value, dur=+$("dur").value, vac=+$("vac").value/100;
+  $("r0v").textContent = R0.toFixed(1);
+  $("durv").textContent = dur;
+  $("vacv").textContent = Math.round(vac*100)+"%";
+  const d = simulate(R0,dur,vac);
+  const W=cv.width, H=cv.height, L=72, B=48, T=16, Rm=24, pw=W-L-Rm, ph=H-T-B;
+  ctx.clearRect(0,0,W,H);
+  ctx.font="22px system-ui,Arial"; ctx.fillStyle=css("--muted"); ctx.strokeStyle=css("--line"); ctx.lineWidth=1;
+  for(let y=0;y<=4;y++){ const yy=T+ph-ph*y/4; ctx.beginPath(); ctx.moveTo(L,yy); ctx.lineTo(W-Rm,yy); ctx.stroke(); ctx.fillText((y*25)+"%",6,yy+7); }
+  for(let x=0;x<=DAYS;x+=30){ const xx=L+pw*x/DAYS; ctx.fillText(x===0?"day 0":x, xx-(x===0?0:18), H-12); }
+  const X=t=>L+pw*t/DAYS, Y=v=>T+ph-ph*v;
+  if(vac>0){ ctx.fillStyle=css("--v"); ctx.globalAlpha=.18; ctx.fillRect(L,Y(1),pw,Y(1-vac)-Y(1)); ctx.globalAlpha=1;
+    ctx.strokeStyle=css("--v"); ctx.setLineDash([6,5]); ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(L,Y(1-vac)); ctx.lineTo(W-Rm,Y(1-vac)); ctx.stroke(); ctx.setLineDash([]); }
+  [["S","--s"],["I","--i"],["R","--r"]].forEach(([k,c])=>{
+    ctx.strokeStyle=css(c); ctx.lineWidth=k==="I"?4:3; ctx.beginPath();
+    d.forEach((p,t)=>{ const v = k==="S"? p.S : k==="I"? p.I : p.R; t?ctx.lineTo(X(t),Y(v)):ctx.moveTo(X(t),Y(v)); });
+    ctx.stroke();
+  });
+  let pk=0, pd=0; d.forEach((p,t)=>{ if(p.I>pk){pk=p.I;pd=t;} });
+  const total = d[DAYS].R + d[DAYS].I;
+  $("peak").textContent = pct(pk);
+  $("day").textContent = pk<=I0*1.01 ? "—" : pd;
+  $("tot").textContent = pct(total);
+  const herd = Math.max(0,1-1/R0);
+  // live values in the "The math behind it" section
+  const br = (x,d=2)=>x.toFixed(d);
+  // 3 decimals, no trailing zeros: 1/8 = 0.125 and 12 · 0.125 = 1.5 (the numbers add up for the student)
+  const br3 = x => x.toFixed(3).replace(/\.?0+$/,"");
+  const g = 1/dur, gs = +g.toFixed(3);
+  $("mDur").textContent = dur; $("mGam").textContent = br3(g); $("mGam2").textContent = br3(g);
+  $("mR0a").textContent = br(R0,1).replace(/\.0$/,""); $("mR0b").textContent = br(R0,1).replace(/\.0$/,"");
+  $("mBet").textContent = br3(R0*gs);
+  $("mHerd").textContent = br(herd); $("mHerdPct").textContent = Math.round(herd*100)+"%";
+  $("mVac").textContent = Math.round(vac*100)+"%";
+  const m = $("msg");
+  if(R0 <= 1){
+    m.className="msg ok";
+    m.innerHTML = `With R₀ = ${R0.toFixed(1)}, each infected person infects at most one other. The disease dies out on its own, even without a vaccine. Increase R₀ to see an epidemic.`;
+  } else if(R0*(1-vac) <= 1){
+    m.className="msg ok";
+    m.innerHTML = `With ${Math.round(vac*100)}% vaccinated, each infected person infects fewer than one other. The disease cannot spread: <b>herd immunity</b> (threshold for this R₀: ${Math.round(herd*100)}%).`;
+  } else {
+    m.className="msg bad";
+    m.innerHTML = `For this R₀, the herd immunity threshold is <b>${Math.round(herd*100)}%</b> vaccinated. Below that the epidemic still grows, but notice how the peak gets lower and comes later with each point of vaccination.`;
+  }
+}
+["r0","dur","vac"].forEach(i=>$(i).addEventListener("input",draw));
+document.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{ const [r,d]=b.dataset.p.split(","); $("r0").value=r; $("dur").value=d; draw(); });
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
+draw();
+</script>
+<div class="vmodal" id="vmodal" role="dialog" aria-modal="true" aria-label="Demo video">
+  <div class="vbox"><button type="button" class="vx" id="vclose">Close ✕</button>
+  <video id="vplayer" controls preload="none" playsinline poster="videos/epidemic-vaccination.jpg"><source src="videos/epidemic-vaccination.mp4" type="video/mp4"><track kind="subtitles" srclang="en" label="English" src="videos/epidemic-vaccination.vtt"></video>
+  <div class="vnote">Optional subtitles: CC button on the video. Narrated in the voice of Marcelo Rovai, cloned with OmniVoice.</div></div>
+</div>
+<script>
+(function () {
+  var m = document.getElementById("vmodal"), v = document.getElementById("vplayer");
+  function abrir() { m.classList.add("on"); v.play().catch(function () {}); }
+  function fechar() { v.pause(); m.classList.remove("on"); }
+  document.getElementById("vopen").addEventListener("click", abrir);
+  document.getElementById("vclose").addEventListener("click", fechar);
+  m.addEventListener("click", function (e) { if (e.target === m) fechar(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && m.classList.contains("on")) fechar(); });
+})();
+</script>
+</body>
+</html>
