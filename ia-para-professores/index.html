@@ -13,6 +13,9 @@ body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.5 system-ui,-app
 .wrap{max-width:1000px;margin:0 auto;padding:36px 16px 48px}
 h1,h2{font-family:Cambria,Georgia,serif;margin:0}
 h1{font-size:clamp(32px,5vw,50px)}
+.dl{display:flex;flex-wrap:wrap;gap:10px;margin:4px 0 18px}
+.dl a{display:inline-block;padding:9px 16px;border:1px solid var(--accent);border-radius:999px;color:var(--accent);text-decoration:none;font-weight:700;font-size:15px}
+.dl a:hover{background:var(--accent);color:var(--card)}
 .kicker{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700}
 p{color:var(--muted)}
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:24px}
@@ -42,6 +45,7 @@ h2.sec{font-size:30px;margin:44px 0 0}
   <div class="kicker">Palestra · Da cópia à curiosidade</div>
   <h1>IA para Professores</h1>
   <p>Quatro demonstrações que rodam no navegador, sem instalação. Cada uma é um arquivo só: depois de aberta, funciona até sem internet. Dá para usar no computador da sala, com o projetor.</p>
+  <div class="dl"><a href="da-copia-a-curiosidade-slides.pdf" download>⬇ Slides da palestra (PDF, 2,6 MB)</a></div>
   <div class="cards">
     <a class="card" href="ensine-a-maquina.html"><span class="tag">O que é machine learning</span><h2>Ensine a Máquina</h2><p>A máquina aprende com exemplos de mangas e erra onde os dados não chegaram. Viés de dados na prática.</p></a>
     <a class="card" href="proxima-palavra.html"><span class="tag">O que é um LLM</span><h2>Próxima Palavra</h2><p>Um "mini-ChatGPT" que prevê a próxima palavra. Cole qualquer texto e treine de novo.</p></a>

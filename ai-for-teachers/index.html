@@ -13,6 +13,9 @@ body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.5 system-ui,-app
 .wrap{max-width:1000px;margin:0 auto;padding:36px 16px 48px}
 h1,h2{font-family:Cambria,Georgia,serif;margin:0}
 h1{font-size:clamp(32px,5vw,50px)}
+.dl{display:flex;flex-wrap:wrap;gap:10px;margin:4px 0 18px}
+.dl a{display:inline-block;padding:9px 16px;border:1px solid var(--accent);border-radius:999px;color:var(--accent);text-decoration:none;font-weight:700;font-size:15px}
+.dl a:hover{background:var(--accent);color:var(--card)}
 .kicker{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700}
 p{color:var(--muted)}
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:24px}
@@ -42,6 +45,7 @@ h2.sec{font-size:30px;margin:44px 0 0}
   <div class="kicker">Talk · From copying to curiosity</div>
   <h1>AI for Teachers</h1>
   <p>Four demonstrations that run in the browser, with nothing to install. Each one is a single file: once it is open, it works even without internet. You can use them on the classroom computer, with the projector.</p>
+  <div class="dl"><a href="from-copying-to-curiosity-slides.pdf" download>⬇ Talk slides (PDF, 2.5 MB)</a><a href="https://youtu.be/zn5ySKycwmw" target="_blank" rel="noopener">▶ Full talk on YouTube (30 min)</a></div>
   <div class="cards">
     <a class="card" href="teach-the-machine.html"><span class="tag">What machine learning is</span><h2>Teach the Machine</h2><p>The machine learns from examples of mangoes and fails where the data did not reach. Data bias in practice.</p></a>
     <a class="card" href="next-word.html"><span class="tag">What an LLM is</span><h2>Next Word</h2><p>A "mini-ChatGPT" that predicts the next word. Paste any text and train it again.</p></a>
